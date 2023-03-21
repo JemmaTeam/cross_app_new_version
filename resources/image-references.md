@@ -1,0 +1,14 @@
+# References for images used:
+- https://www.freepik.com/free-vector/maintenance-concept-illustration_5421740.htm#page=1&query=maintenence%20concept&position=0
+- https://www.freepik.com/free-vector/electrician-concept-illustration_9233787.htm#page=1&query=electrician%20concept&position=30
+- https://www.freepik.com/free-vector/electrician-concept-illustration_9558307.htm#page=1&query=electrician%20concept&position=1
+- https://www.flaticon.com/free-icon/review_651140?term=ratings%20and%20reviews&page=1&position=4&page=1&position=4&related_id=651140&origin=search
+- https://www.flaticon.com/free-icon/online-resume_2680958?term=resume&page=1&position=22&page=1&position=22&related_id=2680958&origin=search
+- https://www.flaticon.com/free-icon/money_890165?term=money%20protection&page=1&position=66&page=1&position=66&related_id=890165&origin=search
+- https://www.flaticon.com/free-icon/resume_943091?term=resume&page=3&position=12&page=3&position=12&related_id=943091&origin=search
+- https://www.flaticon.com/free-icon/payment_3595938?term=payment&page=1&position=59&page=1&position=59&related_id=3595938&origin=search
+- https://www.flaticon.com/free-icon/balance_913138?term=balance&page=2&position=38&page=2&position=38&related_id=913138&origin=search
+- https://www.flaticon.com/free-icon/user_847969?term=user%20profile&page=1&position=32&page=1&position=32&related_id=847969&origin=search
+- https://www.freepik.com/free-vector/professional-builders-making-brick-wall-site-helmet-constructor-flat-vector-illustration-construction-engineering_10173402.htm#query=female%20labour&position=17
+- https://www.freepik.com/free-vector/workers-overalls-standing-near-closed-broken-elevator-repairmen-engineers-technicians-flat-vector-illustration-public-utility-service-concept_10613884.htm#page=1&query=maintenence%20concept&position=17
+- https://www.freepik.com/free-vector/phone-maintenance-concept-illustration_13717652.htm#page=1&query=maintenence%20concept&position=11

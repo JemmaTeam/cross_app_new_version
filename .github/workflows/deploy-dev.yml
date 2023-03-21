@@ -1,0 +1,40 @@
+# See https://github.com/JemmaTeam/cross-app/tree/deploy-dev#readme on the purpose of this script.
+# Uploading to Git repo part is based on this SO answer: https://stackoverflow.com/a/58393457/11200630 
+# Idea of using worktrees is from this Github action script: https://github.com/erickzanardo/flutter-gh-pages/blob/main/action.yml
+
+name: 'Deploy development version'
+
+on:
+  push:
+    branches: [ main ]
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2 
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: '2.2.3'
+      - name: Setting up Flutter environment
+        run: |
+          flutter config --enable-web
+          flutter config --enable-android
+          flutter pub get
+      - name: Generate Flutter Android apk
+        run: flutter build apk --release 
+      - name: Move Android apk to ci-resources folder
+        run:  mv build/app/outputs/flutter-apk/app-release.apk ci-resources/app-release.apk         
+      - name: Generate Flutter web build files
+        run: flutter build web --release --web-renderer=canvaskit
+      - name: Move web build folder's content to public_html under ci-resources folder
+        run:  mv build/web/* ci-resources/public_html
+      - name: Upload to deploy-dev branch
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git --work-tree ci-resources add --all
+          git commit -m "chore: Deployment by Github-actions to Heroku."
+          git push origin HEAD:deploy-dev --force
