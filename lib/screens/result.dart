@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -47,9 +46,14 @@ class ResultState extends State<Result> {
           //Navigator.of(context).popAndPushNamed(Screen.result.getURL(),arguments: {"location":"Belconnen","job-type":"Electrician"});
           /// change popAndPushNamed to pushNamed, and the home page does not appear.
           ///
-          Navigator.of(context).pushNamed(Screen.result.getURL(),arguments: {"location":"Belconnen","job-type":"Electrician"});
+          Navigator.of(context).pushNamed(Screen.result.getURL(),
+              arguments: {"location": "Belconnen", "job-type": "Electrician"});
         }, // TODO: Replace with search request
-        icon: const Icon(Icons.search,color: Colors.black,size: 18,),
+        icon: const Icon(
+          Icons.search,
+          color: Colors.black,
+          size: 18,
+        ),
         label: const Text(
           'Search',
           style: TextStyle(
@@ -57,8 +61,7 @@ class ResultState extends State<Result> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        style: ElevatedButton.styleFrom(primary:kLogoColor,elevation: 2 ),
-
+        style: ElevatedButton.styleFrom(primary: kLogoColor, elevation: 2),
       ),
     );
   }
@@ -75,89 +78,82 @@ class ResultState extends State<Result> {
 
   @override
   Widget build(BuildContext context) {
-
     /// Receive the data in an Iterable<dynamic> TODO: it needs to retrieve data from search_bar
-    Map? t = ModalRoute.of(context)!.settings.arguments as Map? ;
-    if (t != null){
+    Map? t = ModalRoute.of(context)!.settings.arguments as Map?;
+    if (t != null) {
       var suburb = t.values;
-
     }
-
-
 
     final arguments = ModalRoute.of(context)?.settings.arguments as Map;
 
     logger.d(arguments);
     final size = MediaQuery.of(context).size;
-    logger.d(size.width/300);
+    logger.d(size.width / 300);
     return Scaffold(
       appBar: AppBar(
         title: Text("Result"),
       ),
       drawer: NavBar(),
       body: SingleChildScrollView(
-
         // TODO ExpansionPanel not expanding problem; Fix widget tree (Rohan)
 
-        child: Column(
-            children:[
+        child: Column(children: [
+          // TODO make it more aligned to the wireframe ()
+          Container(
+            width: 40.pw(size),
+            constraints: const BoxConstraints(minWidth: 275),
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 35),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: defaultShadows,
+              borderRadius: BorderRadius.circular(35),
+            ),
 
-              // TODO make it more aligned to the wireframe ()
-              Container(
-                width: 40.pw(size),
-                constraints: const BoxConstraints(minWidth: 275),
-                alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 35),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: defaultShadows,
-                  borderRadius: BorderRadius.circular(35),
-                ),
+            // Contains dropdownButtons + Search button
+            child: OverflowBar(
+              overflowAlignment: OverflowBarAlignment.center,
+              spacing: 2.5.pw(size),
+              overflowSpacing: 1.75.ph(size),
+              children: [
+                DropDownContainer(
+                    topic: "Job type",
+                    topicIconData: Icons.handyman,
+                    dropDownContent: {}),
+                _buildSearchButton(context)
+              ],
+            ),
+          ),
 
-                // Contains dropdownButtons + Search button
-                child: OverflowBar(
-                  overflowAlignment: OverflowBarAlignment.center,
-                  spacing: 2.5.pw(size),
-                  overflowSpacing: 1.75.ph(size),
-                  children: [
-                    DropDownContainer(topic:"Job type",topicIconData: Icons.handyman, dropDownContent: {}),
-                    _buildSearchButton(context)
-                  ],
-                ),
-              ),
-
-              Center(
-                child: Container(
-                  height: 90.ph(size),
-                  constraints: const BoxConstraints(maxWidth: 1080),
-                  child: Consumer<ResultNotifier>(
-                      builder: (context,resultNotifier,child) => StaggeredGridView.countBuilder(
+          Center(
+            child: Container(
+              height: 90.ph(size),
+              constraints: const BoxConstraints(maxWidth: 1080),
+              child: Consumer<ResultNotifier>(
+                  //builder: (context,resultNotifier,child) => StaggeredGrid.count(
+                  builder: (context, resultNotifier, child) =>
+                      StaggeredGridView.countBuilder(
                         // From Flutter docs: When this is true,the scroll view is scrollable
                         // even if it does not have sufficient content to actually scroll
                         primary: false,
                         controller: _scrollController,
                         itemCount: resultNotifier.tradies.length,
-                        crossAxisCount: min((size.width/300).floor(),3),
+                        crossAxisCount: min((size.width / 300).floor(), 3),
                         crossAxisSpacing: 20,
                         addAutomaticKeepAlives: false,
                         mainAxisSpacing: 20,
-                        itemBuilder: (context, index) => TradieContainer(tradie : resultNotifier.tradies[index]),
+                        itemBuilder: (context, index) => TradieContainer(
+                            tradie: resultNotifier.tradies[index]),
                         // Something like weights
-                        staggeredTileBuilder: (index) => const StaggeredTile.fit(1),
-                      )
-                  ),
-                ),
-              ),
-            ]),
+                        staggeredTileBuilder: (index) =>
+                            const StaggeredTile.fit(1),
+                      )),
+            ),
+          ),
+        ]),
       ),
     );
-
   }
-
-
-
-
-
 
 // void _scrollListener() {
 //   if (_scrollController.offset >=
@@ -198,16 +194,14 @@ class ResultState extends State<Result> {
 // }
 }
 
-
 class TradieContainer extends StatefulWidget {
   const TradieContainer({Key? key, required this.tradie}) : super(key: key);
   final Tradie tradie;
   @override
-  _TradieContainerState createState() => _TradieContainerState(tradie:tradie);
+  _TradieContainerState createState() => _TradieContainerState(tradie: tradie);
 }
 
 class _TradieContainerState extends State<TradieContainer> {
-
   // TODO: Remove this once images can be fetched directly.
   late final List<String>? imageList = tradie.certificatesUrl;
 
@@ -215,7 +209,6 @@ class _TradieContainerState extends State<TradieContainer> {
   _TradieContainerState({required this.tradie});
 
   bool isExpanded = false;
-
 
   @override
   Widget build(BuildContext context) {
@@ -253,9 +246,7 @@ class _TradieContainerState extends State<TradieContainer> {
                     ).image,
                     radius: 25,
                   ),
-
                   Text(tradie.firstName ?? "First name"),
-
                   ElevatedButton(
                       onPressed: () {
                         logger.d("Pressed");
@@ -265,24 +256,24 @@ class _TradieContainerState extends State<TradieContainer> {
           ),
           Expanded(
             child: Column(children: [
-
-
-              GFRating(onChanged: (value) {}, value: 3.5,
+              GFRating(
+                onChanged: (value) {},
+                value: 3.5,
                 color: Colors.black,
                 size: 22.5,
-                borderColor: Colors.black,),
-              Text( tradie.description ?? "Description: [To be filled]",
+                borderColor: Colors.black,
+              ),
+              Text(tradie.description ?? "Description: [To be filled]",
                   style: const TextStyle(fontStyle: FontStyle.italic)),
-
             ]),
           ),
         ]),
         children: [
-
           Column(children: [
             // buildCarouselFeedbackRatings(imageList,size,isExpanded),
-            const Text("Certificates",style: TextStyle(fontWeight: FontWeight.bold)),
-            buildCertificatesCarousel(imageList,size,isExpanded),
+            const Text("Certificates",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            buildCertificatesCarousel(imageList, size, isExpanded),
           ])
         ],
       ),
@@ -290,33 +281,37 @@ class _TradieContainerState extends State<TradieContainer> {
   }
 
   // TODO: Link backend image
-  Widget buildCertificatesCarousel(List<String>? imageList, Size size, bool isExpanded) {
-    return isExpanded? GFCarousel(
-      height: 10.ph(size),
-      viewportFraction: 1,
-      items: imageList!= null ? imageList.map(
-            (url) {
-          logger.d(url.toString());
-          return Container(
-            margin: const EdgeInsets.all(5),
-            child: Image.network(
-              url,
-              loadingBuilder: (_, child, progress) {
-                if (progress == null) {
-                  return child;
-                }
-                return const CircularProgressIndicator();
-              },
-            ),
-          );
-        },
-      ).toList() : [const Text("No certificates uploaded by tradie.")],
-      onPageChanged: (index) {},
-    ): Container();
+  Widget buildCertificatesCarousel(
+      List<String>? imageList, Size size, bool isExpanded) {
+    return isExpanded
+        ? GFCarousel(
+            height: 10.ph(size),
+            viewportFraction: 1,
+            items: imageList != null
+                ? imageList.map(
+                    (url) {
+                      logger.d(url.toString());
+                      return Container(
+                        margin: const EdgeInsets.all(5),
+                        child: Image.network(
+                          url,
+                          loadingBuilder: (_, child, progress) {
+                            if (progress == null) {
+                              return child;
+                            }
+                            return const CircularProgressIndicator();
+                          },
+                        ),
+                      );
+                    },
+                  ).toList()
+                : [const Text("No certificates uploaded by tradie.")],
+            onPageChanged: (index) {},
+          )
+        : Container();
   }
 
-
-/// Shows feedback and ratings of top jobs done by the tradie
+  /// Shows feedback and ratings of top jobs done by the tradie
 // Widget buildCarouselFeedbackRatings(List<String> imageList, Size size, bool isExpanded) {
 //   return isExpanded? GFCarousel(
 //     height: 10.ph(size),
