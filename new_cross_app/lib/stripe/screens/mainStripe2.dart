@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-
 import 'package:new_cross_app/stripe/screens/card_form_screen.dart';
 import 'package:new_cross_app/stripe/screens/.env';
-import 'package:new_cross_app/stripe/screens/screens.dart';
-import 'package:new_cross_app/stripe/constains.dart';
-import 'package:stripe/stripe.dart';
+// import 'package:stripe/stripe.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:flutter_stripe_web/flutter_stripe_web.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // TODO
   Stripe.publishableKey = stripePublishableKey;
-  await Stripe.instance.applySetting();
+  await Stripe.instance.applySettings();
 
   runApp(const MyApp());
 }
