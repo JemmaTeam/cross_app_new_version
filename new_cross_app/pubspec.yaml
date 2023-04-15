@@ -32,10 +32,22 @@ dependencies:
     sdk: flutter
 
   # TODO: stripe-- YM L
+#  stripe: ^23.6.0
   stripe: ^4.4.1
   flutter_credit_card: ^3.0.6
   flutter_svg: ^1.1.1+1
-  flutter_stripe: ^1.0.1
+#  flutter_stripe: ^1.0.1
+  # Flutter 3.0 with Stripe:
+  # https://www.youtube.com/watch?v=YWonKJ0RBs8&t=369s
+  flutter_stripe: ^8.0.0
+#  flutter_stripe: ^9.0.0+1
+  flutter_stripe_web: ^3.0.0
+  http: ^0.13.5
+  # How to enable Stripe payments in your flutter Apps[2022]:
+  # https://www.youtube.com/watch?v=tpILK64NM6M&t=486s
+  flutter_bloc: 8.0.1
+  equatable: ^2.0.3
+
   #  flutter_svg: ^0.22.0
 
   # The following adds the Cupertino Icons font to your application.

@@ -6,13 +6,59 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.0'
+//        classpath 'com.android.tools.build:gradle:7.2.0'
+        classpath 'com.android.tools.build:gradle:7.2.2'
         // START: FlutterFire Configuration
         classpath 'com.google.gms:google-services:4.3.10'
         // END: FlutterFire Configuration
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
+
+//YM stripe
+android{
+//    compileSdkVersion flutter.compileSdkVersion
+//    ndkVersion flutter.ndkVersion
+//
+//    compileOptioins{
+//        sourceCompatibility JavaVersion.VERSION_1_8
+//        targetCompatibility JavaVersion.VERSION_1_8
+//    }
+//
+//    kotlinOptions{
+//        jvmTarget = '1.8'
+//    }
+//
+//    sourceSets{
+//        main.java.srcDirs += 'src/main/kotlin'
+//    }
+
+    defaultConfig{
+        minSdkVersion 21
+        //TODO:Specify your own unique application ID(https://developer.android)
+//        applicationId "com.example.flutter_payments_with_stripe"
+//
+//        minSdkVersion 21
+//        targetSdkVersion flutter.targetSdkVersion
+//
+//        versionCode flutterVersionCode.toInteger()
+//        versionName flutterVersionName
+    }
+
+//    buildType{
+//        release{
+//            signingConfig signingConfigs.debug
+//        }
+//    }
+}
+
+//flutter{
+//    source'../..'
+//}
+
+
+//YM stripe
+
 
 allprojects {
     repositories {
