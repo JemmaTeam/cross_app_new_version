@@ -23,6 +23,7 @@ import 'dart:convert';
 import '../main.dart';
 import '../widgets/nav_bar.dart';
 import 'dart:js' as js;
+// import 'package:js/js.dart' as js;
 
 /// Shows the details of a selected [Quote]; Note: This screen can be accessed through Quote list page.
 /// Expects the [Quote] to be sent as an arg via the Navigator.
