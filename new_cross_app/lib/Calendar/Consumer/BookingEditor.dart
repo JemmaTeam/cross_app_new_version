@@ -275,6 +275,31 @@ class BookingEditorState extends State<BookingEditor> {
               height: 1.0,
               thickness: 1,
             ),
+            ListTile(
+              contentPadding: const EdgeInsets.all(5),
+              leading: const Icon(
+                Icons.star,
+                color: Colors.yellow,
+              ),
+              title: Text(_rating.toString()),
+            ),
+            const Divider(
+              height: 1.0,
+              thickness: 1,
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.all(5),
+              leading: const Icon(
+                Icons.rate_review,
+                color: Colors.black87,
+              ),
+              title: Text(_comment),
+            ),
+            const Divider(
+              height: 1.0,
+              thickness: 1,
+            ),
+
           ],
         ));
   }
@@ -308,10 +333,9 @@ class BookingEditorState extends State<BookingEditor> {
                     ),
                     onPressed: () async {
                       if (_selectedAppointment == null) {
-                        print('new booking');
                         final meetings = <Booking>[];
                         AlertDialog alert_outBound;
-                        if (_startDate.hour < 9 || _endDate.hour > 17) {
+                        if (_startDate.hour < workStart || _endDate.hour > workEnd) {
                           Widget OKButton = TextButton(
                             child: const Text("Ok"),
                             onPressed: () {
@@ -461,7 +485,7 @@ class BookingEditorState extends State<BookingEditor> {
 
                       _selectedAppointment = null;
                       //_consumer.bookings.add(meetings[0]);
-                      Navigator.pop(context);
+                      GoRouter.of(context).pop();
                     })
               ],
             ),

@@ -463,8 +463,9 @@ class _ProfileHomeState extends State<ProfileHome> {
                     ),
                     TextButton(
                         onPressed: () {
-                          GoRouter.of(context).pushNamed(RouterName.CalendarTradie,
+                          GoRouter.of(context).pushReplacementNamed(RouterName.CalendarTradie,
                               params: {'userId': userId});
+
                         },
                         child: Text(
                           "Go to Tradie's Calendar",

@@ -115,7 +115,7 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                             _selectedStatusIndex=_statusNames.indexOf('Complete');
                           });
                           await bookingRef.doc(selectedKey).update({'status': 'Complete'});
-                          GoRouter.of(context).pushNamed(RouterName.Rate,
+                          GoRouter.of(context).pushReplacementNamed(RouterName.Rate,
                               params: {'bookingId': selectedKey});
                         }
                       },
@@ -137,10 +137,9 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                           _selectedStatusIndex=_statusNames.indexOf('Working');
                         });
                         await bookingRef.doc(selectedKey).update({'status': 'Working'});
-                        await createPaymentIntent({'price': quote.toString(),
+                        await createPaymentIntent({'price': (quote*100).toString(),
                         'userId':_consumerId,
                         'product_name':_subject});
-
                       },
                     ),
             ),
@@ -171,6 +170,30 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                   hintText: 'Add Note',
                 ),
               ),
+            ),
+            const Divider(
+              height: 1.0,
+              thickness: 1,
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.all(5),
+              leading: const Icon(
+                Icons.star,
+                color: Colors.yellow,
+              ),
+              title: Text(_rating.toString()),
+            ),
+            const Divider(
+              height: 1.0,
+              thickness: 1,
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.all(5),
+              leading: const Icon(
+                Icons.rate_review,
+                color: Colors.black87,
+              ),
+              title: Text(_comment),
             ),
             const Divider(
               height: 1.0,
@@ -238,13 +261,13 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                       'tradieId': _tradieId,
                       'consumerId': _consumerId,
                       'quote': quote,
-                      'rating':0,
-                      'comment':'',
+                      'rating':_rating,
+                      'comment':_comment,
                     });
                     _selectedAppointment = null;
 
                     //_consumer.bookings.add(meetings[0]);
-                    Navigator.pop(context);
+                    GoRouter.of(context).pop();
                   })
             ],
           ),

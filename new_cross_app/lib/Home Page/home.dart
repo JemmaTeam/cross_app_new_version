@@ -232,13 +232,6 @@ class HomeState extends State<Home> {
                     ),
                   ),
                   ListTile(
-                    title: const Text('Home'),
-                    onTap: () {
-                      GoRouter.of(context).pushNamed(RouterName.homePage,
-                          params: {'userId': userId});
-                    },
-                  ),
-                  ListTile(
                     title: const Text('Profile'),
                     onTap: () {
                       GoRouter.of(context)
@@ -247,25 +240,13 @@ class HomeState extends State<Home> {
                       });
                     },
                   ),
-                  //TODO: Test User Type
-                  _isConsumer == true
-                      ? ListTile(
+                      ListTile(
                           title: const Text('Calendar'),
                           onTap: () {
-                            GoRouter.of(context).pushNamed(
-                                RouterName.CalendarConsumer,
+                            context.pushNamed(RouterName.CalendarConsumer,
                                 params: {
                                   'userId': userId,
                                 });
-                          },
-                        )
-                      : ListTile(
-                          title: const Text('Calendar'),
-                          onTap: () {
-                            GoRouter.of(context)
-                                .pushNamed(RouterName.CalendarTradie, params: {
-                              'userId': userId,
-                            });
                           },
                         ),
                   ListTile(

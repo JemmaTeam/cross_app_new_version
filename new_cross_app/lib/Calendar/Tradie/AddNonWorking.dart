@@ -315,14 +315,17 @@ class AddNonWorkingState extends State<AddNonWorking> {
                         meetings.add(Booking(
                           from: _startDate,
                           to: _endDate,
-                          status: "Unavailable",
+                          status: _statusNames[_selectedStatusIndex],
                           consumerName: _consumerName,
-                          tradieName: user_tradieName,
+                          tradieName: _tradieName,
                           description: _notes,
-                          eventName: "Unavailable",
+                          eventName: _subject,
                           consumerId: _consumerId,
                           tradieId: _tradieId,
                           key: selectedKey,
+                          quote: 0,
+                          comment: '',
+                          rating: 0,
                         ));
                         _events.appointments!.add(meetings[0]);
                         _events.notifyListeners(
@@ -338,24 +341,59 @@ class AddNonWorkingState extends State<AddNonWorking> {
                           }
                         }
                         colRef.doc().set({
-                          'eventName': "Unavailable",
+                          'eventName': _subject,
                           'from': _startDate.toString(),
                           'to': _endDate.toString(),
-                          'status': 'Unavailable',
-                          'tradieName': user_tradieName,
-                          'consumerName': 'null',
+                          'status': 'Pending',
+                          'tradieName': _tradieName,
+                          'consumerName': _consumerName,
                           'description': _notes,
                           'key': selectedKey,
                           'tradieId': _tradieId,
-                          'consumerId': 'null',
+                          'consumerId': _consumerId,
+                          'quote': quote,
+                          'rating': _rating,
+                          'comment': _comment,
                         });
 
                         var k = await getKey(keys);
                         colRef.doc(k).update({'key': k});
+                      }else{
+                        setState(() {
+                          _selectedAppointment!.from = _startDate;
+                          _selectedAppointment!.to = _endDate;
+                          _selectedAppointment!.tradieName = _tradieName;
+                          _selectedAppointment!.status =
+                          _statusNames[_selectedStatusIndex];
+                          _selectedAppointment!.consumerName = _consumerName;
+                          _selectedAppointment!.description = _notes;
+                          _selectedAppointment!.key = selectedKey;
+                          _selectedAppointment!.tradieId = _tradieId;
+                          _selectedAppointment!.consumerId = _consumerId;
+                          _selectedAppointment!.quote = quote;
+                          _selectedAppointment!.rating = _rating;
+                          _selectedAppointment!.comment = _comment;
+                          _selectedAppointment!.eventName = _subject;
+                        });
+                        colRef.doc(_selectedAppointment?.key).update({
+                          'eventName': _subject,
+                          'from': _startDate.toString(),
+                          'to': _endDate.toString(),
+                          'status': _statusNames[_selectedStatusIndex],
+                          'tradieName': _tradieName,
+                          'consumerName': _consumerName,
+                          'description': _notes,
+                          'key': selectedKey,
+                          'tradieId': _tradieId,
+                          'consumerId': _consumerId,
+                          'quote': quote,
+                          'rating': _rating,
+                          'comment': _comment,
+                        });
                       }
                       _selectedAppointment = null;
                       //_consumer.bookings.add(meetings[0]);
-                      Navigator.pop(context);
+                      GoRouter.of(context).pop();
                     })
               ],
             ),

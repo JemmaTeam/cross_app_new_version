@@ -122,14 +122,6 @@ class ConsumerProfileState extends State<ConsumerProfilePage> {
 
         return Scaffold(
             appBar: AppBar(
-                leading: IconButton(
-                  onPressed: (){
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(
-                    Icons.arrow_back
-                  ),
-                )
             ),
             resizeToAvoidBottomInset: true,
             body: getEventCalendar(_events, onCalendarTapped));
@@ -212,11 +204,7 @@ class ConsumerProfileState extends State<ConsumerProfilePage> {
           _startTime =
               TimeOfDay(hour: _startDate.hour, minute: _startDate.minute);
           _endTime = TimeOfDay(hour: _endDate.hour, minute: _endDate.minute);
-          Navigator.push<Widget>(
-            context,
-            MaterialPageRoute(
-                builder: (BuildContext context) => AppointmentEditor()),
-          );
+          GoRouter.of(context).pushNamed(RouterName.AppointmentEditor);
         });
       }
     }

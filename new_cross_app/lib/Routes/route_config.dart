@@ -176,6 +176,14 @@ class MyRouter {
                 child: AppointmentEditor());
           },
         ),
+        GoRoute(
+          name: RouterName.BookingEditorT,
+          path: '/bookingEditor_tradie',
+          pageBuilder: (context, state) {
+            return const MaterialPage(
+                child: BookingEditorT());
+          },
+        ),
       ],
       errorPageBuilder: (context, state) {
         return MaterialPage(child: ErrorPage());
