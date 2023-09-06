@@ -13,20 +13,24 @@ const cors = require('cors')({ origin: true });
 //Stripe TODO: 1. connect stripe with other page 2.add webhook to monitor status and send notification 3.mobile side stripe debug and setting
 
 //TODO: pass user id and return url to redirect
-//NOTE: This is function for onboarding tradies
+
+//This is function for onboarding tradies
 exports.createConnectAccount = functions.https.onRequest(async (req, res) => {cors(req, res,async () => {
     const userId = req.body
     try {
-        // 使用 Stripe API 创建 Connect 账号
+        // create stripe account
         const account = await stripe.accounts.create({
           type: 'express',
         });
+        // create stripe account link for onboarding
         const accountLinks = await stripe.accountLinks.create({
             account: account.id,
             refresh_url: 'https://jemma-b0fcd.web.app/#/',
             return_url: 'https://jemma-b0fcd.web.app/#/',
             type: 'account_onboarding',
         });
+        // return account id to store on firebase and account link for redirection
+
         return res.send({
             url:accountLinks.url,
             id: account.id

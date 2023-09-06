@@ -1,13 +1,13 @@
 part of tradie_calendar;
 
 
-class BookingEditor extends StatefulWidget {
-  const BookingEditor({super.key});
+class BookingEditorT extends StatefulWidget {
+  const BookingEditorT({super.key});
   @override
-  BookingEditorState createState() => BookingEditorState();
+  BookingEditorTState createState() => BookingEditorTState();
 }
 
-class BookingEditorState extends State<BookingEditor> {
+class BookingEditorTState extends State<BookingEditorT> {
   Widget _getAppointmentEditor(BuildContext context) {
     var textFieldC= TextEditingController(text: quote.toString());
     return Container(

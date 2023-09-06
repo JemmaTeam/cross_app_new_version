@@ -14,9 +14,9 @@ class Booking {
         this.rating=0,
         this.comment=''});
 
-  final String tradieName;
-  final String consumerName;
-  final String eventName;
+  String tradieName;
+  String consumerName;
+  String eventName;
   DateTime from;
   DateTime to;
   String status;

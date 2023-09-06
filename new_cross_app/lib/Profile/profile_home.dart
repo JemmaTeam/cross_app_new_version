@@ -12,6 +12,7 @@ import 'customer_info_edit.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher_string.dart';
+import 'dart:js' as js;
 
 class ProfileHome extends StatefulWidget {
   String userId;
@@ -535,7 +536,7 @@ class _ProfileHomeState extends State<ProfileHome> {
         FirebaseFirestore.instance.collection('users').doc(userId).update({
           'stripeId': accountId,
         });
-        _launchURL(responseMap['url']!.toString());
+        openExternalUrl(responseMap['url']!.toString());
       } else {
         print('请求失败：${response.statusCode}');
       }
@@ -544,11 +545,7 @@ class _ProfileHomeState extends State<ProfileHome> {
     });
   }
 
-  void _launchURL(String url) async {
-    if (await canLaunchUrlString(url)) {
-      await launchUrlString(url);
-    } else {
-      throw 'could not open $url';
-    }
+  void openExternalUrl(String url) {
+    js.context.callMethod('openExternalUrl', [url]);
   }
 }

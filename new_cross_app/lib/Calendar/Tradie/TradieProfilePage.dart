@@ -9,7 +9,7 @@ import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import '../Consumer/Booking.dart';
 
-part 'BookingEditor.dart';
+part 'BookingEditorT.dart';
 
 part 'AddNonWorking.dart';
 
@@ -258,7 +258,7 @@ class TradieProfileState extends State<TradieProfilePage> {
               Navigator.push<Widget>(
                 context,
                 MaterialPageRoute(
-                    builder: (BuildContext context) => BookingEditor()),
+                    builder: (BuildContext context) => BookingEditorT()),
               );
             }
             //如果返回appointments 为null，则说明是新的meeting,根据点击的时间点设置信息，并且跳转到appointment editor
@@ -278,7 +278,7 @@ class TradieProfileState extends State<TradieProfilePage> {
             Navigator.push<Widget>(
               context,
               MaterialPageRoute(
-                  builder: (BuildContext context) => BookingEditor()),
+                  builder: (BuildContext context) => BookingEditorT()),
             );
           }
         });

@@ -467,7 +467,7 @@ class BookingEditorState extends State<BookingEditor> {
             ),
             body: Padding(
               padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
-              //TODO 搞懂
+
               child: Stack(
                 children: <Widget>[_getAppointmentEditor(context)],
               ),

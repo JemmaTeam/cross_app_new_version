@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:new_cross_app/Calendar/Consumer/ConsumerProfilePage.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:intl/intl.dart';
-
+import 'dart:js' as js;
 import '../../Routes/route_const.dart';
 import '../../stripe/check_out.dart';
 import 'Booking.dart';

@@ -160,7 +160,22 @@ class MyRouter {
                 child: Rating(bookingId: state.params['bookingId']!));
           },
         ),
-
+        GoRoute(
+          name: RouterName.BookingEditor,
+          path: '/bookingEditor',
+          pageBuilder: (context, state) {
+            return MaterialPage(
+                child: BookingEditor());
+          },
+        ),
+        GoRoute(
+          name: RouterName.AppointmentEditor,
+          path: '/appointmentEditor',
+          pageBuilder: (context, state) {
+            return const MaterialPage(
+                child: AppointmentEditor());
+          },
+        ),
       ],
       errorPageBuilder: (context, state) {
         return MaterialPage(child: ErrorPage());
