@@ -69,10 +69,6 @@ Future<void> createStripeConnectAccount() async {
       print('请求成功：${response.body}');
       Map<String, dynamic> responseMap = json.decode(response.body);
       String accountId = responseMap['id']!.toString();
-
-      FirebaseFirestore.instance.collection('stripeId').add({
-        'account_id': accountId,
-      });
       _launchURL(responseMap['url']!.toString());
     } else {
       print('请求失败：${response.statusCode}');

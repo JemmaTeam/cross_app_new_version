@@ -41,6 +41,8 @@ class _RatingState extends State<Rating> {
       consumerId: data['consumerId'] ?? '',
       comment: data['comment'] ?? '',
       rating: data['rating'] ?? 0,
+      quote: data['quote']?? 0,
+      eventName: data['eventName']?? '',
     );
     return booking;
   }
@@ -144,15 +146,31 @@ class _RatingState extends State<Rating> {
                           // Update the service rating field
                         });
                         // Todo: Get accountId & quote from firebase
-
                       },
                       child: ElevatedButton(
-                          child: Text('Submit'),
-                          onPressed: (){
-                            confirmWork({'accountId': 'acct_1NkozJC1m29tlvhX', 'amount': '90'});
-                            GoRouter.of(context).pop();
+                        child: Text('Submit'),
+                        onPressed: () async{
+                          var accountId;
+                          print(booking.tradieId);
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(booking.tradieId)
+                              .get().then(
+                                (DocumentSnapshot doc) async {
+                              final data = doc.data() as Map<String, dynamic>;
+                              if(data!=null){
+                                await confirmWork({
+                                  'accountId': data['stripeId'],
+                                  //TODO: Get Amount after deducting fee
+                                  'amount': (booking.quote*100*0.95).toString(),
+                                });
+                              }
+                            },
+                            onError: (e) => print("Error getting document: $e"),
+                          );;
 
-                          },
+                          GoRouter.of(context).pop();
+                        },
                       ),
                     ),
                   ],
