@@ -150,11 +150,7 @@ class _RatingState extends State<Rating> {
                           child: Text('Submit'),
                           onPressed: (){
                             confirmWork({'accountId': 'acct_1NkozJC1m29tlvhX', 'amount': '90'});
-                            GoRouter.of(context).pushReplacementNamed(
-                                RouterName.CalendarConsumer,
-                                params: {
-                                  'userId': booking.consumerId,
-                                });
+                            GoRouter.of(context).pop();
 
                           },
                       ),

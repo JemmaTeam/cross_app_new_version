@@ -6,7 +6,9 @@ class AppointmentEditor extends StatefulWidget {
   @override
   AppointmentEditorState createState() => AppointmentEditorState();
 }
+
 late int amount;
+
 class AppointmentEditorState extends State<AppointmentEditor> {
   Widget _getAppointmentEditor(BuildContext context) {
     return Container(
@@ -112,10 +114,14 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                       onPressed: () async {
                         if (_statusNames[_selectedStatusIndex] == 'Rating') {
                           setState(() {
-                            _selectedStatusIndex=_statusNames.indexOf('Complete');
+                            _selectedStatusIndex =
+                                _statusNames.indexOf('Complete');
                           });
-                          await bookingRef.doc(selectedKey).update({'status': 'Complete'});
-                          GoRouter.of(context).pushReplacementNamed(RouterName.Rate,
+                          await bookingRef
+                              .doc(selectedKey)
+                              .update({'status': 'Complete'});
+                          GoRouter.of(context).pushReplacementNamed(
+                              RouterName.Rate,
                               params: {'bookingId': selectedKey});
                         }
                       },
@@ -134,12 +140,17 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                       ),
                       onPressed: () async {
                         setState(() {
-                          _selectedStatusIndex=_statusNames.indexOf('Working');
+                          _selectedStatusIndex =
+                              _statusNames.indexOf('Working');
                         });
-                        await bookingRef.doc(selectedKey).update({'status': 'Working'});
-                        await createPaymentIntent({'price': (quote*100).toString(),
-                        'userId':_consumerId,
-                        'product_name':_subject});
+                        await bookingRef
+                            .doc(selectedKey)
+                            .update({'status': 'Working'});
+                        await createPaymentIntent({
+                          'price': (quote * 100).toString(),
+                          'userId': _consumerId,
+                          'product_name': _subject
+                        });
                       },
                     ),
             ),
@@ -234,20 +245,20 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                     final List<Booking> meetings = <Booking>[];
                     //如果是已存在的appointment，从列表中移除，加上更改的
                     if (_selectedAppointment != null) {
-                      _selectedAppointment!.from=_startDate;
-                      _selectedAppointment!.to=_endDate;
-                      _selectedAppointment!.tradieName=_tradieName;
-                      _selectedAppointment!.status=_statusNames[_selectedStatusIndex];
-                      _selectedAppointment!.consumerName=_consumerName;
-                      _selectedAppointment!.description=_notes;
-                      _selectedAppointment!.key=selectedKey;
-                      _selectedAppointment!.tradieId=_tradieId;
-                      _selectedAppointment!.consumerId=_consumerId;
-                      _selectedAppointment!.quote=quote;
-                      _selectedAppointment!.rating=_rating;
-                      _selectedAppointment!.comment=_comment;
-                      _selectedAppointment!.eventName=_subject;
-
+                      _selectedAppointment!.from = _startDate;
+                      _selectedAppointment!.to = _endDate;
+                      _selectedAppointment!.tradieName = _tradieName;
+                      _selectedAppointment!.status =
+                          _statusNames[_selectedStatusIndex];
+                      _selectedAppointment!.consumerName = _consumerName;
+                      _selectedAppointment!.description = _notes;
+                      _selectedAppointment!.key = selectedKey;
+                      _selectedAppointment!.tradieId = _tradieId;
+                      _selectedAppointment!.consumerId = _consumerId;
+                      _selectedAppointment!.quote = quote;
+                      _selectedAppointment!.rating = _rating;
+                      _selectedAppointment!.comment = _comment;
+                      _selectedAppointment!.eventName = _subject;
                     }
                     bookingRef.doc(_selectedAppointment?.key).update({
                       'eventName': _subject,
@@ -261,8 +272,8 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                       'tradieId': _tradieId,
                       'consumerId': _consumerId,
                       'quote': quote,
-                      'rating':_rating,
-                      'comment':_comment,
+                      'rating': _rating,
+                      'comment': _comment,
                     });
                     _selectedAppointment = null;
 
@@ -277,21 +288,18 @@ class AppointmentEditorState extends State<AppointmentEditor> {
               children: <Widget>[_getAppointmentEditor(context)],
             ),
           ),
-          floatingActionButton: _selectedAppointment == null
-              ? const Text('')
-              : FloatingActionButton(
+          /*floatingActionButton:FloatingActionButton(
                   onPressed: () {
-                    if (_selectedAppointment != null) {
-                      _events.appointments!.removeAt(
-                          _events.appointments!.indexOf(_selectedAppointment));
+                    setState(() {
+                      _events.appointments!.removeAt(_selectedStatusIndex);
                       _events.notifyListeners(CalendarDataSourceAction.remove,
                           <Booking>[]..add(_selectedAppointment!));
-                      try {
-                        bookingRef.doc(_selectedAppointment?.key).delete();
-                      } catch (e) {}
-                      _selectedAppointment = null;
-                      Navigator.pop(context);
-                    }
+                    });
+                    try {
+                      bookingRef.doc(_selectedAppointment?.key).delete();
+                    } catch (e) {}
+                    _selectedAppointment = null;
+                    Navigator.pop(context);
                   },
                   child: const Text(
                     'Cancel',
@@ -299,33 +307,35 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                   ),
                   /*const Icon(Icons.delete_outline, color: Colors.white),*/
                   backgroundColor: Colors.red,
-                ),
+                ),*/
         ));
   }
 
   String getTile() {
     return _subject.isEmpty ? 'New event' : 'Event details';
   }
-
-
 }
-Future<String> createPaymentIntent(Map<String,String> body) async{
-  await http.post(
-    Uri.parse('https://us-central1-jemma-b0fcd.cloudfunctions.net/StripeCheckOut'),
-    body:body,
-  ).then((res){
-    if(res.statusCode == 200){
+
+Future<String> createPaymentIntent(Map<String, String> body) async {
+  await http
+      .post(
+    Uri.parse(
+        'https://us-central1-jemma-b0fcd.cloudfunctions.net/StripeCheckOut'),
+    body: body,
+  )
+      .then((res) {
+    if (res.statusCode == 200) {
       print('success');
       Map<String, dynamic> responseMap = json.decode(res.body);
       amount = int.parse(responseMap['amount']!.toString());
       openExternalUrl(responseMap['url']!.toString());
-    }else{
+    } else {
       print('failed: ${res.body}');
     }
   });
   return '';
-
 }
+
 void openExternalUrl(String url) {
   js.context.callMethod('openExternalUrl', [url]);
 }

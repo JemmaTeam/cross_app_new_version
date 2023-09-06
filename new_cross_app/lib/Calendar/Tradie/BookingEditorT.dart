@@ -437,9 +437,7 @@ class BookingEditorTState extends State<BookingEditorT> {
                 children: <Widget>[_getAppointmentEditor(context)],
               ),
             ),
-            floatingActionButton: _selectedAppointment == null
-                ? const Text('')
-                : FloatingActionButton(
+            /*floatingActionButton:FloatingActionButton(
                     onPressed: () {
                       if (_selectedAppointment != null) {
                         int remove = 0;
@@ -467,7 +465,7 @@ class BookingEditorTState extends State<BookingEditorT> {
                     ),
                     /*const Icon(Icons.delete_outline, color: Colors.white),*/
                     backgroundColor: Colors.red,
-                  )));
+                  )*/));
   }
 
   Future<String> getKey(List<String> oldkeys) async {
