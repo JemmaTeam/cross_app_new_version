@@ -32,7 +32,6 @@
 
   <title>new_cross_app</title>
   <link rel="manifest" href="manifest.json">
-
   <script>
     // The value below is injected by flutter build, do not touch.
     var serviceWorkerVersion = null;
@@ -43,6 +42,9 @@
 </head>
 <body>
   <script>
+    function openExternalUrl(url) {
+      window.open(url, '_blank');
+    }
     window.addEventListener('load', function(ev) {
       // Download main.dart.js
       _flutter.loader.loadEntrypoint({

@@ -105,9 +105,9 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                             ),
                           ),
                           SizedBox(height: max(2.ph(size), 20)),
-
-                          Text('UID: ${widget.uid}'), // 添加这行代码来显示uid
-                          SizedBox(height: max(2.ph(size), 20)),
+                          //
+                          // Text('UID: ${widget.uid}'), // 添加这行代码来显示uid
+                          // SizedBox(height: max(2.ph(size), 20)),
 
                           // 添加一个新的输入框用于postcode
                           Center(
@@ -145,75 +145,95 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                 ),
                               ),
                               SizedBox(height: 10), // 空间填充，垂直间距
-                              ElevatedButton(
-                                onPressed: () async {  // 定义一个异步的onPressed函数，这个函数在按钮被点击后触发
-                                  FilePickerResult? result = await FilePicker.platform.pickFiles(  // 使用FilePicker来让用户选择文件
-                                    type: FileType.custom,  // 设置文件类型为自定义
-                                    allowedExtensions: ['jpg', 'png', 'jpeg'],  // 允许的文件扩展名
-                                  );
-
-                                  if (result != null) {  // 如果用户成功选取了一个文件
-                                    File file = File(result.files.single.path!);  // 从选取结果中获取文件
-                                    String fileName = DateTime.now().millisecondsSinceEpoch.toString();  // 创建一个基于当前时间的文件名
-
-                                    FirebaseStorage storage = FirebaseStorage.instance;  // 获取FirebaseStorage的实例
-                                    // 在Firebase Storage引用路径中包括userId，这样每个用户都将在其自己的文件夹中有文件。
-                                    UploadTask task = storage.ref('users/${widget.uid}/$fileName').putFile(file);
-
-                                    task.snapshotEvents.listen((TaskSnapshot snapshot) {
-                                      double progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                                      print('Upload progress: $progress%');
-                                      // You can update UI with progress here if needed
-                                    }, onError: (Object e) {
-                                      // Handle error during upload
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text("图片上传失败"),
-                                        ),
-                                      );
-                                    });
-
-                                    try {
-                                      await task;  // 等待任务完成
-                                      final String downloadUrl = await task.snapshot.ref.getDownloadURL();
-                                      await FirebaseFirestore.instance
-                                          .collection('users')
-                                          .doc(widget.uid)
-                                          .update({'lincensePic': downloadUrl});
-
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text("图片上传成功"),
-                                        ),
-                                      );
-                                    } catch (error) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text("图片上传失败"),
-                                        ),
-                                      );
-                                    }
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text("没有选取文件"),
-                                      ),
-                                    );
-                                  }
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: kLogoColor,
-                                  minimumSize: Size(300, 60), // 调整按钮尺寸
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min, // 水平方向上尽可能小的尺寸
-                                  children: [
-                                    Icon(Icons.upload),
-                                    SizedBox(width: 5),
-                                    Text("Upload License Picture"), // 添加按钮的提示
-                                  ],
-                                ),
-                              ),
+                              // ElevatedButton(
+                              //   onPressed: () async {
+                              //     // 定义一个异步的onPressed函数，这个函数在按钮被点击后触发
+                              //
+                              //     try {
+                              //       FilePickerResult? result = await FilePicker.platform.pickFiles(
+                              //         type: FileType.custom,
+                              //         allowedExtensions: ['jpg', 'png', 'jpeg'],
+                              //       );
+                              //
+                              //     print("Result: $result");
+                              //     print("Path: ${result?.files.single.path}");
+                              //
+                              //     if (result != null && result.files.single.path != null) {  // 如果用户成功选取了一个文件
+                              //
+                              //       print("Result: $result");
+                              //       print("Path: ${result?.files.single.path}");
+                              //
+                              //       File file = File(result.files.single.path!);  // 从选取结果中获取文件
+                              //       String fileName = DateTime.now().millisecondsSinceEpoch.toString();  // 创建一个基于当前时间的文件名
+                              //
+                              //       FirebaseStorage storage = FirebaseStorage.instance;  // 获取FirebaseStorage的实例
+                              //       // 在Firebase Storage引用路径中包括userId，这样每个用户都将在其自己的文件夹中有文件。
+                              //       UploadTask task = storage.ref('users/${widget.uid}/$fileName').putFile(file);
+                              //
+                              //       task.snapshotEvents.listen((TaskSnapshot snapshot) {
+                              //         double progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                              //         print('Upload progress: $progress%');
+                              //         // You can update UI with progress here if needed
+                              //       }, onError: (Object e) {
+                              //         // Handle error during upload
+                              //         ScaffoldMessenger.of(context).showSnackBar(
+                              //           SnackBar(
+                              //             content: Text("图片上传失败"),
+                              //           ),
+                              //         );
+                              //       });
+                              //
+                              //       try {
+                              //         await task;  // 等待任务完成
+                              //         final String downloadUrl = await task.snapshot.ref.getDownloadURL();
+                              //         await FirebaseFirestore.instance
+                              //             .collection('users')
+                              //             .doc(widget.uid)
+                              //             .update({'lincensePic': downloadUrl});
+                              //
+                              //         ScaffoldMessenger.of(context).showSnackBar(
+                              //           SnackBar(
+                              //             content: Text("图片上传成功"),
+                              //           ),
+                              //         );
+                              //       } catch (error) {
+                              //         ScaffoldMessenger.of(context).showSnackBar(
+                              //           SnackBar(
+                              //             content: Text("图片上传失败"),
+                              //           ),
+                              //         );
+                              //       }
+                              //     } else {
+                              //       print("FilePickerResult is null or path is null");
+                              //       ScaffoldMessenger.of(context).showSnackBar(
+                              //         SnackBar(
+                              //           content: Text("没有选取文件"),
+                              //         ),
+                              //       );
+                              //     }
+                              //   }
+                              //     catch (e) {
+                              //     print("Error picking file: $e");
+                              //     ScaffoldMessenger.of(context).showSnackBar(
+                              //     SnackBar(
+                              //     content: Text("文件选择出错"),
+                              //     ),
+                              //     );
+                              //     }
+                              //   },
+                              //   style: ElevatedButton.styleFrom(
+                              //     backgroundColor: kLogoColor,
+                              //     minimumSize: Size(300, 60), // 调整按钮尺寸
+                              //   ),
+                              //   child: Row(
+                              //     mainAxisSize: MainAxisSize.min, // 水平方向上尽可能小的尺寸
+                              //     children: [
+                              //       Icon(Icons.upload),
+                              //       SizedBox(width: 5),
+                              //       Text("Upload License Picture"), // 添加按钮的提示
+                              //     ],
+                              //   ),
+                              // ),
                             ],
                           ),
                           SizedBox(height: max(2.ph(size), 20)), // 空间填充，垂直间距
@@ -262,14 +282,6 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                             content: Text("注册成功"),
                                           ),
                                         );
-                                        // 导航到新页面并传递用户的 uid
-                                        // Navigator.push(
-                                        //   context,
-                                        //   MaterialPageRoute(
-                                        //     builder: (context) => ProfileHome(userId: widget.uid),
-                                        //   ),
-                                        // );
-                                        // 返回profile页面,并传递更新信息的参数
                                         Navigator.pop(context, 'update');
                                       } catch (error) {
                                         ScaffoldMessenger.of(context).showSnackBar(
@@ -301,10 +313,6 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
         floatingActionButton: FloatingActionButton( // 悬浮按钮
           backgroundColor: Colors.white, // 背景颜色
           onPressed: () { // 点击事件
-            // Navigator.push(
-            //     context,
-            //     MaterialPageRoute(builder: (context) => ProfileHome(userId: widget.uid))); // 跳转到另一个页面
-            // 返回profile页面,并传递未更新信息的参数
             Navigator.pop(context, 'notupdate');
           },
           child: const Icon(Icons.arrow_back, color: Colors.black87), // 按钮图标

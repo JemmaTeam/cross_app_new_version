@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:new_cross_app/Calendar/Consumer/ConsumerProfilePage.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:intl/intl.dart';
-
+import 'dart:js' as js;
 import '../../Routes/route_const.dart';
 import '../../stripe/check_out.dart';
 import 'Booking.dart';
@@ -53,6 +53,8 @@ late bool weekend;
 bool _isAllDay = false;
 String _subject = '';
 String _notes = '';
+String _comment = '';
+num _rating = 0;
 final db = FirebaseFirestore.instance;
 final usersRef = db.collection('users');
 final bookingRef = db.collection('bookings');
@@ -78,7 +80,9 @@ class ConsumerBookingState extends State<ConsumerBooking> {
   Future<void> getName(tradieId, consumerId)async {
     await usersRef.where('uid', isEqualTo: tradieId).get().then((value) => {
       user_tradieName=value.docs[0]['fullName'],
-      user_subject = value.docs[0]['workTitle']
+      user_subject = value.docs[0]['workTitle'],
+      workStart=value.docs[0]['workStart'],
+      workEnd=value.docs[0]['workEnd'],
     });
     await usersRef.where('uid', isEqualTo: consumerId).get().then((value) => user_consumerName=value.docs[0]['fullName']);
 
@@ -214,12 +218,10 @@ class ConsumerBookingState extends State<ConsumerBooking> {
               _consumerId=meetingDetails.consumerId;
               _tradieId=meetingDetails.tradieId;
               quote=meetingDetails.quote;
+              _rating = meetingDetails.rating;
+              _comment = meetingDetails.comment;
               // Goto Editor
-              Navigator.push<Widget>(
-                context,
-                MaterialPageRoute(
-                    builder: (BuildContext context) => BookingEditor()),
-              );
+              GoRouter.of(context).pushNamed(RouterName.BookingEditor);
             }
             //如果返回appointments 为null，则说明是新的meeting,根据点击的时间点设置信息，并且跳转到appointment editor
           } else {
@@ -234,11 +236,7 @@ class ConsumerBookingState extends State<ConsumerBooking> {
             _consumerName=user_consumerName;
             _tradieName=user_tradieName;
             _subject=user_subject;
-            Navigator.push<Widget>(
-              context,
-              MaterialPageRoute(
-                  builder: (BuildContext context) => BookingEditor()),
-            );
+            GoRouter.of(context).pushNamed(RouterName.BookingEditor);
           }
         });
       }
