@@ -13,20 +13,24 @@ const cors = require('cors')({ origin: true });
 //Stripe TODO: 1. connect stripe with other page 2.add webhook to monitor status and send notification 3.mobile side stripe debug and setting
 
 //TODO: pass user id and return url to redirect
-//NOTE: This is function for onboarding tradies
+
+//This is function for onboarding tradies
 exports.createConnectAccount = functions.https.onRequest(async (req, res) => {cors(req, res,async () => {
+    const userId = req.body
     try {
-        // 使用 Stripe API 创建 Connect 账号
+        // create stripe account
         const account = await stripe.accounts.create({
           type: 'express',
         });
+        // create stripe account link for onboarding
         const accountLinks = await stripe.accountLinks.create({
             account: account.id,
-            refresh_url: 'https://jemma-b0fcd.web.app/#/refresh',
+            refresh_url: 'https://jemma-b0fcd.web.app/#/',
             return_url: 'https://jemma-b0fcd.web.app/#/',
             type: 'account_onboarding',
         });
-        // TODO: return account id
+        // return account id to store on firebase and account link for redirection
+
         return res.send({
             url:accountLinks.url,
             id: account.id
@@ -57,8 +61,8 @@ exports.StripeCheckOut = functions.https.onRequest(async (req, res) => {
             quantity: 1
           }
         ],
-        success_url: 'http://localhost:3000/success',
-        cancel_url: 'https://jemma-b0fcd.web.app/#/cancel',
+        success_url: 'https://jemma-b0fcd.web.app/#/',
+        cancel_url: 'https://jemma-b0fcd.web.app/#/',
       });
 
       // 返回 session.url 和 session.amount_total
@@ -78,7 +82,7 @@ exports.Transfer = functions.https.onRequest(async (req, res)=>{cors(req, res, a
     const {accountId, amount}= req.body;
     try{
         const transfer = await stripe.transfers.create({
-          amount: parseInt(amount)*0.95,
+          amount: parseInt(amount),
           currency: 'aud',
           destination: accountId,
         });
@@ -216,6 +220,35 @@ functions.https.onRequest(async (req, res) => {
     return res.send({error: e.message});
   }
 });
+
+// Cloud Function to monitor bookings
+exports.monitorBookingNotifications = functions.firestore
+    .document('bookings/{bookingId}')
+    .onCreate(async (snapshot, context) => {
+        // Get booking data from snapshot
+        const bookingData = snapshot.data();
+
+        // Use consumerId
+        const consumerId = bookingData.consumerId;
+
+        if (!consumerId) {
+            console.error('ConsumerId not found in booking data.');
+            return null;
+        }
+
+        // Formulate your notification message
+        const notificationMessage = `Your booking is successful, the status is ${bookingData.status}`;
+
+        // Store this notification in a user-specific notifications collection
+        await admin.firestore().collection('users').doc(consumerId).collection('notifications').add({
+            message: notificationMessage,
+            timestamp: admin.firestore.FieldValue.serverTimestamp(), // for chronological order
+            read: false // to mark if the user has read the notification
+        });
+
+        return null;
+    });
+
 
 
 //const functions = require('firebase-functions');

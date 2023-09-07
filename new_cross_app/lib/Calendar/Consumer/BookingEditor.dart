@@ -235,11 +235,14 @@ class BookingEditorState extends State<BookingEditor> {
                         color: _colorCollection[_selectedStatusIndex],
                       ),
                       onPressed: () {
-                        GoRouter.of(context)
-                            .pushNamed(RouterName.Checkout, params: {
-                          'bookingId': selectedKey,'userId':_consumerId
-                        });
-                        bookingRef.doc(selectedKey).update({'status': 'Working'});
+                        GoRouter.of(context).pushNamed(RouterName.Checkout,
+                            params: {
+                              'bookingId': selectedKey,
+                              'userId': _consumerId
+                            });
+                        bookingRef
+                            .doc(selectedKey)
+                            .update({'status': 'Working'});
                       },
                     ),
             ),
@@ -270,6 +273,30 @@ class BookingEditorState extends State<BookingEditor> {
                   hintText: 'Add Note',
                 ),
               ),
+            ),
+            const Divider(
+              height: 1.0,
+              thickness: 1,
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.all(5),
+              leading: const Icon(
+                Icons.star,
+                color: Colors.yellow,
+              ),
+              title: Text(_rating.toString()),
+            ),
+            const Divider(
+              height: 1.0,
+              thickness: 1,
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.all(5),
+              leading: const Icon(
+                Icons.rate_review,
+                color: Colors.black87,
+              ),
+              title: Text(_comment),
             ),
             const Divider(
               height: 1.0,
@@ -307,59 +334,59 @@ class BookingEditorState extends State<BookingEditor> {
                       color: Colors.white,
                     ),
                     onPressed: () async {
-                      if (_selectedAppointment == null) {
-                        print('new booking');
-                        final meetings = <Booking>[];
-                        AlertDialog alert_outBound;
-                        if (_startDate.hour < 9 || _endDate.hour > 17) {
-                          Widget OKButton = TextButton(
-                            child: const Text("Ok"),
-                            onPressed: () {
-                              Navigator.pop(context, true);
-                            },
-                          );
-                          alert_outBound = AlertDialog(
-                            title: const Text("Alert"),
-                            content: const Text('Out of Tradie Working Time'),
-                            actions: [
-                              OKButton,
-                            ],
-                          );
-                          await showDialog<bool>(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return alert_outBound;
-                            },
-                          );
-                          return;
-                        }
-                        final Booking? newTimeAppointment =
-                            _isInterceptExistingAppointments(
-                                _startDate, _endDate);
-                        AlertDialog alert_conflict;
-                        if (newTimeAppointment != null) {
-                          Widget okButton = TextButton(
-                            child: const Text("Ok"),
-                            onPressed: () {
-                              Navigator.pop(context, true);
-                            },
-                          );
-                          alert_conflict = AlertDialog(
-                            title: const Text("Alert"),
-                            content: const Text('Have intercept with existing'),
-                            actions: [
-                              okButton,
-                            ],
-                          );
+                      AlertDialog alert_outBound;
+                      if (_startDate.hour < workStart ||
+                          _endDate.hour > workEnd) {
+                        Widget OKButton = TextButton(
+                          child: const Text("Ok"),
+                          onPressed: () {
+                            Navigator.pop(context, true);
+                          },
+                        );
+                        alert_outBound = AlertDialog(
+                          title: const Text("Alert"),
+                          content: const Text('Out of Tradie Working Time'),
+                          actions: [
+                            OKButton,
+                          ],
+                        );
+                        await showDialog<bool>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return alert_outBound;
+                          },
+                        );
+                        return;
+                      }
+                      final Booking? newTimeAppointment =
+                          _isInterceptExistingAppointments(
+                              _startDate, _endDate);
+                      AlertDialog alert_conflict;
+                      if (newTimeAppointment != null) {
+                        Widget okButton = TextButton(
+                          child: const Text("Ok"),
+                          onPressed: () {
+                            Navigator.pop(context, true);
+                          },
+                        );
+                        alert_conflict = AlertDialog(
+                          title: const Text("Alert"),
+                          content: const Text('Have intercept with existing'),
+                          actions: [
+                            okButton,
+                          ],
+                        );
 
-                          await showDialog<bool>(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return alert_conflict;
-                            },
-                          );
-                          return;
-                        }
+                        await showDialog<bool>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return alert_conflict;
+                          },
+                        );
+                        return;
+                      }
+                      if (_selectedAppointment == null) {
+                        final meetings = <Booking>[];
                         meetings.add(Booking(
                           from: _startDate,
                           to: _endDate,
@@ -372,8 +399,8 @@ class BookingEditorState extends State<BookingEditor> {
                           tradieId: _tradieId,
                           key: selectedKey,
                           quote: quote,
-                          rating: 0,
-                          comment: '',
+                          rating: _rating,
+                          comment: _comment,
                         ));
                         _bookings.appointments!.add(meetings[0]);
                         _bookings.notifyListeners(
@@ -400,30 +427,29 @@ class BookingEditorState extends State<BookingEditor> {
                           'tradieId': _tradieId,
                           'consumerId': _consumerId,
                           'quote': quote,
-                          'rating':0,
-                          'comment':'',
+                          'rating': _rating,
+                          'comment': _comment,
                         });
-
                         var k = await getKey(keys);
                         bookingRef.doc(k).update({'key': k});
                       } else {
                         print('old booking');
-                        final meetings = <Booking>[];
-                        int remove = 0;
-                        for (int i = 0;
-                            i < _bookings.appointments!.length;
-                            i++) {
-                          Booking b = _bookings.appointments![i];
-                          if (b.key == _selectedAppointment!.key) {
-                            print('find');
-                            remove = i;
-                            break;
-                          }
-                        }
-                        _bookings.appointments!.removeAt(remove);
-                        _bookings.notifyListeners(
-                            CalendarDataSourceAction.remove,
-                            <Booking>[]..add(_selectedAppointment!));
+                        setState(() {
+                          _selectedAppointment!.from = _startDate;
+                          _selectedAppointment!.to = _endDate;
+                          _selectedAppointment!.tradieName = _tradieName;
+                          _selectedAppointment!.status =
+                              _statusNames[_selectedStatusIndex];
+                          _selectedAppointment!.consumerName = _consumerName;
+                          _selectedAppointment!.description = _notes;
+                          _selectedAppointment!.key = selectedKey;
+                          _selectedAppointment!.tradieId = _tradieId;
+                          _selectedAppointment!.consumerId = _consumerId;
+                          _selectedAppointment!.quote = quote;
+                          _selectedAppointment!.rating = _rating;
+                          _selectedAppointment!.comment = _comment;
+                          _selectedAppointment!.eventName = _subject;
+                        });
                         bookingRef.doc(_selectedAppointment?.key).update({
                           'eventName': _subject,
                           'from': _startDate.toString(),
@@ -436,68 +462,35 @@ class BookingEditorState extends State<BookingEditor> {
                           'tradieId': _tradieId,
                           'consumerId': _consumerId,
                           'quote': quote,
-                          'rating':0,
+                          'rating': 0,
                           'comment': '',
                         });
-                        meetings.add(Booking(
-                          from: _startDate,
-                          to: _endDate,
-                          status: _statusNames[_selectedStatusIndex],
-                          consumerName: _consumerName,
-                          tradieName: _tradieName,
-                          description: _notes,
-                          eventName: _subject,
-                          consumerId: _consumerId,
-                          tradieId: _tradieId,
-                          key: selectedKey,
-                          quote: quote,
-                          rating: 0,
-                          comment: '',
-                        ));
-                        _bookings.appointments!.add(meetings[0]);
-                        _bookings.notifyListeners(
-                            CalendarDataSourceAction.add, meetings);
                       }
-
                       _selectedAppointment = null;
                       //_consumer.bookings.add(meetings[0]);
-                      Navigator.pop(context);
+                      GoRouter.of(context).pop();
                     })
               ],
             ),
             body: Padding(
               padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
-              //TODO 搞懂
               child: Stack(
                 children: <Widget>[_getAppointmentEditor(context)],
               ),
             ),
-            floatingActionButton: _selectedAppointment == null
-                ? const Text('')
-                : FloatingActionButton(
+            /*floatingActionButton: FloatingActionButton(
                     onPressed: () {
-                      if (_selectedAppointment != null) {
-                        int remove = 0;
-                        for (int i = 0;
-                            i < _bookings.appointments!.length;
-                            i++) {
-                          Booking b = _bookings.appointments![i];
-                          if (b.key == _selectedAppointment!.key) {
-                            print('find');
-                            remove = i;
-                            break;
-                          }
-                        }
-                        _bookings.appointments!.removeAt(remove);
+                      setState(() {
+                        _bookings.appointments!.removeAt(_selectedStatusIndex);
                         _bookings.notifyListeners(
                             CalendarDataSourceAction.remove,
                             <Booking>[]..add(_selectedAppointment!));
-                        try {
-                          bookingRef.doc(_selectedAppointment?.key).delete();
-                        } catch (e) {}
-                        _selectedAppointment = null;
-                        Navigator.pop(context);
-                      }
+                      });
+                      try {
+                        bookingRef.doc(_selectedAppointment?.key).delete();
+                      } catch (e) {}
+                      _selectedAppointment = null;
+                      Navigator.pop(context);
                     },
                     child: const Text(
                       'Cancel',
@@ -505,7 +498,7 @@ class BookingEditorState extends State<BookingEditor> {
                     ),
                     /*const Icon(Icons.delete_outline, color: Colors.white),*/
                     backgroundColor: Colors.red,
-                  )));
+                  )*/));
   }
 
   Future<String> getKey(List<String> oldkeys) async {

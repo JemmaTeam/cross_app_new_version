@@ -58,7 +58,7 @@ final logger = Logger(
   printer: PrettyPrinter(),
 );
 bool _isLoggedIn = false;
-late bool _isConsumer;
+late bool _isConsumer = true;
 
 class HomeState extends State<Home> {
   String userId;
@@ -73,7 +73,6 @@ class HomeState extends State<Home> {
     super.initState();
     _checkLoginStatus();
     isConsumer(userId).then((value) {
-      print(value);
       _isConsumer = value;
     });
   }
@@ -233,13 +232,6 @@ class HomeState extends State<Home> {
                     ),
                   ),
                   ListTile(
-                    title: const Text('Home'),
-                    onTap: () {
-                      GoRouter.of(context).pushNamed(RouterName.homePage,
-                          params: {'userId': userId});
-                    },
-                  ),
-                  ListTile(
                     title: const Text('Profile'),
                     onTap: () {
                       GoRouter.of(context)
@@ -248,25 +240,13 @@ class HomeState extends State<Home> {
                       });
                     },
                   ),
-                  //TODO: Test User Type
-                  _isConsumer == true
-                      ? ListTile(
+                      ListTile(
                           title: const Text('Calendar'),
                           onTap: () {
-                            GoRouter.of(context).pushNamed(
-                                RouterName.CalendarConsumer,
+                            context.pushNamed(RouterName.CalendarConsumer,
                                 params: {
                                   'userId': userId,
                                 });
-                          },
-                        )
-                      : ListTile(
-                          title: const Text('Calendar'),
-                          onTap: () {
-                            GoRouter.of(context)
-                                .pushNamed(RouterName.CalendarTradie, params: {
-                              'userId': userId,
-                            });
                           },
                         ),
                   ListTile(

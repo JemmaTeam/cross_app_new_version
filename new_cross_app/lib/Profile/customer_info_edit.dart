@@ -14,7 +14,7 @@ class CustomerInfoEdit extends StatefulWidget {
 }
 
 final databaseReference = FirebaseFirestore.instance;
-final CollectionReference colRef = databaseReference.collection('customers');
+final CollectionReference colRef = databaseReference.collection('users');
 
 class _CustomerInfoEditState extends State<CustomerInfoEdit> {
   TextEditingController nameController = TextEditingController();

@@ -41,6 +41,10 @@ dependencies:
   equatable: ^2.0.3
   flutter_rating_bar: ^4.0.0
 
+#  tradie-register
+  file_picker: ^3.0.3
+
+
 #  stripe_payment: ^1.1.4
 #  stripe_platform_interface: ^2.1.2
 

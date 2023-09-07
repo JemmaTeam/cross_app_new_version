@@ -13,7 +13,7 @@ class TradieWorkPublish extends StatefulWidget {
 }
 
 final databaseReference = FirebaseFirestore.instance;
-final CollectionReference colRef = databaseReference.collection('customers');
+final CollectionReference colRef = databaseReference.collection('users');
 
 class _TradieWorkPublishState extends State<TradieWorkPublish> {
   TextEditingController workTitleController = TextEditingController();

@@ -2,14 +2,16 @@ library tradie_calendar;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:new_cross_app/Calendar/Consumer/TradieDemo.dart';
+import 'package:new_cross_app/Routes/route_const.dart';
 import 'package:new_cross_app/main.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import '../Consumer/Booking.dart';
 
-part 'BookingEditor.dart';
+part 'BookingEditorT.dart';
 
 part 'AddNonWorking.dart';
 
@@ -45,6 +47,8 @@ String _consumerName = '';
 String _tradieId = '';
 String _consumerId = '';
 String user_tradieName = '';
+String _comment = '';
+num _rating = 0;
 //String user_tradieId='C6lHBZcGEyVSO7wSbozURFpObKV2';
 String user_subject = '';
 late num quote;
@@ -79,48 +83,6 @@ class TradieProfileState extends State<TradieProfilePage> {
     super.initState();
   }
 
-  //Main Page
-  // @override
-  // Widget build(BuildContext context) {
-  //   _tradie = widget.tradie;
-  //   return Scaffold(
-  //       appBar: AppBar(
-  //         title: Text('Current Bookings'),
-  //         leading: IconButton(
-  //           icon: Icon(Icons.house),
-  //           onPressed: () {
-  //             Navigator.push(
-  //                 context, MaterialPageRoute(builder: (context) => MyApp()));
-  //           },
-  //         ),
-  //       ),
-  //       resizeToAvoidBottomInset: true,
-  //       body: Padding(
-  //           padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-  //           child: getEventCalendar(_events, onCalendarTapped)),
-  //       floatingActionButton: FloatingActionButton(
-  //         onPressed: () {
-  //           final DateTime today = DateTime.now();
-  //           _startDate = today;
-  //           _endDate = today;
-  //           _startTime =
-  //               TimeOfDay(hour: _startDate.hour, minute: _startDate.minute);
-  //           _endTime = TimeOfDay(hour: _endDate.hour, minute: _endDate.minute);
-  //
-  //           Navigator.push<Widget>(
-  //             context,
-  //             MaterialPageRoute(
-  //                 builder: (BuildContext context) => AddNonWorking()),
-  //           );
-  //         },
-  //         /*const Icon(Icons.delete_outline, color: Colors.white),*/
-  //         backgroundColor: Colors.green,
-  //         child: const Text(
-  //           'Add',
-  //           selectionColor: Colors.cyan,
-  //         ),
-  //       ));
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -137,17 +99,19 @@ class TradieProfileState extends State<TradieProfilePage> {
 
         List<Booking>? list = snapshot.data?.docs
             .map((e) => Booking(
-                  eventName: e['eventName'] ?? '',
-                  from: DateFormat('yyyy-MM-dd HH:mm:ss.sss').parse(e['from']),
-                  to: DateFormat('yyyy-MM-dd HH:mm:ss.sss').parse(e['to']),
-                  status: e['status'],
-                  consumerName: e['consumerName'] ?? '',
-                  tradieName: e['tradieName'] ?? '',
-                  description: e['description'] ?? '',
-                  key: e['key'],
-                  consumerId: e['consumerId'] ?? '',
-                  tradieId: e['tradieId'] ?? '',
-                  quote: e['quote'] ?? '',
+          eventName: e['eventName'] ?? '',
+          from: DateFormat('yyyy-MM-dd HH:mm:ss.sss').parse(e['from']),
+          to: DateFormat('yyyy-MM-dd HH:mm:ss.sss').parse(e['to']),
+          status: e['status'],
+          consumerName: e['consumerName'] ?? '',
+          tradieName: e['tradieName'] ?? '',
+          description: e['description'] ?? '',
+          key: e['key'],
+          consumerId: e['consumerId'] ?? '',
+          tradieId: e['tradieId'] ?? '',
+          quote: e['quote'] ?? '',
+          rating: e['quote'] ?? '',
+          comment: e['comment']?? '',
                 ))
             .toList();
         getName(_tradieId).then((value) {user_tradieName = value;});
@@ -254,12 +218,9 @@ class TradieProfileState extends State<TradieProfilePage> {
               _consumerId = meetingDetails.consumerId;
               _tradieId = meetingDetails.tradieId;
               quote = meetingDetails.quote;
-
-              Navigator.push<Widget>(
-                context,
-                MaterialPageRoute(
-                    builder: (BuildContext context) => BookingEditor()),
-              );
+              _comment = meetingDetails.comment;
+              _rating = meetingDetails.rating;
+              GoRouter.of(context).pushNamed(RouterName.BookingEditorT);
             }
             //如果返回appointments 为null，则说明是新的meeting,根据点击的时间点设置信息，并且跳转到appointment editor
           } else {
@@ -278,7 +239,7 @@ class TradieProfileState extends State<TradieProfilePage> {
             Navigator.push<Widget>(
               context,
               MaterialPageRoute(
-                  builder: (BuildContext context) => BookingEditor()),
+                  builder: (BuildContext context) => BookingEditorT()),
             );
           }
         });
@@ -349,7 +310,7 @@ class DataSource extends CalendarDataSource {
 
 Future<String> getName(userId) async {
   await FirebaseFirestore.instance
-      .collection('tradeperson')
+      .collection('users')
       .doc(userId)
       .get()
       .then((value) {

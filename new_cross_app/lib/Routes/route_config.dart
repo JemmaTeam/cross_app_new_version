@@ -18,6 +18,7 @@ import '../Calendar/Consumer/TradieDemo.dart';
 import '../Profile/customer_info_edit.dart';
 import '../Profile/profile_home.dart';
 import '../Profile/customer_info_edit.dart';
+import '../stripe/screens/rating_new.dart';
 import 'ErrorPage.dart';
 import '../Home Page/home.dart';
 import '../chat/screens/chat_screen.dart';
@@ -156,10 +157,33 @@ class MyRouter {
           path: '/rate/:bookingId',
           pageBuilder: (context, state) {
             return MaterialPage(
-                child: Rate(bookingId: state.params['bookingId']!));
+                child: Rating(bookingId: state.params['bookingId']!));
           },
         ),
-
+        GoRoute(
+          name: RouterName.BookingEditor,
+          path: '/bookingEditor',
+          pageBuilder: (context, state) {
+            return MaterialPage(
+                child: BookingEditor());
+          },
+        ),
+        GoRoute(
+          name: RouterName.AppointmentEditor,
+          path: '/appointmentEditor',
+          pageBuilder: (context, state) {
+            return const MaterialPage(
+                child: AppointmentEditor());
+          },
+        ),
+        GoRoute(
+          name: RouterName.BookingEditorT,
+          path: '/bookingEditor_tradie',
+          pageBuilder: (context, state) {
+            return const MaterialPage(
+                child: BookingEditorT());
+          },
+        ),
       ],
       errorPageBuilder: (context, state) {
         return MaterialPage(child: ErrorPage());

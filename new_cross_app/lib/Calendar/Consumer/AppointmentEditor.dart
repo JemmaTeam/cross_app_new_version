@@ -6,7 +6,9 @@ class AppointmentEditor extends StatefulWidget {
   @override
   AppointmentEditorState createState() => AppointmentEditorState();
 }
+
 late int amount;
+
 class AppointmentEditorState extends State<AppointmentEditor> {
   Widget _getAppointmentEditor(BuildContext context) {
     return Container(
@@ -23,7 +25,7 @@ class AppointmentEditorState extends State<AppointmentEditor> {
               height: 1.0,
               thickness: 1,
             ),
-            //start and end time TODO:搞懂
+            //start and end time
             ListTile(
                 contentPadding: const EdgeInsets.fromLTRB(5, 2, 5, 2),
                 leading: const Text(''),
@@ -109,10 +111,17 @@ class AppointmentEditorState extends State<AppointmentEditor> {
               ),
               trailing: _statusNames[_selectedStatusIndex] != 'Confirmed'
                   ? IconButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (_statusNames[_selectedStatusIndex] == 'Rating') {
-                          //TODO go to rating
-                          GoRouter.of(context).pushNamed(RouterName.Rate,
+                          setState(() {
+                            _selectedStatusIndex =
+                                _statusNames.indexOf('Complete');
+                          });
+                          await bookingRef
+                              .doc(selectedKey)
+                              .update({'status': 'Complete'});
+                          GoRouter.of(context).pushReplacementNamed(
+                              RouterName.Rate,
                               params: {'bookingId': selectedKey});
                         }
                       },
@@ -130,9 +139,18 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                         color: _colorCollection[_selectedStatusIndex],
                       ),
                       onPressed: () async {
-                        //TODO go to stripe checkout
-                        await createPaymentIntent(body);
-                        bookingRef.doc(selectedKey).update({'status': 'Working'});
+                        setState(() {
+                          _selectedStatusIndex =
+                              _statusNames.indexOf('Working');
+                        });
+                        await bookingRef
+                            .doc(selectedKey)
+                            .update({'status': 'Working'});
+                        await createPaymentIntent({
+                          'price': (quote * 100).toString(),
+                          'userId': _consumerId,
+                          'product_name': _subject
+                        });
                       },
                     ),
             ),
@@ -163,6 +181,30 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                   hintText: 'Add Note',
                 ),
               ),
+            ),
+            const Divider(
+              height: 1.0,
+              thickness: 1,
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.all(5),
+              leading: const Icon(
+                Icons.star,
+                color: Colors.yellow,
+              ),
+              title: Text(_rating.toString()),
+            ),
+            const Divider(
+              height: 1.0,
+              thickness: 1,
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.all(5),
+              leading: const Icon(
+                Icons.rate_review,
+                color: Colors.black87,
+              ),
+              title: Text(_comment),
             ),
             const Divider(
               height: 1.0,
@@ -203,46 +245,26 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                     final List<Booking> meetings = <Booking>[];
                     //如果是已存在的appointment，从列表中移除，加上更改的
                     if (_selectedAppointment != null) {
-                      int remove = 0;
-                      for (int i = 0; i < _events.appointments!.length; i++) {
-                        Booking b = _events.appointments![i];
-                        if (b.key == _selectedAppointment!.key) {
-                          print('find');
-                          remove = i;
-                          break;
-                        }
-                      }
-                      _events.appointments!.removeAt(remove);
-                      print(_events.appointments!.length);
-                      _events.notifyListeners(CalendarDataSourceAction.remove,
-                          <Booking>[]..add(_selectedAppointment!));
+                      _selectedAppointment!.from = _startDate;
+                      _selectedAppointment!.to = _endDate;
+                      _selectedAppointment!.tradieName = _tradieName;
+                      _selectedAppointment!.status =
+                          _statusNames[_selectedStatusIndex];
+                      _selectedAppointment!.consumerName = _consumerName;
+                      _selectedAppointment!.description = _notes;
+                      _selectedAppointment!.key = selectedKey;
+                      _selectedAppointment!.tradieId = _tradieId;
+                      _selectedAppointment!.consumerId = _consumerId;
+                      _selectedAppointment!.quote = quote;
+                      _selectedAppointment!.rating = _rating;
+                      _selectedAppointment!.comment = _comment;
+                      _selectedAppointment!.eventName = _subject;
                     }
-                    meetings.add(Booking(
-                        from: _startDate,
-                        to: _endDate,
-                        status: _statusNames[_selectedStatusIndex],
-                        description: _notes,
-                        eventName: _subject == '' ? '(No title)' : _subject,
-                        consumerName: _consumerName,
-                        tradieName: _tradieName,
-                        key: selectedKey,
-                        consumerId: _consumerId,
-                        tradieId: _tradieId,
-                        quote: quote,
-                        rating: _rating,
-                        comment: '',
-                        ///eventName: _subject =_subject,
-                        ));
-
-                    _events.appointments!.add(meetings[0]);
-
-                    _events.notifyListeners(
-                        CalendarDataSourceAction.add, meetings);
                     bookingRef.doc(_selectedAppointment?.key).update({
                       'eventName': _subject,
                       'from': _startDate.toString(),
                       'to': _endDate.toString(),
-                      'status': 'Pending',
+                      'status': _statusNames[_selectedStatusIndex],
                       'tradieName': _tradieName,
                       'consumerName': _consumerName,
                       'description': _notes,
@@ -250,13 +272,13 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                       'tradieId': _tradieId,
                       'consumerId': _consumerId,
                       'quote': quote,
-                      'rating':0,
-                      'comment':'',
+                      'rating': _rating,
+                      'comment': _comment,
                     });
                     _selectedAppointment = null;
 
                     //_consumer.bookings.add(meetings[0]);
-                    Navigator.pop(context);
+                    GoRouter.of(context).pop();
                   })
             ],
           ),
@@ -266,21 +288,18 @@ class AppointmentEditorState extends State<AppointmentEditor> {
               children: <Widget>[_getAppointmentEditor(context)],
             ),
           ),
-          floatingActionButton: _selectedAppointment == null
-              ? const Text('')
-              : FloatingActionButton(
+          /*floatingActionButton:FloatingActionButton(
                   onPressed: () {
-                    if (_selectedAppointment != null) {
-                      _events.appointments!.removeAt(
-                          _events.appointments!.indexOf(_selectedAppointment));
+                    setState(() {
+                      _events.appointments!.removeAt(_selectedStatusIndex);
                       _events.notifyListeners(CalendarDataSourceAction.remove,
                           <Booking>[]..add(_selectedAppointment!));
-                      try {
-                        bookingRef.doc(_selectedAppointment?.key).delete();
-                      } catch (e) {}
-                      _selectedAppointment = null;
-                      Navigator.pop(context);
-                    }
+                    });
+                    try {
+                      bookingRef.doc(_selectedAppointment?.key).delete();
+                    } catch (e) {}
+                    _selectedAppointment = null;
+                    Navigator.pop(context);
                   },
                   child: const Text(
                     'Cancel',
@@ -288,37 +307,35 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                   ),
                   /*const Icon(Icons.delete_outline, color: Colors.white),*/
                   backgroundColor: Colors.red,
-                ),
+                ),*/
         ));
   }
 
   String getTile() {
     return _subject.isEmpty ? 'New event' : 'Event details';
   }
-
-
 }
-Future<String> createPaymentIntent(Map<String,String> body) async{
-  await http.post(
-    Uri.parse('https://us-central1-jemma-b0fcd.cloudfunctions.net/StripeCheckOut'),
-    body:body,
-  ).then((res){
-    if(res.statusCode == 200){
+
+Future<String> createPaymentIntent(Map<String, String> body) async {
+  await http
+      .post(
+    Uri.parse(
+        'https://us-central1-jemma-b0fcd.cloudfunctions.net/StripeCheckOut'),
+    body: body,
+  )
+      .then((res) {
+    if (res.statusCode == 200) {
       print('success');
       Map<String, dynamic> responseMap = json.decode(res.body);
       amount = int.parse(responseMap['amount']!.toString());
-      _launchURL(responseMap['url']!.toString());
-    }else{
+      openExternalUrl(responseMap['url']!.toString());
+    } else {
       print('failed: ${res.body}');
     }
   });
   return '';
-
 }
-void _launchURL(String url) async {
-  if (await canLaunchUrlString(url)) {
-    await launchUrlString(url);
-  } else {
-    throw 'could not open $url';
-  }
+
+void openExternalUrl(String url) {
+  js.context.callMethod('openExternalUrl', [url]);
 }

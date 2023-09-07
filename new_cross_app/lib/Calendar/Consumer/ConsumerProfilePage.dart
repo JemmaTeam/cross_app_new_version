@@ -1,5 +1,5 @@
 library booking_Calendar;
-
+import 'dart:js' as js;
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -56,6 +56,7 @@ late TimeOfDay _endTime;
 bool _isAllDay = false;
 String _subject = '';
 String _notes = '';
+String _comment = '';
 late num _rating;
 final databaseReference = FirebaseFirestore.instance;
 final CollectionReference bookingRef=databaseReference.collection('bookings');
@@ -121,14 +122,6 @@ class ConsumerProfileState extends State<ConsumerProfilePage> {
 
         return Scaffold(
             appBar: AppBar(
-                leading: IconButton(
-                  onPressed: (){
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(
-                    Icons.arrow_back
-                  ),
-                )
             ),
             resizeToAvoidBottomInset: true,
             body: getEventCalendar(_events, onCalendarTapped));
@@ -199,6 +192,7 @@ class ConsumerProfileState extends State<ConsumerProfilePage> {
             _selectedAppointment = meetingDetails;
             quote=meetingDetails.quote;
             _rating=meetingDetails.rating;
+            _comment=meetingDetails.comment;
 
             //如果返回appointments 为null，则说明是新的meeting,根据点击的时间点设置信息，并且跳转到appointment editor
           } else {
@@ -210,11 +204,7 @@ class ConsumerProfileState extends State<ConsumerProfilePage> {
           _startTime =
               TimeOfDay(hour: _startDate.hour, minute: _startDate.minute);
           _endTime = TimeOfDay(hour: _endDate.hour, minute: _endDate.minute);
-          Navigator.push<Widget>(
-            context,
-            MaterialPageRoute(
-                builder: (BuildContext context) => AppointmentEditor()),
-          );
+          GoRouter.of(context).pushNamed(RouterName.AppointmentEditor);
         });
       }
     }

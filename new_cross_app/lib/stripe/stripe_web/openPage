@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Flutter Web URL Open</title>
+  <script>
+    function openExternalUrl(url) {
+      window.open(url, '_blank');
+    }
+  </script>
+</head>
+<body>
+  <!-- ... -->
+</body>
+</html>
