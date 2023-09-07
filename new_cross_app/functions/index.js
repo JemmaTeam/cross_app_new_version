@@ -221,6 +221,35 @@ functions.https.onRequest(async (req, res) => {
   }
 });
 
+// Cloud Function to monitor bookings
+exports.monitorBookingNotifications = functions.firestore
+    .document('bookings/{bookingId}')
+    .onCreate(async (snapshot, context) => {
+        // Get booking data from snapshot
+        const bookingData = snapshot.data();
+
+        // Use consumerId
+        const consumerId = bookingData.consumerId;
+
+        if (!consumerId) {
+            console.error('ConsumerId not found in booking data.');
+            return null;
+        }
+
+        // Formulate your notification message
+        const notificationMessage = `Your booking is successful, the status is ${bookingData.status}`;
+
+        // Store this notification in a user-specific notifications collection
+        await admin.firestore().collection('users').doc(consumerId).collection('notifications').add({
+            message: notificationMessage,
+            timestamp: admin.firestore.FieldValue.serverTimestamp(), // for chronological order
+            read: false // to mark if the user has read the notification
+        });
+
+        return null;
+    });
+
+
 
 //const functions = require('firebase-functions');
 //const admin = require('firebase-admin');
