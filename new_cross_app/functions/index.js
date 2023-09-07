@@ -252,3 +252,48 @@ functions.https.onRequest(async (req, res) => {
 //    throw new functions.https.HttpsError('internal', 'Failed to create the payment: ' + error.message);
 //  }
 //});
+
+/*
+//发送电子邮件提醒
+const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+const nodemailer = require('nodemailer');
+
+admin.initializeApp();
+
+// 配置电子邮件发送
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: functions.config().email.auth.user,
+    pass: functions.config().email.auth.pass
+  }
+});
+
+exports.onNewMessage = functions.firestore
+  .document('chatRoom/{chatRoomId}/chats/{messageId}')
+  .onCreate(async (snapshot, context) => {
+    const newMessage = snapshot.data();
+    const recipientId = newMessage['sendBy'];  // 假设字段名为'sendBy'
+
+    // 获取接收者的电子邮件地址（您需要根据您的数据库结构进行调整）
+    const recipientDoc = await admin.firestore().collection('users').doc(recipientId).get();
+    const recipientEmail = recipientDoc.data().email;
+
+    // 设置电子邮件内容
+    const mailOptions = {
+      from: 'your-email@gmail.com',
+      to: recipientEmail,
+      subject: 'New Message Notification',
+      text: `You have a new message from ${newMessage['sendBy']}`
+    };
+
+    // 发送电子邮件
+    return transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        return console.log(error);
+      }
+      console.log('Message sent: %s', info.messageId);
+    });
+  });
+*/

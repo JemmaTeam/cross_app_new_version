@@ -7,7 +7,7 @@ import 'package:new_cross_app/services/database_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import '../../Routes/route_const.dart';
 import '../../helper/helper_function.dart';
 import '../../main.dart';
@@ -25,17 +25,11 @@ class Chat extends StatefulWidget {
 final chatRef = FirebaseFirestore.instance.collection('chatRoom');
 
 class _ChatState extends State<Chat> {
+  bool showEmojiPicker = false;
   Stream<QuerySnapshot>? chats;
   TextEditingController messageEditingController = TextEditingController();
-  //String latestMessageId = '';
-  /*_ChatState(String chatRoomId, String userId){
-    //TODO
-    chatRef.where('user', arrayContains: userId).snapshots().listen(
-            (event) => print("get query"),
-        onError: (error) => print("Listen failed: $error"));
-    chats=chatRef.where('users',arrayContains: userId).snapshots();
-  }*/
-  String userName = 'Test_User';
+
+  String TalkeruserName = '';
   Widget chatMessages() {
     if (chats == null) {
       return Container();
@@ -71,6 +65,18 @@ class _ChatState extends State<Chat> {
     );
   }
 
+  void toggleEmojiPicker() {
+    setState(() {
+      showEmojiPicker = !showEmojiPicker;
+    });
+  }
+
+  void onEmojiSelected(Category? category, Emoji emoji) {
+    setState(() {
+      messageEditingController.text += emoji.emoji;
+    });
+  }
+
   addMessage() {
     if (messageEditingController.text.isNotEmpty) {
       Map<String, dynamic> chatMessageMap = {
@@ -92,16 +98,38 @@ class _ChatState extends State<Chat> {
   @override
   initState() {
     super.initState();
+    print("聊天室内部当前用户的ID为: ${Constants.MyId}");
     DatabaseService().getChats(widget.chatRoomId).then((val) {
       setState(() {
         chats = val;
       });
+    });
+    getTalkerUserName();
+  }
+
+  // 获取聊天对象的用户名的函数
+  void getTalkerUserName() async {
+    // 聊天室ID是由两个用户ID组合而成的，例如 "user1_user2"
+    List<String> users = widget.chatRoomId.split("_");
+    String talkerUserId =
+        users.first == Constants.MyId ? users.last : users.first;
+
+    // 从数据库中获取聊天对象的用户名
+    DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(talkerUserId)
+        .get();
+    setState(() {
+      TalkeruserName =
+          documentSnapshot['fullName']; // 假设'userName'是数据库中存储用户名的字段
     });
   }
 
   @override
   Widget build(BuildContext context) {
     String userId = widget.userId;
+    //print("当前用户的id为");
+    //print(userId);
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -113,8 +141,7 @@ class _ChatState extends State<Chat> {
           icon: const Icon(Icons.arrow_back),
         ),
         title: Text(
-          //TODO: NAME
-          userName,
+          TalkeruserName,
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -127,6 +154,44 @@ class _ChatState extends State<Chat> {
         children: [
           Expanded(
             child: chatMessages(),
+          ),
+          Visibility(
+            visible: showEmojiPicker,
+            child: SizedBox(
+              height: 250, // 降低高度为250
+              width: MediaQuery.of(context).size.width, // 设置宽度与屏幕宽度相等
+              child: EmojiPicker(
+                config: const Config(
+                  columns: 7,
+                  emojiSizeMax: 24.0,
+                  verticalSpacing: 0,
+                  horizontalSpacing: 0,
+                  gridPadding: EdgeInsets.zero,
+                  initCategory: Category.RECENT,
+                  bgColor: Color(0xFFF2F2F2),
+                  indicatorColor: Colors.blue,
+                  iconColor: Colors.grey,
+                  iconColorSelected: Colors.blue,
+                  backspaceColor: Colors.blue,
+                  skinToneDialogBgColor: Colors.white,
+                  skinToneIndicatorColor: Colors.grey,
+                  enableSkinTones: true,
+                  recentTabBehavior: RecentTabBehavior.RECENT,
+                  recentsLimit: 28,
+                  noRecents: Text(
+                    'No Recents',
+                    style: TextStyle(fontSize: 20, color: Colors.black26),
+                    textAlign: TextAlign.center,
+                  ), // Needs to be const Widget
+                  loadingIndicator:
+                      SizedBox.shrink(), // Needs to be const Widget
+                  tabIndicatorAnimDuration: kTabScrollDuration,
+                  categoryIcons: CategoryIcons(),
+                  buttonMode: ButtonMode.MATERIAL,
+                ),
+                onEmojiSelected: onEmojiSelected,
+              ),
+            ),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -149,7 +214,7 @@ class _ChatState extends State<Chat> {
                             Icons.emoji_emotions_outlined,
                             size: 28,
                           ),
-                          onPressed: () {},
+                          onPressed: toggleEmojiPicker,
                         ),
                         const SizedBox(
                           width: 10,
@@ -212,10 +277,9 @@ class MessageTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!sendByMe) {
-      DatabaseService().updateMessageReadStatus(chatRoomId);
-    }
-    ;
+    //if (!sendByMe) {
+    //DatabaseService().updateMessageReadStatus(chatRoomId);
+    //}
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),

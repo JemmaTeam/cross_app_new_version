@@ -47,11 +47,17 @@ class AuthService {
   Future<bool> signInWithGoogle() async {
     // Create an instance of the firebase auth and google signin
     FirebaseAuth auth = FirebaseAuth.instance;
-    final GoogleSignIn googleSignIn = GoogleSignIn();
+    // 初始化 GoogleSignIn 对象
+    GoogleSignIn _googleSignIn = GoogleSignIn(
+      scopes: [
+        'email',
+        'https://www.googleapis.com/auth/contacts.readonly',
+      ],
+    );
 
     try {
       // Trigger the authentication flow
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       // If the user cancels the Google Sign-In process, googleUser will be null.
       if (googleUser != null) {
