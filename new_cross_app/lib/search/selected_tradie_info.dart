@@ -4,10 +4,14 @@ import 'package:go_router/go_router.dart';
 
 import '../Home Page/constants.dart';
 import '../Routes/route_const.dart';
+import '../services/database_service.dart';
 
-/// Initialize Firestore database and user collection references
+// Initialize a reference to the Firestore database.
 final databaseReference = FirebaseFirestore.instance;
+// Create a reference to the 'users' collection within the Firestore database.
 final CollectionReference colRef = databaseReference.collection('users');
+// Instantiate the DatabaseService class for database-related operations.
+DatabaseService databaseservice = DatabaseService();
 
 /// StatefulWidget to display selected tradie information
 class SelectedTradieInfo extends StatefulWidget {
@@ -53,11 +57,18 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
 
     // Update the state with fetched tradie information
     setState(() {
-      name = data['fullName']?.isEmpty ? 'No Name Information' : data['fullName'];
-      licenseNumber = data['licenseNumber']?.isEmpty ? 'No Information' : data['licenseNumber'];
-      workType = data['workType']?.isEmpty ? 'No Information' : data['workType'];
-      workTitle = data['workTitle']?.isEmpty ? 'No Information' : data['workTitle'];
-      workDescription = data['workDescription']?.isEmpty ? 'No Information' : data['workDescription'];
+      name =
+          data['fullName']?.isEmpty ? 'No Name Information' : data['fullName'];
+      licenseNumber = data['licenseNumber']?.isEmpty
+          ? 'No Information'
+          : data['licenseNumber'];
+      workType =
+          data['workType']?.isEmpty ? 'No Information' : data['workType'];
+      workTitle =
+          data['workTitle']?.isEmpty ? 'No Information' : data['workTitle'];
+      workDescription = data['workDescription']?.isEmpty
+          ? 'No Information'
+          : data['workDescription'];
       workWeekend = data['workWeekend'];
       workStart = data['workStart'];
       workEnd = data['workEnd'];
@@ -84,10 +95,12 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
           workEnd >= 12 && workEnd < 24 ? ":00 PM" : ":00 AM";
       // Update workTime based on whether work is available on weekends or not
       if (workWeekend) {
-        workTime = 'Monday to Sunday: $workStart$workStartSuffix to $workEnd$workEndSuffix';
+        workTime =
+            'Monday to Sunday: $workStart$workStartSuffix to $workEnd$workEndSuffix';
       }
       if (!workWeekend) {
-        workTime = 'Monday to Friday: $workStart$workStartSuffix to $workEnd$workEndSuffix\nNo Work on Weekends';
+        workTime =
+            'Monday to Friday: $workStart$workStartSuffix to $workEnd$workEndSuffix\nNo Work on Weekends';
       }
     }
     return Scaffold(
@@ -104,7 +117,8 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
               Text(
                 workTitle,
                 textAlign: TextAlign.center, // Center-align text
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               // TODO: replace the following image with the actual certificate image
@@ -112,7 +126,8 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
                 image: AssetImage("images/certificate.png"),
                 width: 300, // // Set image width
                 height: 250, // Set image height
-                fit: BoxFit.fill, // Fill the entire part, some images may be stretched or compressed
+                fit: BoxFit
+                    .fill, // Fill the entire part, some images may be stretched or compressed
               ),
               const SizedBox(height: 8),
               // Display license number
@@ -124,7 +139,8 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
               // Display tradie name in bold
               Text(
                 name,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               // Display workType
@@ -166,14 +182,16 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
                 child: Text(
                   workDescription,
                   textAlign: TextAlign.center, // Center-align text
-                  style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+                  style: const TextStyle(
+                      fontSize: 16, fontStyle: FontStyle.italic),
                 ),
               ),
               const SizedBox(height: 16),
               // Display work time title
               const Text(
                 "Work Time:",
-                textAlign: TextAlign.center, // Add this line for center alignment
+                textAlign: TextAlign.center,
+                // Add this line for center alignment
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 5),
@@ -182,18 +200,45 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
                 workTime,
                 textAlign: TextAlign.center,
                 // Add this line for center alignment
-                style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+                style:
+                    const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
               ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Chat button
+                  // ElevatedButton widget for initiating a chat.
                   ElevatedButton(
-                    onPressed: () {
-                      //TODO: Navigate to chat page and pass required parameters
+                    onPressed: () async {
+                      // Generate a chatRoomID based on the current user ID and the selected user ID.
+                      String chatRoomID =
+                          getChatRoomId(widget.userId, widget.selectedUserId);
+                      // Check if a chat room with the generated ID already exists.
+                      bool exists = await checkChatRoomExists(chatRoomID);
+                      // If the chat room does not exist, create one.
+                      if (!exists) {
+                        // Create a list of users involved in the chat room.
+                        List<String> users = [
+                          widget.userId,
+                          widget.selectedUserId
+                        ];
+                        // Create a map object to hold the chat room data.
+                        Map<String, dynamic> chatRoom = {
+                          "users": users,
+                          "chatRoomId": chatRoomID,
+                        };
+                        // Add the new chat room to the database.
+                        databaseservice.addChatRoom(chatRoom, chatRoomID);
+                      }
+                      // Navigate to the ChatRoom screen, passing in the user ID and chat room ID as parameters.
+                      GoRouter.of(context)
+                          .pushNamed(RouterName.ChatRoom, params: {
+                        'userId': widget.userId,
+                        'chatRoomId': chatRoomID,
+                      });
                     },
-                    style: ElevatedButton.styleFrom(primary: kLogoColor, elevation: 2),
+                    style: ElevatedButton.styleFrom(
+                        primary: kLogoColor, elevation: 2),
                     child: const Text(
                       "Chat",
                       style: TextStyle(
@@ -207,9 +252,14 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
                   ElevatedButton(
                     onPressed: () {
                       // Navigate to Booking page and pass required parameters
-                      GoRouter.of(context).pushNamed(RouterName.Booking,params: {'userId':widget.userId,'tradieId':selectedUserId});
+                      GoRouter.of(context).pushNamed(RouterName.Booking,
+                          params: {
+                            'userId': widget.userId,
+                            'tradieId': selectedUserId
+                          });
                     },
-                    style: ElevatedButton.styleFrom(primary: kLogoColor, elevation: 2),
+                    style: ElevatedButton.styleFrom(
+                        primary: kLogoColor, elevation: 2),
                     child: const Text(
                       "Booking",
                       style: TextStyle(
@@ -254,5 +304,34 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
     }
 
     return stars; // Return the list of star icons
+  }
+
+  /// Function to generate a chat room ID based on two user IDs
+  getChatRoomId(String userIdA, String userIdB) {
+    // Compare the ASCII code of the first character of userIdA and userIdB.
+    if (userIdA.substring(0, 1).codeUnitAt(0) >
+        userIdB.substring(0, 1).codeUnitAt(0)) {
+      // If the ASCII code of the first character in userIdA is greater than that in userIdB,
+      // return a string combining userId B and A, separated by an underscore.
+      return "$userIdB\_$userIdA";
+    } else {
+      // Otherwise, return a string combining userId A and B, separated by an underscore.
+      return "$userIdA\_$userIdB";
+    }
+  }
+
+  /// Asynchronous function to check if a chat room with a given ID exists in the Firestore database.
+  Future<bool> checkChatRoomExists(String chatRoomID) async {
+    // Execute a Firestore query to get documents from the 'chatRoom' collection that match the given chatRoomID.
+    final QuerySnapshot result = await databaseReference
+        .collection('chatRoom') // Specify the collection to query.
+        .where('chatRoomId', isEqualTo: chatRoomID) // Set the query condition.
+        .get(); // Execute the query.
+
+    // Retrieve all documents that match the query.
+    final List<DocumentSnapshot> documents = result.docs;
+
+    // Return true if one or more documents are found, otherwise return false.
+    return documents.length > 0;
   }
 }
