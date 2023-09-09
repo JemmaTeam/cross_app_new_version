@@ -17,5 +17,6 @@ class RouterName{
   static const BookingEditor='calendar_booking_editor';
   static const AppointmentEditor='calendar_appointment_editor';
   static const BookingEditorT='calendar_booking_tradie_editor';
+  static const SearchOutcome = 'tradie_search_outcome';
 
 }
