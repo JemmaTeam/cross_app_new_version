@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../Home Page/constants.dart';
 import '../Routes/route_const.dart';
 import '../services/database_service.dart';
+import 'certificate_image_display.dart';
 
 // Initialize a reference to the Firestore database.
 final databaseReference = FirebaseFirestore.instance;
@@ -73,6 +74,7 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
       workStart = data['workStart'];
       workEnd = data['workEnd'];
       rate = data['rate'];
+      lincensePic = data['lincensePic']?.isEmpty ? 'No Information' : data['lincensePic'];
     });
   }
 
@@ -126,9 +128,13 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
                 image: AssetImage("images/certificate.png"),
                 width: 300, // // Set image width
                 height: 250, // Set image height
-                fit: BoxFit
-                    .fill, // Fill the entire part, some images may be stretched or compressed
+                fit: BoxFit.fill, // Fill the entire part, some images may be stretched or compressed
               ),
+              // Text(
+              //   lincensePic,
+              //   style: const TextStyle(fontSize: 16, color: Colors.grey),
+              // ),
+              // CertificateDisplay(imageUrl:lincensePic),
               const SizedBox(height: 8),
               // Display license number
               Text(

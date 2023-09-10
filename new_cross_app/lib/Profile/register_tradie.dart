@@ -177,7 +177,6 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
 
                                       if (fileBytes != null) {
                                         UploadTask task = storage.ref('users/${widget.uid}/$fileName').putData(fileBytes);
-
                                         task.snapshotEvents.listen((TaskSnapshot snapshot) {
                                           double progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                                           print('Upload progress: $progress%');
@@ -192,6 +191,7 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                         try {
                                           await task;  // 等待任务完成
                                           final String downloadUrl = await task.snapshot.ref.getDownloadURL();
+                                          print('Download URL: $downloadUrl');
                                           await FirebaseFirestore.instance
                                               .collection('users')
                                               .doc(widget.uid)
