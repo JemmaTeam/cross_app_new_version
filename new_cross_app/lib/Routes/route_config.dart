@@ -5,7 +5,6 @@ import 'package:new_cross_app/Calendar/Consumer/ConsumerProfilePage.dart';
 import 'package:new_cross_app/Calendar/RatePage.dart';
 import 'package:new_cross_app/Calendar/Tradie/TradieProfilePage.dart';
 import 'package:new_cross_app/Login/login.dart';
-import 'package:new_cross_app/Profile/profile.dart';
 import 'package:new_cross_app/Routes/route_const.dart';
 //import 'package:new_cross_app/Sign_up/signup.dart';
 import 'package:new_cross_app/Sign_up/signup_customer.dart';
@@ -15,9 +14,8 @@ import 'package:new_cross_app/stripe/screens/mainStripe2.dart';
 //import 'package:new_cross_app/main.dart';
 
 import '../Calendar/Consumer/TradieDemo.dart';
-import '../Profile/customer_info_edit.dart';
 import '../Profile/profile_home.dart';
-import '../Profile/customer_info_edit.dart';
+import '../search/search_outcome.dart';
 import '../stripe/screens/rating_new.dart';
 import 'ErrorPage.dart';
 import '../Home Page/home.dart';
@@ -182,6 +180,17 @@ class MyRouter {
           pageBuilder: (context, state) {
             return const MaterialPage(
                 child: BookingEditorT());
+          },
+        ),
+        GoRoute(
+          name: RouterName.SearchOutcome,
+          path: '/searchOutcome/:userId/:postcode/:workType',
+          pageBuilder: (context, state) {
+            return MaterialPage(
+                child: SearchOutcome(
+                    userId: state.params['userId']!,
+                    postcode: state.params['postcode']!,
+                    workType: state.params['workType']!));
           },
         ),
       ],

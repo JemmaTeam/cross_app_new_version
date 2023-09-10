@@ -1,9 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:new_cross_app/Home%20Page/responsive.dart';
 import 'package:new_cross_app/Profile/register_tradie.dart';
 import 'package:new_cross_app/Profile/tradie_work_publish.dart';
+import 'package:new_cross_app/search/image_display_const.dart';
 import '../Home Page/constants.dart';
 import '../Home Page/decorations.dart';
 import '../Home Page/home.dart';
@@ -11,7 +13,6 @@ import '../Routes/route_const.dart';
 import 'customer_info_edit.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:url_launcher/url_launcher_string.dart';
 import 'dart:js' as js;
 
 class ProfileHome extends StatefulWidget {
@@ -40,7 +41,7 @@ class _ProfileHomeState extends State<ProfileHome> {
 
   // Tradie information
   String licenseNumber = "";
-  String lincensePic = "";
+  String lincensePic = ImageURL.certificateDefault;
   String workType = "";
   String workTitle = "";
   num workStart = 0;
@@ -86,6 +87,11 @@ class _ProfileHomeState extends State<ProfileHome> {
         workWeekend = data['workWeekend'];
         workStart = data['workStart'];
         workEnd = data['workEnd'];
+        if (data.containsKey('lincensePic')) {
+          if(!data['lincensePic'].isEmpty){
+            lincensePic = data['lincensePic'];
+          }
+        }
       });
     }
   }
@@ -123,7 +129,7 @@ class _ProfileHomeState extends State<ProfileHome> {
                         setState(() {}); // 更新状态
                       }
                     },
-                    child: Text('Register as a tradie',
+                    child: const Text('Register as a tradie',
                         style: TextStyle(color: Colors.black87))),
               // Tradie information part
               if (!_isConsumer)
@@ -258,7 +264,7 @@ class _ProfileHomeState extends State<ProfileHome> {
           children: [
             Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               // Title
-              Text(
+              const Text(
                 'Certification',
                 style: TextStyle(
                     color: kTextColor,
@@ -270,10 +276,15 @@ class _ProfileHomeState extends State<ProfileHome> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Certificate image
-                  Image(
-                    image: AssetImage("images/certificate.png"),
-                    width: 100,
+                  Container(
+                      width: 120,
+                      height: 100,
+                      child:
+                      CachedNetworkImage(
+                        imageUrl: lincensePic,
+                        placeholder: (context, url) => CircularProgressIndicator(), // placeholder when loading
+                        errorWidget: (context, url, error) => Icon(Icons.error), // error icon
+                      )
                   ),
                   SizedBox(width: 4.pw(size)),
                   Column(
@@ -290,14 +301,15 @@ class _ProfileHomeState extends State<ProfileHome> {
                 ],
               ),
             ]),
+            // TODO: add the certification information edition function later
             // Button to edit the certification information
-            Positioned(
-                top: -10,
-                right: 10,
-                child: IconButton(
-                  onPressed: () {},
-                  icon: Icon(Icons.edit, size: 20),
-                ))
+            // Positioned(
+            //     top: -10,
+            //     right: 10,
+            //     child: IconButton(
+            //       onPressed: () {},
+            //       icon: Icon(Icons.edit, size: 20),
+            //     ))
           ],
         ));
   }
@@ -316,7 +328,7 @@ class _ProfileHomeState extends State<ProfileHome> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Stripe Account',
             style: TextStyle(
                 color: kTextColor, fontSize: 16, fontWeight: FontWeight.w600),
@@ -332,7 +344,7 @@ class _ProfileHomeState extends State<ProfileHome> {
                   onPressed: () {
                     createStripeConnectAccount(userId);
                   },
-                  child: Text(
+                  child: const Text(
                     "Go to your stripe account",
                     style: TextStyle(color: Colors.black87),
                   ))
@@ -355,12 +367,13 @@ class _ProfileHomeState extends State<ProfileHome> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(
+        const Text(
           'Tradie Rating',
           style: TextStyle(
               color: kTextColor, fontSize: 16, fontWeight: FontWeight.w600),
         ),
         SizedBox(height: 2.ph(size)),
+        // TODO: replace with the actual rating score
         Image(
           image: AssetImage("images/five_star.png"),
           width: 150,
@@ -379,21 +392,10 @@ class _ProfileHomeState extends State<ProfileHome> {
       String workEndSuffix =
           workEnd >= 12 && workEnd < 24 ? ":00 PM" : ":00 AM";
       if (workWeekend) {
-        workTime = 'Monday to Sunday: ' +
-            workStart.toString() +
-            workStartSuffix +
-            ' to ' +
-            workEnd.toString() +
-            workEndSuffix;
+        workTime = 'Monday to Sunday: $workStart$workStartSuffix to $workEnd$workEndSuffix';
       }
       if (!workWeekend) {
-        workTime = 'Monday to Friday: ' +
-            workStart.toString() +
-            workStartSuffix +
-            ' to ' +
-            workEnd.toString() +
-            workEndSuffix +
-            '\nNo Work on Weekends';
+        workTime = 'Monday to Friday: $workStart$workStartSuffix to $workEnd$workEndSuffix\nNo Work on Weekends';
       }
     }
     return Container(
@@ -414,7 +416,7 @@ class _ProfileHomeState extends State<ProfileHome> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Work Title
-                Text(
+                const Text(
                   'Work Title',
                   style: TextStyle(
                       color: kTextColor,
@@ -431,11 +433,11 @@ class _ProfileHomeState extends State<ProfileHome> {
                       border: Border.all(color: Colors.grey),
                       color: Colors.grey.withOpacity(0.15)),
                   child: Text(workTitle,
-                      style: TextStyle(color: Colors.black54, fontSize: 10)),
+                      style: const TextStyle(color: Colors.black54, fontSize: 10)),
                 ),
                 SizedBox(height: 3.ph(size)),
                 // Working Time
-                Text(
+                const Text(
                   'Working Time',
                   style: TextStyle(
                       color: kTextColor,
@@ -452,7 +454,7 @@ class _ProfileHomeState extends State<ProfileHome> {
                       border: Border.all(color: Colors.grey),
                       color: Colors.grey.withOpacity(0.15)),
                   child: Text(workTime,
-                      style: TextStyle(color: Colors.black54, fontSize: 10)),
+                      style: const TextStyle(color: Colors.black54, fontSize: 10)),
                 ),
                 SizedBox(height: 2.ph(size)),
                 Row(
@@ -463,11 +465,11 @@ class _ProfileHomeState extends State<ProfileHome> {
                     ),
                     TextButton(
                         onPressed: () {
-                          GoRouter.of(context).pushReplacementNamed(RouterName.CalendarTradie,
+                          GoRouter.of(context).pushReplacementNamed(
+                              RouterName.CalendarTradie,
                               params: {'userId': userId});
-
                         },
-                        child: Text(
+                        child: const Text(
                           "Go to Tradie's Calendar",
                           style: TextStyle(color: Colors.black87),
                         ))
@@ -475,7 +477,7 @@ class _ProfileHomeState extends State<ProfileHome> {
                 ),
                 SizedBox(height: 3.ph(size)),
                 // Work Description
-                Text(
+                const Text(
                   'Work Description',
                   style: TextStyle(
                       color: kTextColor,
