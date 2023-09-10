@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
@@ -5,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../Home Page/constants.dart';
 import '../Routes/route_const.dart';
 import '../services/database_service.dart';
-import 'certificate_image_display.dart';
+import 'image_display_const.dart';
 
 // Initialize a reference to the Firestore database.
 final databaseReference = FirebaseFirestore.instance;
@@ -34,7 +35,7 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
   // Variables to hold tradie information
   String name = "";
   String licenseNumber = "";
-  String lincensePic = "";
+  String lincensePic = ImageURL.certificateDefault; // initialize with the default image
   String workType = "";
   String workTitle = "";
   num workStart = 0;
@@ -74,7 +75,12 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
       workStart = data['workStart'];
       workEnd = data['workEnd'];
       rate = data['rate'];
-      lincensePic = data['lincensePic']?.isEmpty ? 'No Information' : data['lincensePic'];
+      if (data.containsKey('lincensePic')) {
+        if(!data['lincensePic'].isEmpty){
+          lincensePic = data['lincensePic'];
+        }
+      }
+
     });
   }
 
@@ -105,6 +111,7 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
             'Monday to Friday: $workStart$workStartSuffix to $workEnd$workEndSuffix\nNo Work on Weekends';
       }
     }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Tradie Details"),
@@ -124,17 +131,17 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
               ),
               const SizedBox(height: 16),
               // TODO: replace the following image with the actual certificate image
-              Image(
-                image: AssetImage("images/certificate.png"),
-                width: 300, // // Set image width
-                height: 250, // Set image height
-                fit: BoxFit.fill, // Fill the entire part, some images may be stretched or compressed
+              Container(
+                  width: 420,
+                  height: 350,
+                  child:
+                  CachedNetworkImage(
+                    imageUrl: lincensePic,
+                    placeholder: (context, url) => CircularProgressIndicator(), // placeholder when loading
+                    errorWidget: (context, url, error) => Icon(Icons.error), // error icon
+                  )
               ),
-              // Text(
-              //   lincensePic,
-              //   style: const TextStyle(fontSize: 16, color: Colors.grey),
-              // ),
-              // CertificateDisplay(imageUrl:lincensePic),
+
               const SizedBox(height: 8),
               // Display license number
               Text(

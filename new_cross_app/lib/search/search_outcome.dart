@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:new_cross_app/search/selected_tradie_info.dart';
@@ -7,6 +8,7 @@ import 'package:new_cross_app/search/selected_tradie_info.dart';
 import '../Home Page/constants.dart';
 import '../Home Page/decorations.dart';
 import '../Home Page/home.dart';
+import 'image_display_const.dart';
 
 class SearchOutcome extends StatefulWidget {
   final String userId;
@@ -114,6 +116,13 @@ class _SearchOutcomeState extends State<SearchOutcome> {
 
 /// Function to build an individual item for a tradie
   Widget buildTradieItem(Map<String, dynamic> data) {
+    // Set the certificate image URL, if not exists, use the default one
+    String lincensePic = ImageURL.certificateDefault;
+    if (data.containsKey('lincensePic')) {
+      if(!data['lincensePic'].isEmpty){
+        lincensePic = data['lincensePic'];
+      }
+    }
     return Container(
       // Padding and margin settings
       padding: EdgeInsets.all(20),
@@ -144,13 +153,16 @@ class _SearchOutcomeState extends State<SearchOutcome> {
           ),
           // Add some vertical space
           const SizedBox(height: 8),
-          // TODO: replace the following image with the actual certificate image
-          Image(
-            image: AssetImage("images/certificate.png"),
-            width: 300, // Set width to 300
-            height: 250, // Set height to 200
-            fit: BoxFit
-                .fill, // Fill the entire part, some images may be stretched or compressed
+          // Display the certificate image. If not exists, display the default one.
+          Container(
+              width: 300,
+              height: 250,
+              child:
+              CachedNetworkImage(
+                imageUrl: lincensePic,
+                placeholder: (context, url) => CircularProgressIndicator(), // placeholder when loading
+                errorWidget: (context, url, error) => Icon(Icons.error), // error icon
+              )
           ),
           // Add some more vertical space
           const SizedBox(height: 8),

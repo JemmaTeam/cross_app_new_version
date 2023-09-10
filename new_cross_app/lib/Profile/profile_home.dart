@@ -1,18 +1,18 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:new_cross_app/Home%20Page/responsive.dart';
 import 'package:new_cross_app/Profile/register_tradie.dart';
 import 'package:new_cross_app/Profile/tradie_work_publish.dart';
+import 'package:new_cross_app/search/image_display_const.dart';
 import '../Home Page/constants.dart';
 import '../Home Page/decorations.dart';
 import '../Home Page/home.dart';
 import '../Routes/route_const.dart';
-import '../search/certificate_image_display.dart';
 import 'customer_info_edit.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:url_launcher/url_launcher_string.dart';
 import 'dart:js' as js;
 
 class ProfileHome extends StatefulWidget {
@@ -41,8 +41,7 @@ class _ProfileHomeState extends State<ProfileHome> {
 
   // Tradie information
   String licenseNumber = "";
-  // TODO: need to change the default certificate image
-  String lincensePic = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Oryctolagus_cuniculus_Rcdo.jpg/1200px-Oryctolagus_cuniculus_Rcdo.jpg";
+  String lincensePic = ImageURL.certificateDefault;
   String workType = "";
   String workTitle = "";
   num workStart = 0;
@@ -88,14 +87,10 @@ class _ProfileHomeState extends State<ProfileHome> {
         workWeekend = data['workWeekend'];
         workStart = data['workStart'];
         workEnd = data['workEnd'];
-        //TODO: need to change the default certificate image
         if (data.containsKey('lincensePic')) {
-          lincensePic = data['lincensePic'].isEmpty
-              ? 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Oryctolagus_cuniculus_Rcdo.jpg/1200px-Oryctolagus_cuniculus_Rcdo.jpg'
-              : data['lincensePic'];
-        } else {
-          lincensePic =
-              'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Oryctolagus_cuniculus_Rcdo.jpg/1200px-Oryctolagus_cuniculus_Rcdo.jpg';
+          if(!data['lincensePic'].isEmpty){
+            lincensePic = data['lincensePic'];
+          }
         }
       });
     }
@@ -281,16 +276,16 @@ class _ProfileHomeState extends State<ProfileHome> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Certificate image
-                  // Image(
-                  //   image: AssetImage("images/certificate.png"),
-                  //   width: 100,
-                  // ),
-                  // TODO: image display error needs to be fixed
                   Container(
-                      width: 100,
-                      height: 80,
-                      child: CertificateDisplay(imageUrl: lincensePic)),
+                      width: 120,
+                      height: 100,
+                      child:
+                      CachedNetworkImage(
+                        imageUrl: lincensePic,
+                        placeholder: (context, url) => CircularProgressIndicator(), // placeholder when loading
+                        errorWidget: (context, url, error) => Icon(Icons.error), // error icon
+                      )
+                  ),
                   SizedBox(width: 4.pw(size)),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,14 +301,15 @@ class _ProfileHomeState extends State<ProfileHome> {
                 ],
               ),
             ]),
+            // TODO: add the certification information edition function later
             // Button to edit the certification information
-            Positioned(
-                top: -10,
-                right: 10,
-                child: IconButton(
-                  onPressed: () {},
-                  icon: Icon(Icons.edit, size: 20),
-                ))
+            // Positioned(
+            //     top: -10,
+            //     right: 10,
+            //     child: IconButton(
+            //       onPressed: () {},
+            //       icon: Icon(Icons.edit, size: 20),
+            //     ))
           ],
         ));
   }
