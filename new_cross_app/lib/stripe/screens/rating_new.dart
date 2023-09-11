@@ -10,6 +10,7 @@ import '../../Calendar/Consumer/Booking.dart';
 import '../../Routes/route_const.dart';
 import '../stripe_web/stripe_payment_web.dart';
 
+
 class Rating extends StatefulWidget {
   String bookingId;
   Rating({required this.bookingId});
@@ -27,7 +28,6 @@ class _RatingState extends State<Rating> {
     super.initState();
     bookingFuture = getBooking(widget.bookingId);
   }
-
   Future<Booking> getBooking(bookingId) async {
     var data = await FirebaseFirestore.instance
         .collection('bookings')
@@ -38,6 +38,7 @@ class _RatingState extends State<Rating> {
       to: DateFormat('yyyy-MM-dd HH:mm:ss.sss').parse(data['to']),
       key: data['key'] ?? '',
       tradieId: data['tradieId'] ?? '',
+      tradieName: data['tradieName'] ?? '',
       consumerId: data['consumerId'] ?? '',
       comment: data['comment'] ?? '',
       rating: data['rating'] ?? 0,
@@ -76,6 +77,10 @@ class _RatingState extends State<Rating> {
                       style: TextStyle(fontSize: 30.0),
                     ),
                     SizedBox(height: 10.0),
+                    Text(
+                      'Please remember that other reviews helped you to find a great tradie so help others too by leaving a review.',
+                      style: TextStyle(fontSize: 15.0),
+                    ),
                     /*Text(
                       booking.key,
                       style: TextStyle(fontSize: 15.0),
@@ -85,7 +90,7 @@ class _RatingState extends State<Rating> {
                         child: Row(children: [
                       Icon(Icons.star, size: 15.0, color: Colors.amber),
                       Text(
-                        booking.rating.toString(),
+                        booking.tradieName.toString(),
                         style: TextStyle(fontSize: 15.0),
                       ),
                     ])),
@@ -134,6 +139,7 @@ class _RatingState extends State<Rating> {
                     Divider(height: 0.0, indent: 10.0, color: Colors.black),
                     Container(height: 15.0),
                     ElevatedButton(
+                      child: Text('Submit'),
                       onPressed: () {
                         String comment = _textEditingController.text.trim();
                         double serviceRating = _serviceRating;
@@ -146,8 +152,9 @@ class _RatingState extends State<Rating> {
                           // Update the service rating field
                         });
                         // Todo: Get accountId & quote from firebase
+                        GoRouter.of(context).pop();
                       },
-                      child: ElevatedButton(
+                      /*child: ElevatedButton(
                         child: Text('Submit'),
                         onPressed: () async{
                           var accountId;
@@ -171,7 +178,7 @@ class _RatingState extends State<Rating> {
 
                           GoRouter.of(context).pop();
                         },
-                      ),
+                      ),*/
                     ),
                   ],
                 ),
