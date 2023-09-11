@@ -10,7 +10,6 @@ import 'package:logger/logger.dart';
 import 'package:new_cross_app/Profile/profile_home.dart';
 import 'package:new_cross_app/services/auth_service.dart';
 import 'package:sizer/sizer.dart';
-import '../main.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -20,6 +19,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class RegisterTradiePage extends StatefulWidget { // 定义一个新的有状态小部件RegisterTradiePage
   final String uid;
   RegisterTradiePage({Key? key, required this.uid}) : super(key: key);
+
   @override
   State<RegisterTradiePage> createState() => _RegisterTradiePage(); // 创建一个_State
 }
@@ -44,7 +44,10 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
   final TextEditingController postcodeController = TextEditingController(); // 创建一个新的控制器用于postcode的输入框
 
   String? selectedWorkingType; //定义一个String变量以保存选定的“working type
-  File? _imageFile;//添加一个File对象，用于存储选择的图片
+
+  double? uploadProgress;  // 添加一个新的状态变量来存储上传进度
+
+  bool isUploading = false;  // 是否正在上传
 
   @override
   Widget build(BuildContext context) { // build函数，用于构建界面
@@ -147,8 +150,21 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                 ),
                               ),
                               SizedBox(height: 10), // 空间填充，垂直间距
+
+
+                              // 如果上传进度不为 null，显示进度条
+                              if (isUploading) ...[  // 如果正在上传，显示进度条
+                                SizedBox(
+                                  width: 290,  // 与按钮的宽度相同
+                                  child: LinearProgressIndicator(
+                                    value: uploadProgress,  // 设置进度值
+                                    color: Color.lerp(Colors.red, Colors.green, uploadProgress ?? 0),  // 进度条的颜色
+                                  ),
+                                ),
+                                SizedBox(height: 2),  // 为了视觉效果，提供一些间距
+                              ],
                               ElevatedButton(
-                                onPressed: () async {
+                                onPressed: isUploading ? null : () async {  // 如果正在上传，则禁用按钮
                                   // 定义一个异步的onPressed函数，这个函数在按钮被点击后触发
 
                                   try {
@@ -156,10 +172,6 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                       type: FileType.custom,
                                       allowedExtensions: ['jpg', 'png', 'jpeg'],
                                     );
-
-                                    // // 打印整个 FilePickerResult 对象
-                                    // print(result);
-
                                     if (result != null) {
                                       Uint8List? fileBytes;
                                       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
@@ -176,14 +188,26 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                       }
 
                                       if (fileBytes != null) {
+
+                                        setState(() {
+                                          isUploading = true;  // 设置为正在上传
+                                        });
+
                                         UploadTask task = storage.ref('users/${widget.uid}/$fileName').putData(fileBytes);
+                                        //为上传任务创建了一个监听器。监听器的作用是监视上传过程的每一个阶段，并为每个阶段提供反馈
                                         task.snapshotEvents.listen((TaskSnapshot snapshot) {
-                                          double progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                                          print('Upload progress: $progress%');
+                                          double progress = (snapshot.bytesTransferred / snapshot.totalBytes);
+                                          setState(() {
+                                            uploadProgress = progress;  // 更新状态变量
+                                          });
+                                          print('Upload progress: ${progress * 100}%');
                                         }, onError: (Object e) {
+                                          setState(() {
+                                            isUploading = false;  // 设置为不再上传
+                                          });
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(
-                                              content: Text("图片上传失败"),
+                                              content: Text("Image upload failed"),
                                             ),
                                           );
                                         });
@@ -192,6 +216,7 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                           await task;  // 等待任务完成
                                           final String downloadUrl = await task.snapshot.ref.getDownloadURL();
                                           print('Download URL: $downloadUrl');
+                                          //如果上传成功，会获取文件的下载链接，更新 Firestore 数据库
                                           await FirebaseFirestore.instance
                                               .collection('users')
                                               .doc(widget.uid)
@@ -199,14 +224,17 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
 
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(
-                                              content: Text("图片上传成功"),
+                                              content: Text("Image uploaded successfully"),
                                             ),
                                           );
                                         } catch (error) {
+                                          setState(() {
+                                            isUploading = false;  // 设置为不再上传
+                                          });
                                           print("Error during upload: $error");
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(
-                                              content: Text("图片上传失败"),
+                                              content: Text("Image upload failed"),
                                             ),
                                           );
                                         }
@@ -216,7 +244,7 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                         print("File bytes are null");
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
-                                            content: Text("文件选择出错1"),
+                                            content: Text("File selection error"),
                                           ),
                                         );
                                       }
@@ -224,7 +252,7 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                       print("FilePickerResult is null");
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
-                                          content: Text("没有选取文件"),
+                                          content: Text("No file selected"),
                                         ),
                                       );
                                     }
@@ -232,21 +260,23 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                     print("Error picking file: $e");
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text("文件选择出错2"),
+                                        content: Text("File selection error"),
                                       ),
                                     );
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: kLogoColor,
+                                  backgroundColor: isUploading
+                                      ? Color.lerp(Colors.red, Colors.green, uploadProgress ?? 0)  // 使用 ?? 运算符提供默认值
+                                      : kLogoColor,
                                   minimumSize: Size(300, 60), // 调整按钮尺寸
                                 ),
                                 child: Row(
-                                  mainAxisSize: MainAxisSize.min, // 水平方向上尽可能小的尺寸
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(Icons.upload),
                                     SizedBox(width: 5),
-                                    Text("Upload License Picture"), // 添加按钮的提示
+                                    Text(isUploading ? "uploading..." : "Upload License Picture"),  // 根据上传状态更改文本
                                   ],
                                 ),
                               ),
