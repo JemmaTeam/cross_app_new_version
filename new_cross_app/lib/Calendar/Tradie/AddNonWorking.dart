@@ -344,7 +344,7 @@ class AddNonWorkingState extends State<AddNonWorking> {
                           'eventName': _subject,
                           'from': _startDate.toString(),
                           'to': _endDate.toString(),
-                          'status': 'Pending',
+                          'status': 'Unavailable',
                           'tradieName': _tradieName,
                           'consumerName': _consumerName,
                           'description': _notes,
