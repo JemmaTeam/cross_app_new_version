@@ -1,19 +1,14 @@
-//import 'package:chatapp/helper/constants.dart';
-//import 'package:chatapp/models/user.dart';
-import 'package:go_router/go_router.dart';
-import 'package:new_cross_app/chat/screens/chat_home_screen.dart';
-import 'package:new_cross_app/chat/screens/chat_screen.dart';
-import 'package:new_cross_app/services/database_service.dart';
-//import 'package:new_cross_app/chat/chatting/widgets.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-//import 'package:new_cross_app/chat/message.dart';
+import 'package:go_router/go_router.dart'; // For routing
+import 'package:new_cross_app/chat/screens/chat_home_screen.dart'; // Chat home screen
+import 'package:new_cross_app/services/database_service.dart'; // Database service
+import 'package:cloud_firestore/cloud_firestore.dart'; // For Firebase Firestore
+import 'package:flutter/material.dart'; // Flutter Material Design
 
-import '../../Login/utils/constants.dart';
-import '../../Routes/route_const.dart';
-import '../../helper/constants.dart';
-import '../../main.dart';
+import '../../Login/utils/constants.dart'; // Constants
+import '../../Routes/route_const.dart'; // Route constants
+import '../../helper/constants.dart'; // Helper constants
 
+// Search screen for chat application
 class Search extends StatefulWidget {
   String userId;
   Search({super.key, required this.userId});
@@ -24,14 +19,21 @@ class Search extends StatefulWidget {
 class _SearchState extends State<Search> {
   String userId;
   _SearchState({required this.userId});
+
+  // Database service instance
   DatabaseService databaseservice = DatabaseService();
+
+  // Search controller
   TextEditingController searchEditingController = TextEditingController();
+
+  // Query snapshot for search results
   late QuerySnapshot searchResultSnapshot;
 
+  // Loading and search state flags
   bool isLoading = false;
   bool haveUserSearched = false;
-  //final allChat = allChats[0];
 
+  // Initiates the search operation
   initiateSearch() async {
     if (searchEditingController.text.isNotEmpty) {
       setState(() {
@@ -41,8 +43,6 @@ class _SearchState extends State<Search> {
           .searchByName(searchEditingController.text)
           .then((snapshot) {
         searchResultSnapshot = snapshot;
-        print("搜索用户的列表长度为：");
-        print(searchResultSnapshot.docs.length);
         setState(() {
           isLoading = false;
           haveUserSearched = true;
@@ -52,18 +52,28 @@ class _SearchState extends State<Search> {
   }
 
   Widget userList() {
-    return haveUserSearched
-        ? ListView.builder(
-            shrinkWrap: true,
-            itemCount: searchResultSnapshot.docs.length,
-            itemBuilder: (context, index) {
-              return userTile(
-                searchResultSnapshot.docs[index]['fullName'],
-                searchResultSnapshot.docs[index]['email'],
-                searchResultSnapshot.docs[index]['uid'],
-              );
-            })
-        : Container();
+    if (haveUserSearched) {
+      if (searchResultSnapshot.docs.length == 0) {
+        return Center(
+          child: Text(
+            "Can't find the tradie! Please check his name.",
+            style: TextStyle(fontSize: 18, color: Colors.red),
+          ),
+        );
+      }
+      return ListView.builder(
+        shrinkWrap: true,
+        itemCount: searchResultSnapshot.docs.length,
+        itemBuilder: (context, index) {
+          return userTile(
+            searchResultSnapshot.docs[index]['fullName'],
+            searchResultSnapshot.docs[index]['email'],
+            searchResultSnapshot.docs[index]['uid'],
+          );
+        },
+      );
+    }
+    return Container();
   }
 
   /// 1.create a chatroom, send user to the chatroom, other userdetails

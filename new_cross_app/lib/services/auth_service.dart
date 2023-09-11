@@ -3,6 +3,7 @@ import 'package:logger/logger.dart';
 import 'package:new_cross_app/helper/helper_function.dart';
 import 'package:new_cross_app/services/database_service.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/foundation.dart'; // for kIsWeb
 
 class AuthService {
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
@@ -43,36 +44,38 @@ class AuthService {
     }
   }
 
-  // Sign in with Google
+// Cross-Platform Google Sign-In
   Future<bool> signInWithGoogle() async {
-    // Create an instance of the firebase auth and google signin
     FirebaseAuth auth = FirebaseAuth.instance;
-    final GoogleSignIn googleSignIn = GoogleSignIn();
+    UserCredential? userCredential;
 
     try {
-      // Trigger the authentication flow
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-
-      // If the user cancels the Google Sign-In process, googleUser will be null.
-      if (googleUser != null) {
-        // Obtain the auth details from the request
-        final GoogleSignInAuthentication googleAuth =
-            await googleUser.authentication;
-
-        // Create a new credentials
-        final AuthCredential credential = GoogleAuthProvider.credential(
-          accessToken: googleAuth.accessToken,
-          idToken: googleAuth.idToken,
+      if (kIsWeb) {
+        // For Web
+        GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        userCredential = await auth.signInWithPopup(googleProvider);
+      } else {
+        // For Android & iOS
+        GoogleSignIn _googleSignIn = GoogleSignIn(
+          scopes: [
+            'email',
+            'https://www.googleapis.com/auth/contacts.readonly',
+          ],
         );
+        final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+        if (googleUser != null) {
+          final GoogleSignInAuthentication googleAuth =
+              await googleUser.authentication;
+          final AuthCredential credential = GoogleAuthProvider.credential(
+            accessToken: googleAuth.accessToken,
+            idToken: googleAuth.idToken,
+          );
+          userCredential = await auth.signInWithCredential(credential);
+        }
+      }
 
-        // Sign in the user with the credentials
-        await auth.signInWithCredential(credential);
-
-        // Sign in the user with the credentials
-        UserCredential userCredential =
-            await auth.signInWithCredential(credential);
+      if (userCredential != null) {
         User? user = userCredential.user;
-
         if (user != null) {
           // Save user data to CustomerCollection
           await DatabaseService(uid: user.uid)
@@ -82,7 +85,7 @@ class AuthService {
       }
     } catch (error) {
       // Handle any errors that might occur during the sign-in process
-      print("Error during Google Sign-In: $error");
+      print('Error during Google Sign-In: $error');
     }
     return false; // Return false if authentication fails or is cancelled
   }

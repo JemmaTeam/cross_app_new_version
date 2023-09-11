@@ -1,32 +1,20 @@
 import 'dart:math';
-
-//import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-//import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
-//import 'package:http/http.dart' as http;
 import 'package:new_cross_app/Login/login.dart';
-//import 'package:new_cross_app/Login/providers/login.dart';
-//import 'package:jemma/routes.dart';
-//import 'package:new_cross_app/Login/utils/adaptive.dart';
 import 'package:new_cross_app/Login/utils/constants.dart';
-//import 'package:new_cross_app/Login/utils/notification.dart';
 import 'package:new_cross_app/Login/utils/responsive.dart';
-//import 'package:new_cross_app/Sign_up/signup.dart';
 import 'package:new_cross_app/Home Page/home.dart';
 import 'package:new_cross_app/Sign_up/widgets/signup/decoration_image_container.dart';
 import 'package:new_cross_app/Sign_up/widgets/signup/input_fields.dart';
 import 'package:new_cross_app/Sign_up/widgets/signup/show_snackbar.dart';
 import 'package:new_cross_app/Sign_up/widgets/signup/login_row.dart';
 import 'package:logger/logger.dart';
-//import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
-
 import '../main.dart';
 import '../services/auth_service.dart';
 
 /// Screen through which Customer users can Sign up.
-
 class SignupComstomer extends StatefulWidget {
   const SignupComstomer({Key? key}) : super(key: key);
 
@@ -35,20 +23,22 @@ class SignupComstomer extends StatefulWidget {
 }
 
 class _SignupComstomerPageState extends State<SignupComstomer> {
+  // Controllers for text fields
   final TextEditingController fullnameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  final logger = Logger(
-    printer: PrettyPrinter(),
-  );
+  // Logger instance
+  final logger = Logger(printer: PrettyPrinter());
 
+  // Title widget
   final jemmaTitle = Center(
     child: FittedBox(
         fit: BoxFit.contain,
         child: Text("Jemma", style: GoogleFonts.parisienne(fontSize: 40.sp))),
   );
 
+  // Form key
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   AuthService authService = AuthService();
@@ -63,7 +53,6 @@ class _SignupComstomerPageState extends State<SignupComstomer> {
             child: Stack(
               children: [
                 SingleChildScrollView(
-                  // Allow scrolling if screen size is too small
                   child: Form(
                     key: _formKey,
                     child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -136,6 +125,7 @@ class _SignupComstomerPageState extends State<SignupComstomer> {
         ));
   }
 
+  // Function to register customer
   registerCusotmer() async {
     if (_formKey.currentState!.validate()) {
       setState(() {

@@ -25,8 +25,8 @@ exports.createConnectAccount = functions.https.onRequest(async (req, res) => {co
         // create stripe account link for onboarding
         const accountLinks = await stripe.accountLinks.create({
             account: account.id,
-            refresh_url: 'https://jemma-b0fcd.web.app/#/',
-            return_url: 'https://jemma-b0fcd.web.app/#/',
+            refresh_url: 'https://jemma-b0fcd.web.app/#/create_success',
+            return_url: 'https://jemma-b0fcd.web.app/#/create_success',
             type: 'account_onboarding',
         });
         // return account id to store on firebase and account link for redirection
@@ -221,6 +221,35 @@ functions.https.onRequest(async (req, res) => {
   }
 });
 
+// Cloud Function to monitor bookings
+exports.monitorBookingNotifications = functions.firestore
+    .document('bookings/{bookingId}')
+    .onCreate(async (snapshot, context) => {
+        // Get booking data from snapshot
+        const bookingData = snapshot.data();
+
+        // Use consumerId
+        const consumerId = bookingData.consumerId;
+
+        if (!consumerId) {
+            console.error('ConsumerId not found in booking data.');
+            return null;
+        }
+
+        // Formulate your notification message
+        const notificationMessage = `Your booking is successful, the status is ${bookingData.status}`;
+
+        // Store this notification in a user-specific notifications collection
+        await admin.firestore().collection('users').doc(consumerId).collection('notifications').add({
+            message: notificationMessage,
+            timestamp: admin.firestore.FieldValue.serverTimestamp(), // for chronological order
+            read: false // to mark if the user has read the notification
+        });
+
+        return null;
+    });
+
+
 
 //const functions = require('firebase-functions');
 //const admin = require('firebase-admin');
@@ -256,3 +285,48 @@ functions.https.onRequest(async (req, res) => {
 //    throw new functions.https.HttpsError('internal', 'Failed to create the payment: ' + error.message);
 //  }
 //});
+
+/*
+//发送电子邮件提醒
+const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+const nodemailer = require('nodemailer');
+
+admin.initializeApp();
+
+// 配置电子邮件发送
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: functions.config().email.auth.user,
+    pass: functions.config().email.auth.pass
+  }
+});
+
+exports.onNewMessage = functions.firestore
+  .document('chatRoom/{chatRoomId}/chats/{messageId}')
+  .onCreate(async (snapshot, context) => {
+    const newMessage = snapshot.data();
+    const recipientId = newMessage['sendBy'];  // 假设字段名为'sendBy'
+
+    // 获取接收者的电子邮件地址（您需要根据您的数据库结构进行调整）
+    const recipientDoc = await admin.firestore().collection('users').doc(recipientId).get();
+    const recipientEmail = recipientDoc.data().email;
+
+    // 设置电子邮件内容
+    const mailOptions = {
+      from: 'your-email@gmail.com',
+      to: recipientEmail,
+      subject: 'New Message Notification',
+      text: `You have a new message from ${newMessage['sendBy']}`
+    };
+
+    // 发送电子邮件
+    return transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        return console.log(error);
+      }
+      console.log('Message sent: %s', info.messageId);
+    });
+  });
+*/

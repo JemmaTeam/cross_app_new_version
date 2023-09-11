@@ -92,11 +92,11 @@ class _TradieWorkPublishState extends State<TradieWorkPublish> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Work title
-            attributeEdit(size, workTitleController, 'work title', 'Put your work title here'),
+            attributeEdit(size, workTitleController, 'work title', 'Put your work title here', 80),
             SizedBox(height: 2.5.ph(size)),
 
             // work description
-            attributeEdit(size, workDescriptionController, 'work description', 'Put your work description here'),
+            attributeEdit(size, workDescriptionController, 'work description', 'Put your work description here', 500),
             SizedBox(height: 2.5.ph(size)),
 
             // work on weekends or not
@@ -295,12 +295,13 @@ class _TradieWorkPublishState extends State<TradieWorkPublish> {
 
   // Each input text field
   Container attributeEdit(Size size, TextEditingController controller,
-      String labelText, String hintText) {
+      String labelText, String hintText, int maxCharLength) {
     return Container(
       width: 50.pw(size),
       constraints: const BoxConstraints(minWidth: 400),
       child: TextField(
         controller: controller,
+        maxLength: maxCharLength,  // Set the maximum number of characters
         decoration: InputDecoration(
           labelText: labelText,
           hintText: hintText,

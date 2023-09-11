@@ -1,17 +1,19 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:new_cross_app/Home%20Page/responsive.dart';
 import 'package:new_cross_app/Profile/register_tradie.dart';
 import 'package:new_cross_app/Profile/tradie_work_publish.dart';
+import 'package:new_cross_app/search/image_display_const.dart';
 import '../Home Page/constants.dart';
 import '../Home Page/decorations.dart';
 import '../Home Page/home.dart';
 import '../Routes/route_const.dart';
+import '../search/rate_star_widget.dart';
 import 'customer_info_edit.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:url_launcher/url_launcher_string.dart';
 import 'dart:js' as js;
 
 class ProfileHome extends StatefulWidget {
@@ -40,13 +42,13 @@ class _ProfileHomeState extends State<ProfileHome> {
 
   // Tradie information
   String licenseNumber = "";
-  String lincensePic = "";
+  String lincensePic = ImageURL.certificateDefault;
   String workType = "";
   String workTitle = "";
   num workStart = 0;
   num workEnd = 0;
   bool workWeekend = false;
-  String rate = "";
+  num rate = 0;
   String workDescription = "";
 
   @override
@@ -86,6 +88,12 @@ class _ProfileHomeState extends State<ProfileHome> {
         workWeekend = data['workWeekend'];
         workStart = data['workStart'];
         workEnd = data['workEnd'];
+        rate = data['rate'];
+        if (data.containsKey('lincensePic')) {
+          if(!data['lincensePic'].isEmpty){
+            lincensePic = data['lincensePic'];
+          }
+        }
       });
     }
   }
@@ -120,10 +128,10 @@ class _ProfileHomeState extends State<ProfileHome> {
                       );
                       if (result.toString() == 'update') {
                         await getUserProfile(userId);
-                        setState(() {}); // 更新状态
+                        setState(() {}); // update the state
                       }
                     },
-                    child: Text('Register as a tradie',
+                    child: const Text('Register as a tradie',
                         style: TextStyle(color: Colors.black87))),
               // Tradie information part
               if (!_isConsumer)
@@ -182,7 +190,8 @@ class _ProfileHomeState extends State<ProfileHome> {
       child: Row(
         children: [
           // avatar and contact
-          CircleAvatar(
+          // TODO: change to the actual avatar image of the logged user
+          const CircleAvatar(
             backgroundImage: AssetImage("images/Tom.jpg"),
             radius: 55,
           ),
@@ -193,14 +202,14 @@ class _ProfileHomeState extends State<ProfileHome> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(name,
-                    style: TextStyle(
+                    style: const TextStyle(
                         color: Colors.black87,
                         fontSize: 20,
                         fontWeight: FontWeight.w600)),
                 SizedBox(height: 6.ph(size)),
                 Text(
                   email,
-                  style: TextStyle(color: Colors.black87),
+                  style: const TextStyle(color: Colors.black87),
                 ),
                 SizedBox(height: 3.ph(size)),
                 Container(
@@ -208,13 +217,13 @@ class _ProfileHomeState extends State<ProfileHome> {
                   constraints: const BoxConstraints(minWidth: 150),
                   child: Text(
                     address,
-                    style: TextStyle(color: Colors.black87),
+                    style: const TextStyle(color: Colors.black87),
                   ),
                 ),
                 SizedBox(height: 3.ph(size)),
                 Text(
                   phone,
-                  style: TextStyle(color: Colors.black87),
+                  style: const TextStyle(color: Colors.black87),
                 ),
               ],
             ),
@@ -231,10 +240,10 @@ class _ProfileHomeState extends State<ProfileHome> {
                     );
                     if (result.toString() == 'update') {
                       await getUserProfile(userId);
-                      setState(() {}); // 更新状态
+                      setState(() {}); // update the state
                     }
                   },
-                  icon: Icon(Icons.edit, size: 20),
+                  icon: const Icon(Icons.edit, size: 20),
                 ))
           ]),
         ],
@@ -258,7 +267,7 @@ class _ProfileHomeState extends State<ProfileHome> {
           children: [
             Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               // Title
-              Text(
+              const Text(
                 'Certification',
                 style: TextStyle(
                     color: kTextColor,
@@ -270,10 +279,15 @@ class _ProfileHomeState extends State<ProfileHome> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Certificate image
-                  Image(
-                    image: AssetImage("images/certificate.png"),
-                    width: 100,
+                  Container(
+                      width: 120,
+                      height: 100,
+                      child:
+                      CachedNetworkImage(
+                        imageUrl: lincensePic,
+                        placeholder: (context, url) => CircularProgressIndicator(), // placeholder when loading
+                        errorWidget: (context, url, error) => Icon(Icons.error), // error icon
+                      )
                   ),
                   SizedBox(width: 4.pw(size)),
                   Column(
@@ -295,7 +309,18 @@ class _ProfileHomeState extends State<ProfileHome> {
                 top: -10,
                 right: 10,
                 child: IconButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              RegisterTradiePage(uid: userId)),
+                    );
+                    if (result.toString() == 'update') {
+                      await getUserProfile(userId);
+                      setState(() {}); // update the state
+                    }
+                  },
                   icon: Icon(Icons.edit, size: 20),
                 ))
           ],
@@ -316,7 +341,7 @@ class _ProfileHomeState extends State<ProfileHome> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Stripe Account',
             style: TextStyle(
                 color: kTextColor, fontSize: 16, fontWeight: FontWeight.w600),
@@ -332,7 +357,7 @@ class _ProfileHomeState extends State<ProfileHome> {
                   onPressed: () {
                     createStripeConnectAccount(userId);
                   },
-                  child: Text(
+                  child: const Text(
                     "Go to your stripe account",
                     style: TextStyle(color: Colors.black87),
                   ))
@@ -348,23 +373,21 @@ class _ProfileHomeState extends State<ProfileHome> {
       width: 40.pw(size),
       constraints: const BoxConstraints(minWidth: 320),
       margin: EdgeInsets.fromLTRB(1.pw(size), 30, 1.pw(size), 0),
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: defaultShadows,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(
+        const Text(
           'Tradie Rating',
           style: TextStyle(
               color: kTextColor, fontSize: 16, fontWeight: FontWeight.w600),
         ),
         SizedBox(height: 2.ph(size)),
-        Image(
-          image: AssetImage("images/five_star.png"),
-          width: 150,
-        ),
+        // Create a row to display rating stars and actual rating number
+        buildRateStars(rate, 'start'),
       ]),
     );
   }
@@ -379,21 +402,10 @@ class _ProfileHomeState extends State<ProfileHome> {
       String workEndSuffix =
           workEnd >= 12 && workEnd < 24 ? ":00 PM" : ":00 AM";
       if (workWeekend) {
-        workTime = 'Monday to Sunday: ' +
-            workStart.toString() +
-            workStartSuffix +
-            ' to ' +
-            workEnd.toString() +
-            workEndSuffix;
+        workTime = 'Monday to Sunday: $workStart$workStartSuffix to $workEnd$workEndSuffix';
       }
       if (!workWeekend) {
-        workTime = 'Monday to Friday: ' +
-            workStart.toString() +
-            workStartSuffix +
-            ' to ' +
-            workEnd.toString() +
-            workEndSuffix +
-            '\nNo Work on Weekends';
+        workTime = 'Monday to Friday: $workStart$workStartSuffix to $workEnd$workEndSuffix\nNo Work on Weekends';
       }
     }
     return Container(
@@ -414,7 +426,7 @@ class _ProfileHomeState extends State<ProfileHome> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Work Title
-                Text(
+                const Text(
                   'Work Title',
                   style: TextStyle(
                       color: kTextColor,
@@ -431,11 +443,11 @@ class _ProfileHomeState extends State<ProfileHome> {
                       border: Border.all(color: Colors.grey),
                       color: Colors.grey.withOpacity(0.15)),
                   child: Text(workTitle,
-                      style: TextStyle(color: Colors.black54, fontSize: 10)),
+                      style: const TextStyle(color: Colors.black54, fontSize: 10)),
                 ),
                 SizedBox(height: 3.ph(size)),
                 // Working Time
-                Text(
+                const Text(
                   'Working Time',
                   style: TextStyle(
                       color: kTextColor,
@@ -452,7 +464,7 @@ class _ProfileHomeState extends State<ProfileHome> {
                       border: Border.all(color: Colors.grey),
                       color: Colors.grey.withOpacity(0.15)),
                   child: Text(workTime,
-                      style: TextStyle(color: Colors.black54, fontSize: 10)),
+                      style: const TextStyle(color: Colors.black54, fontSize: 10)),
                 ),
                 SizedBox(height: 2.ph(size)),
                 Row(
@@ -463,11 +475,11 @@ class _ProfileHomeState extends State<ProfileHome> {
                     ),
                     TextButton(
                         onPressed: () {
-                          GoRouter.of(context).pushReplacementNamed(RouterName.CalendarTradie,
+                          GoRouter.of(context).pushReplacementNamed(
+                              RouterName.CalendarTradie,
                               params: {'userId': userId});
-
                         },
-                        child: Text(
+                        child: const Text(
                           "Go to Tradie's Calendar",
                           style: TextStyle(color: Colors.black87),
                         ))
@@ -475,7 +487,7 @@ class _ProfileHomeState extends State<ProfileHome> {
                 ),
                 SizedBox(height: 3.ph(size)),
                 // Work Description
-                Text(
+                const Text(
                   'Work Description',
                   style: TextStyle(
                       color: kTextColor,
@@ -512,7 +524,7 @@ class _ProfileHomeState extends State<ProfileHome> {
                     );
                     if (result.toString() == 'update') {
                       await getUserProfile(userId);
-                      setState(() {}); // 更新状态
+                      setState(() {}); // update State
                     }
                   },
                   icon: Icon(Icons.edit, size: 20),
