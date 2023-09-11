@@ -29,9 +29,14 @@ class DatabaseService {
 
   // Get user data by email
   Future gettingUserData(String email) async {
-    QuerySnapshot snapshotC =
-        await UserCollection.where("email", isEqualTo: email).get();
-    return snapshotC.docs.isEmpty ? null : snapshotC;
+    try {
+      QuerySnapshot snapshotC =
+          await UserCollection.where("email", isEqualTo: email).get();
+      return snapshotC.docs.isEmpty ? null : snapshotC;
+    } catch (e) {
+      print("An error occurred: $e");
+      return null;
+    }
   }
 
   // Search user by name and Is_Tradie attribute
