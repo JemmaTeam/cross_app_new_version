@@ -25,8 +25,8 @@ exports.createConnectAccount = functions.https.onRequest(async (req, res) => {co
         // create stripe account link for onboarding
         const accountLinks = await stripe.accountLinks.create({
             account: account.id,
-            refresh_url: 'https://jemma-b0fcd.web.app/#/',
-            return_url: 'https://jemma-b0fcd.web.app/#/',
+            refresh_url: 'https://jemma-b0fcd.web.app/#/create_success',
+            return_url: 'https://jemma-b0fcd.web.app/#/create_success',
             type: 'account_onboarding',
         });
         // return account id to store on firebase and account link for redirection

@@ -10,6 +10,7 @@ import 'package:new_cross_app/Routes/route_const.dart';
 import 'package:new_cross_app/Sign_up/signup_customer.dart';
 import 'package:new_cross_app/chat/screens/chat_home_screen.dart';
 import 'package:new_cross_app/chat/screens/search_page.dart';
+import 'package:new_cross_app/stripe/create_success.dart';
 import 'package:new_cross_app/stripe/screens/mainStripe2.dart';
 //import 'package:new_cross_app/main.dart';
 
@@ -180,6 +181,14 @@ class MyRouter {
           pageBuilder: (context, state) {
             return const MaterialPage(
                 child: BookingEditorT());
+          },
+        ),
+        GoRoute(
+          name: RouterName.CreateSuccess,
+          path: '/create_success',
+          pageBuilder: (context, state) {
+            return const MaterialPage(
+                child: CreateSuccess());
           },
         ),
         GoRoute(
