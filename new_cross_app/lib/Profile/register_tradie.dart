@@ -275,6 +275,10 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                       String tradieLicense = licenseController.text;
 
                                       try {
+                                        DocumentSnapshot docSnapshot = await colRef.doc(widget.uid).get();
+                                        Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>;
+                                        // 判断该用户是否已经注册过，如果未注册过，则更新全部tradie字段
+                                        if (!data.containsKey('workType')) {
                                         // 更新用户的 Firestore 文档
                                         await FirebaseFirestore.instance
                                             .collection('users')
@@ -293,6 +297,18 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                           'workDescription' : "",
                                           'tOrders' : 0,
                                         });
+                                        }
+                                        // 如果已经注册过，则只更新tradie的worktype,postcode和licenseNumber
+                                        else {
+                                          await FirebaseFirestore.instance
+                                              .collection('users')
+                                              .doc(widget.uid)
+                                              .update({
+                                            'workType': workingType,
+                                            'postcode': postcode,
+                                            'licenseNumber': tradieLicense,
+                                          });
+                                        }
 
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(

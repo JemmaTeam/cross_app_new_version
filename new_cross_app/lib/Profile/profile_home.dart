@@ -304,15 +304,25 @@ class _ProfileHomeState extends State<ProfileHome> {
                 ],
               ),
             ]),
-            // TODO: add the certification information edition function later
             // Button to edit the certification information
-            // Positioned(
-            //     top: -10,
-            //     right: 10,
-            //     child: IconButton(
-            //       onPressed: () {},
-            //       icon: Icon(Icons.edit, size: 20),
-            //     ))
+            Positioned(
+                top: -10,
+                right: 10,
+                child: IconButton(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              RegisterTradiePage(uid: userId)),
+                    );
+                    if (result.toString() == 'update') {
+                      await getUserProfile(userId);
+                      setState(() {}); // update the state
+                    }
+                  },
+                  icon: Icon(Icons.edit, size: 20),
+                ))
           ],
         ));
   }
