@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
+import 'package:new_cross_app/search/rate_star_widget.dart';
 
 import '../Home Page/constants.dart';
 import '../Routes/route_const.dart';
@@ -162,22 +163,8 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
                 style: const TextStyle(fontSize: 18, color: Colors.grey),
               ),
               const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Generate star icons based on rating
-                  ...getStarIconsBasedOnRate(rate),
-                  const SizedBox(width: 4),
-                  // Display the rating number
-                  Text(
-                    rate.toString(),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
+              // Create a row to display rating stars and actual rating number
+              buildRateStars(rate, 'center'),
               const SizedBox(height: 16),
               // Display work description title
               const Text(
@@ -290,34 +277,7 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
     );
   }
 
-  /// Return the corresponding star icon based on the rating
-  List<Icon> getStarIconsBasedOnRate(dynamic rate) {
-    // Parse the rate to double, default to 0.0 if rate is not a number (or no rating available)
-    double parsedRate = rate is num ? rate.toDouble() : 0.0;
 
-    // Calculate the number of full stars and half stars
-    int fullStars = parsedRate.floor();
-    int halfStars = parsedRate.ceil() - fullStars;
-
-    // Initialize an empty list to hold the star icons
-    List<Icon> stars = [];
-
-    // If the parsed rate is zero, then add an empty star
-    if (parsedRate == 0.0) {
-      stars.add(const Icon(Icons.star_border_outlined, color: Colors.yellow));
-    } else {
-      // Add full star icons based on the fullStars count
-      for (int i = 0; i < fullStars; i++) {
-        stars.add(const Icon(Icons.star, color: Colors.yellow));
-      }
-      // If there's a half star, add a half star icon
-      if (halfStars > 0) {
-        stars.add(const Icon(Icons.star_half, color: Colors.yellow));
-      }
-    }
-
-    return stars; // Return the list of star icons
-  }
 
   /// Function to generate a chat room ID based on two user IDs
   getChatRoomId(String userIdA, String userIdB) {

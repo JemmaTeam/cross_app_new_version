@@ -10,6 +10,7 @@ import '../Home Page/constants.dart';
 import '../Home Page/decorations.dart';
 import '../Home Page/home.dart';
 import '../Routes/route_const.dart';
+import '../search/rate_star_widget.dart';
 import 'customer_info_edit.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -47,7 +48,7 @@ class _ProfileHomeState extends State<ProfileHome> {
   num workStart = 0;
   num workEnd = 0;
   bool workWeekend = false;
-  String rate = "";
+  num rate = 0;
   String workDescription = "";
 
   @override
@@ -87,6 +88,7 @@ class _ProfileHomeState extends State<ProfileHome> {
         workWeekend = data['workWeekend'];
         workStart = data['workStart'];
         workEnd = data['workEnd'];
+        rate = data['rate'];
         if (data.containsKey('lincensePic')) {
           if(!data['lincensePic'].isEmpty){
             lincensePic = data['lincensePic'];
@@ -126,7 +128,7 @@ class _ProfileHomeState extends State<ProfileHome> {
                       );
                       if (result.toString() == 'update') {
                         await getUserProfile(userId);
-                        setState(() {}); // 更新状态
+                        setState(() {}); // update the state
                       }
                     },
                     child: const Text('Register as a tradie',
@@ -188,7 +190,8 @@ class _ProfileHomeState extends State<ProfileHome> {
       child: Row(
         children: [
           // avatar and contact
-          CircleAvatar(
+          // TODO: change to the actual avatar image of the logged user
+          const CircleAvatar(
             backgroundImage: AssetImage("images/Tom.jpg"),
             radius: 55,
           ),
@@ -199,14 +202,14 @@ class _ProfileHomeState extends State<ProfileHome> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(name,
-                    style: TextStyle(
+                    style: const TextStyle(
                         color: Colors.black87,
                         fontSize: 20,
                         fontWeight: FontWeight.w600)),
                 SizedBox(height: 6.ph(size)),
                 Text(
                   email,
-                  style: TextStyle(color: Colors.black87),
+                  style: const TextStyle(color: Colors.black87),
                 ),
                 SizedBox(height: 3.ph(size)),
                 Container(
@@ -214,13 +217,13 @@ class _ProfileHomeState extends State<ProfileHome> {
                   constraints: const BoxConstraints(minWidth: 150),
                   child: Text(
                     address,
-                    style: TextStyle(color: Colors.black87),
+                    style: const TextStyle(color: Colors.black87),
                   ),
                 ),
                 SizedBox(height: 3.ph(size)),
                 Text(
                   phone,
-                  style: TextStyle(color: Colors.black87),
+                  style: const TextStyle(color: Colors.black87),
                 ),
               ],
             ),
@@ -237,10 +240,10 @@ class _ProfileHomeState extends State<ProfileHome> {
                     );
                     if (result.toString() == 'update') {
                       await getUserProfile(userId);
-                      setState(() {}); // 更新状态
+                      setState(() {}); // update the state
                     }
                   },
-                  icon: Icon(Icons.edit, size: 20),
+                  icon: const Icon(Icons.edit, size: 20),
                 ))
           ]),
         ],
@@ -360,7 +363,7 @@ class _ProfileHomeState extends State<ProfileHome> {
       width: 40.pw(size),
       constraints: const BoxConstraints(minWidth: 320),
       margin: EdgeInsets.fromLTRB(1.pw(size), 30, 1.pw(size), 0),
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: defaultShadows,
@@ -373,11 +376,8 @@ class _ProfileHomeState extends State<ProfileHome> {
               color: kTextColor, fontSize: 16, fontWeight: FontWeight.w600),
         ),
         SizedBox(height: 2.ph(size)),
-        // TODO: replace with the actual rating score
-        Image(
-          image: AssetImage("images/five_star.png"),
-          width: 150,
-        ),
+        // Create a row to display rating stars and actual rating number
+        buildRateStars(rate, 'start'),
       ]),
     );
   }
@@ -514,7 +514,7 @@ class _ProfileHomeState extends State<ProfileHome> {
                     );
                     if (result.toString() == 'update') {
                       await getUserProfile(userId);
-                      setState(() {}); // 更新状态
+                      setState(() {}); // update State
                     }
                   },
                   icon: Icon(Icons.edit, size: 20),
