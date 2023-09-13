@@ -284,10 +284,12 @@ class HomeState extends State<Home> {
                     const GraphicalBanner(),
                     Transform.translate(
                         offset: const Offset(
-                            0, -GraphicalBanner.bannerHeight * 0.25),
-                        child: SearchBar(
+                            0, -GraphicalBanner.bannerHeight * 0.1),
+                        child:
+                        SearchBar(
                           userId: userId,
                         )),
+                    SizedBox(height: 5.ph(size)),
                     const AboutJemma(),
                     SizedBox(height: 5.ph(size)),
                     WhyJemma(),
