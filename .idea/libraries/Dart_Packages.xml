@@ -334,7 +334,7 @@
         <entry key="flutter">
           <value>
             <list>
-              <option value="$USER_HOME$/Downloads/flutter 3/packages/flutter/lib" />
+              <option value="$USER_HOME$/Applications/flutter/packages/flutter/lib" />
             </list>
           </value>
         </entry>
@@ -446,14 +446,14 @@
         <entry key="flutter_test">
           <value>
             <list>
-              <option value="$USER_HOME$/Downloads/flutter 3/packages/flutter_test/lib" />
+              <option value="$USER_HOME$/Applications/flutter/packages/flutter_test/lib" />
             </list>
           </value>
         </entry>
         <entry key="flutter_web_plugins">
           <value>
             <list>
-              <option value="$USER_HOME$/Downloads/flutter 3/packages/flutter_web_plugins/lib" />
+              <option value="$USER_HOME$/Applications/flutter/packages/flutter_web_plugins/lib" />
             </list>
           </value>
         </entry>
@@ -608,6 +608,13 @@
           <value>
             <list>
               <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/image_picker_platform_interface-2.9.1/lib" />
+            </list>
+          </value>
+        </entry>
+        <entry key="image_picker_web">
+          <value>
+            <list>
+              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/image_picker_web-3.1.1/lib" />
             </list>
           </value>
         </entry>
@@ -873,7 +880,7 @@
         <entry key="sky_engine">
           <value>
             <list>
-              <option value="$USER_HOME$/Downloads/flutter 3/bin/cache/pkg/sky_engine/lib" />
+              <option value="$USER_HOME$/Applications/flutter/bin/cache/pkg/sky_engine/lib" />
             </list>
           </value>
         </entry>
@@ -1230,6 +1237,7 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/image_picker_linux-0.2.1+1/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/image_picker_macos-0.2.1+1/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/image_picker_platform_interface-2.9.1/lib" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/image_picker_web-3.1.1/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/image_picker_windows-0.2.1+1/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/images_picker-1.2.11/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/intl-0.17.0/lib" />
@@ -1305,10 +1313,10 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/win32_registry-1.1.1/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/xdg_directories-1.0.2/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/xml-6.3.0/lib" />
-      <root url="file://$USER_HOME$/Downloads/flutter 3/bin/cache/pkg/sky_engine/lib" />
-      <root url="file://$USER_HOME$/Downloads/flutter 3/packages/flutter/lib" />
-      <root url="file://$USER_HOME$/Downloads/flutter 3/packages/flutter_test/lib" />
-      <root url="file://$USER_HOME$/Downloads/flutter 3/packages/flutter_web_plugins/lib" />
+      <root url="file://$USER_HOME$/Applications/flutter/bin/cache/pkg/sky_engine/lib" />
+      <root url="file://$USER_HOME$/Applications/flutter/packages/flutter/lib" />
+      <root url="file://$USER_HOME$/Applications/flutter/packages/flutter_test/lib" />
+      <root url="file://$USER_HOME$/Applications/flutter/packages/flutter_web_plugins/lib" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

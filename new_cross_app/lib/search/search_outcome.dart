@@ -124,6 +124,14 @@ class _SearchOutcomeState extends State<SearchOutcome> {
         lincensePic = data['lincensePic'];
       }
     }
+    // Set the average rating scores
+    num averageRate = 0;
+    if (data['tOrders'] == 0){
+      averageRate = data['rate'];
+    }
+    else {
+      averageRate = data['rate'] / data['tOrders'];
+    }
     return Container(
       // Padding and margin settings
       padding: EdgeInsets.all(20),
@@ -188,7 +196,7 @@ class _SearchOutcomeState extends State<SearchOutcome> {
           // Add some more vertical space
           const SizedBox(height: 4),
           // Create a row to display rating stars and actual rating number
-          buildRateStars(data['rate'], 'center'),
+          buildRateStars(averageRate, 'center'),
         ],
       ),
     );

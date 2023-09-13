@@ -43,6 +43,7 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
   num workEnd = 0;
   bool workWeekend = false;
   num rate = 0;
+  num tOrders = 0;
   String workDescription = "";
 
   @override
@@ -76,6 +77,7 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
       workStart = data['workStart'];
       workEnd = data['workEnd'];
       rate = data['rate'];
+      tOrders = data['tOrders'];
       if (data.containsKey('lincensePic')) {
         if(!data['lincensePic'].isEmpty){
           lincensePic = data['lincensePic'];
@@ -112,7 +114,14 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
             'Monday to Friday: $workStart$workStartSuffix to $workEnd$workEndSuffix\nNo Work on Weekends';
       }
     }
-
+    // Set the average rating scores
+    num averageRate = 0;
+    if (tOrders == 0){
+      averageRate = rate;
+    }
+    else {
+      averageRate = rate / tOrders;
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text("Tradie Details"),
@@ -164,7 +173,7 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
               ),
               const SizedBox(height: 8),
               // Create a row to display rating stars and actual rating number
-              buildRateStars(rate, 'center'),
+              buildRateStars(averageRate, 'center'),
               const SizedBox(height: 16),
               // Display work description title
               const Text(

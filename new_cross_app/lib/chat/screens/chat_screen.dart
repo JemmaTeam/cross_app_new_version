@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker_web/image_picker_web.dart';
 import 'package:new_cross_app/chat/screens/chat_home_screen.dart';
 import 'package:new_cross_app/helper/constants.dart';
 import 'package:new_cross_app/services/database_service.dart';
@@ -11,10 +13,18 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import '../../Routes/route_const.dart';
 import '../../helper/helper_function.dart';
 import '../../main.dart';
+import 'package:path/path.dart' as Path;
+
+
+//Chat类是一个完整的聊天页面，包括显示消息、获取聊天对象的用户名、发送和接收消息等功能
 
 class Chat extends StatefulWidget {
   final String chatRoomId;
   final String userId;
+  //存储用户选择的图片
+  File? selectedImage;
+  final picker = ImagePickerWeb();
+
 
   Chat({super.key, required this.chatRoomId, required this.userId});
 
@@ -30,6 +40,13 @@ class _ChatState extends State<Chat> {
   TextEditingController messageEditingController = TextEditingController();
 
   String TalkeruserName = '';
+
+  // //存储用户选择的图片
+  File? selectedImage;
+  // 追踪图片上传状态
+  bool isUploading = false;
+  double uploadProgress = 0.0;
+
   Widget chatMessages() {
     if (chats == null) {
       return Container();
@@ -51,12 +68,14 @@ class _ChatState extends State<Chat> {
                   final DateFormat formatter = DateFormat('yy/MM/dd  HH:mm');
                   final String formattedTime = formatter.format(sendTime);
                   final bool Isread = messageData?['Isread'];
+                  final bool isImage = messageData?['isImage'] ?? false;
                   return MessageTile(
                     message: messageData?['message'],
                     sendByMe: Constants.MyId == messageData?['sendBy'],
                     sendTime: formattedTime,
                     Isread: Isread,
                     chatRoomId: widget.chatRoomId,
+                    isImage: isImage,  // 传递isImage参数
                   );
                 },
               )
@@ -125,6 +144,20 @@ class _ChatState extends State<Chat> {
     });
   }
 
+
+  // 在数据库中插入上传照片的信息
+  void addImageMessage(String imageUrl) {
+    Map<String, dynamic> chatMessageMap = {
+      "sendBy": Constants.MyId,
+      "message": imageUrl, // 使用图片的URL作为消息内容
+      'time': DateTime.now().millisecondsSinceEpoch,
+      'Isread': false,
+      'isImage': true, // 添加新的属性，表示这是一张图片
+    };
+    DatabaseService().addMessage(widget.chatRoomId, chatMessageMap);
+  }
+
+
   @override
   Widget build(BuildContext context) {
     String userId = widget.userId;
@@ -154,6 +187,12 @@ class _ChatState extends State<Chat> {
         children: [
           Expanded(
             child: chatMessages(),
+          ),
+          widget.selectedImage == null
+              ? Container()
+              : Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Image.file(widget.selectedImage!),
           ),
           Visibility(
             visible: showEmojiPicker,
@@ -219,6 +258,44 @@ class _ChatState extends State<Chat> {
                         const SizedBox(
                           width: 10,
                         ),
+                        //上传图片的按钮
+                        IconButton(
+                          icon: Icon(Icons.photo),
+                          onPressed: () async {
+                            try {
+                              final mediaInfo = await ImagePickerWeb.getImageInfo;
+                              if (mediaInfo != null && mediaInfo.data != null) {
+                                // 显示上传进度
+                                final snackBar = SnackBar(content: Text('Uploading image...'));
+                                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+                                // 上传到 Firebase
+                                Reference storageReference = FirebaseStorage.instance.ref().child('chat_images/${mediaInfo.fileName}');
+                                UploadTask uploadTask = storageReference.putData(mediaInfo.data!);
+
+                                // 等待上传完成并获取下载URL
+                                TaskSnapshot snapshot = await uploadTask.whenComplete(() => {});
+                                String imageUrl = await snapshot.ref.getDownloadURL();
+
+                                // 显示上传成功的提示
+                                final successSnackBar = SnackBar(content: Text('Image uploaded successfully!'));
+                                ScaffoldMessenger.of(context).showSnackBar(successSnackBar);
+
+                                // 保存图片URL到聊天数据库
+                                addImageMessage(imageUrl);
+                              }
+                            } catch (error) {
+                              print("An error occurred: $error");
+
+                              // 显示上传失败的提示
+                              final failSnackBar = SnackBar(content: Text('Image upload failed!'));
+                              ScaffoldMessenger.of(context).showSnackBar(failSnackBar);
+                            }
+                          },
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
                         Expanded(
                           child: TextField(
                             controller: messageEditingController,
@@ -265,6 +342,7 @@ class MessageTile extends StatelessWidget {
   final String sendTime;
   final bool Isread;
   final String chatRoomId;
+  final bool isImage;  // 新增属性
 
   const MessageTile({
     Key? key,
@@ -273,6 +351,7 @@ class MessageTile extends StatelessWidget {
     required this.sendTime,
     required this.Isread,
     required this.chatRoomId,
+    this.isImage = false,  // 默认值为 false
   }) : super(key: key);
 
   @override
@@ -338,7 +417,18 @@ class MessageTile extends StatelessWidget {
                       ),
                 color: sendByMe ? const Color(0xFF4CAF50) : Colors.grey[200],
               ),
-              child: Text(
+              // child: Text(
+              //   message,
+              //   textAlign: sendByMe ? TextAlign.right : TextAlign.left,
+              //   style: TextStyle(
+              //     color: sendByMe ? Colors.white : Colors.black,
+              //     fontSize: 16,
+              //     fontFamily: 'OverpassRegular',
+              //     fontWeight: FontWeight.w300,
+              //   ),
+              child: isImage
+                  ? Image.network(message, fit: BoxFit.cover)  // 如果是图片，显示图片
+                  : Text(  // 如果不是图片，显示文本
                 message,
                 textAlign: sendByMe ? TextAlign.right : TextAlign.left,
                 style: TextStyle(

@@ -2,6 +2,7 @@ library tradie_calendar;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:getwidget/components/toast/gf_toast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:new_cross_app/Calendar/Consumer/TradieDemo.dart';
@@ -53,8 +54,9 @@ num _rating = 0;
 String user_subject = '';
 late num quote;
 
-final databaseReference = FirebaseFirestore.instance;
-final CollectionReference colRef = databaseReference.collection('bookings');
+final db = FirebaseFirestore.instance;
+final CollectionReference colRef = db.collection('bookings');
+final usersRef = db.collection('users');
 
 class TradieProfileState extends State<TradieProfilePage> {
   String tradie = '';
