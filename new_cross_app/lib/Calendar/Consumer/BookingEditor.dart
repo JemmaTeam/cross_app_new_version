@@ -207,45 +207,39 @@ class BookingEditorState extends State<BookingEditor> {
             ),
             //Status
             ListTile(
-              contentPadding: const EdgeInsets.fromLTRB(5, 2, 5, 2),
-              leading: Icon(Icons.lens,
-                  color: _colorCollection[_selectedStatusIndex]),
-              title: Text(
-                _statusNames[_selectedStatusIndex],
-              ),
-              trailing: _statusNames[_selectedStatusIndex] != 'Confirmed'
-                  ? IconButton(
-                      onPressed: () {
-                        if (_statusNames[_selectedStatusIndex] == 'Rating') {
-                          GoRouter.of(context).pushNamed(RouterName.Rate,
-                              params: {'bookingId': selectedKey});
+                contentPadding: const EdgeInsets.fromLTRB(5, 2, 5, 2),
+                leading: Icon(Icons.lens,
+                    color: _colorCollection[_selectedStatusIndex]),
+                title: Text(
+                  _statusNames[_selectedStatusIndex],
+                ),
+                trailing: TextButton(
+                    child: Text(displayText(_statusNames[_selectedStatusIndex])),
+                    onPressed: () async {
+                      if (_statusNames[_selectedStatusIndex] == 'Rating') {
+                        setState(() {
+                          _selectedStatusIndex=_statusNames.indexOf('Complete');
+                        });
+                        GoRouter.of(context).pushNamed(RouterName.Rate,
+                            params: {'bookingId': selectedKey});
+                      } else if (_statusNames[_selectedStatusIndex] ==
+                          'Confirmed') {
+                        setState(() {
+                          _selectedStatusIndex=_statusNames.indexOf('Working');
+                        });
+                        if(quote != 0){
+                          await createPaymentIntent({
+                            'price':(quote*100).toString(),
+                            'userId': _consumerId,
+                            'product_name': _subject,
+                          });
                         }
-                      },
-                      icon: _statusNames[_selectedStatusIndex] == 'Rating'
-                          ? Icon(
-                              Icons.check_circle,
-                              color: Colors.white,
-                            )
-                          : Icon(
-                              Icons.check_circle,
-                            ))
-                  : IconButton(
-                      icon: Icon(
-                        Icons.check_circle,
-                        color: _colorCollection[_selectedStatusIndex],
-                      ),
-                      onPressed: () {
-                        GoRouter.of(context).pushNamed(RouterName.Checkout,
-                            params: {
-                              'bookingId': selectedKey,
-                              'userId': _consumerId
-                            });
                         bookingRef
                             .doc(selectedKey)
                             .update({'status': 'Working'});
-                      },
-                    ),
-            ),
+                      }
+                    },
+                )),
             const Divider(
               height: 1.0,
               thickness: 1,
@@ -296,7 +290,9 @@ class BookingEditorState extends State<BookingEditor> {
                 Icons.rate_review,
                 color: Colors.black87,
               ),
-              title: Text(_comment),
+              title: _comment == ''
+                  ? const Text('Your comment will display here.')
+                  : Text(_comment),
             ),
             const Divider(
               height: 1.0,
@@ -386,6 +382,9 @@ class BookingEditorState extends State<BookingEditor> {
                         return;
                       }
                       if (_selectedAppointment == null) {
+                        print('add booking test');
+                        print(selectedKey);
+                        // making new booking
                         final meetings = <Booking>[];
                         meetings.add(Booking(
                           from: _startDate,
@@ -406,6 +405,7 @@ class BookingEditorState extends State<BookingEditor> {
                         _bookings.notifyListeners(
                             CalendarDataSourceAction.add, meetings);
                         List<String> keys = <String>[];
+                        // store old bookings' key
                         if (_bookings.appointments!.isNotEmpty ||
                             _bookings.appointments != null) {
                           for (int i = 0;
@@ -462,7 +462,7 @@ class BookingEditorState extends State<BookingEditor> {
                           'tradieId': _tradieId,
                           'consumerId': _consumerId,
                           'quote': quote,
-                          'rating': 0,
+                          'rating': _rating,
                           'comment': '',
                         });
                       }
@@ -478,27 +478,27 @@ class BookingEditorState extends State<BookingEditor> {
                 children: <Widget>[_getAppointmentEditor(context)],
               ),
             ),
-            /*floatingActionButton: FloatingActionButton(
-                    onPressed: () {
-                      setState(() {
-                        _bookings.appointments!.removeAt(_selectedStatusIndex);
-                        _bookings.notifyListeners(
-                            CalendarDataSourceAction.remove,
-                            <Booking>[]..add(_selectedAppointment!));
-                      });
-                      try {
-                        bookingRef.doc(_selectedAppointment?.key).delete();
-                      } catch (e) {}
-                      _selectedAppointment = null;
-                      Navigator.pop(context);
-                    },
-                    child: const Text(
-                      'Cancel',
-                      selectionColor: Colors.white,
-                    ),
-                    /*const Icon(Icons.delete_outline, color: Colors.white),*/
-                    backgroundColor: Colors.red,
-                  )*/));
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                List<Booking> bookings = [_selectedAppointment!];
+                setState(() {
+                  _bookings.appointments!.removeAt(_selectedStatusIndex);
+                  _bookings.notifyListeners(
+                      CalendarDataSourceAction.remove, bookings);
+                });
+                try {
+                  bookingRef.doc(_selectedAppointment?.key).delete();
+                } catch (e) {}
+                _selectedAppointment = null;
+                Navigator.pop(context);
+              },
+              child: const Text(
+                'Cancel',
+                selectionColor: Colors.white,
+              ),
+              /*const Icon(Icons.delete_outline, color: Colors.white),*/
+              backgroundColor: Colors.red,
+            )));
   }
 
   Future<String> getKey(List<String> oldkeys) async {
@@ -573,5 +573,15 @@ class BookingEditorState extends State<BookingEditor> {
     }
 
     return false;
+  }
+
+  String displayText(String statusNam) {
+    if(statusNam == 'Rating'){
+      return 'Go to Rating Page';
+    }else if (statusNam == 'Confirmed'){
+      return 'Make Payment';
+    }else{
+      return 'No Action Required';
+    }
   }
 }

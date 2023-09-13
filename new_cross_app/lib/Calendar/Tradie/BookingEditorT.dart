@@ -237,11 +237,8 @@ class BookingEditorTState extends State<BookingEditorT> {
                 _statusNames[_selectedStatusIndex],
               ),
 
-              trailing:  IconButton(
-                      icon: Icon(
-                        Icons.check_circle,
-                        color: _colorCollection[_selectedStatusIndex],
-                      ),
+              trailing:  TextButton(
+                      child: Text(displayText(_statusNames[_selectedStatusIndex])),
                       onPressed: () {
                         if(_statusNames[_selectedStatusIndex]=='Pending'){
                           setState(() {
@@ -253,6 +250,21 @@ class BookingEditorTState extends State<BookingEditorT> {
                             _selectedStatusIndex=_statusNames.indexOf('Rating');
                           });
                           colRef.doc(selectedKey).update({'status': 'Rating'});
+                        }else{
+                          final snackBar = SnackBar(
+                            content: Text('No Action Allowed!'),
+                            duration: Duration(seconds: 3),
+                            action: SnackBarAction(
+                              label: 'Close',
+                              onPressed: () {
+                                ScaffoldMessenger.of(context).clearSnackBars();
+                                // Handle the action when the user taps the "Close" button.
+                              },
+                            ),
+                          );
+
+                          // Show the SnackBar at the bottom of the screen
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
                         }
                       },
                     ),
@@ -307,7 +319,9 @@ class BookingEditorTState extends State<BookingEditorT> {
                 Icons.rate_review,
                 color: Colors.black87,
               ),
-              title: Text(_comment),
+              title: _comment == ''
+                  ? const Text('Your comment will display here.')
+                  :Text(_comment),
             ),
           ],
         ));
@@ -432,32 +446,23 @@ class BookingEditorTState extends State<BookingEditorT> {
             ),
             body: Padding(
               padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
-              //TODO 搞懂
               child: Stack(
                 children: <Widget>[_getAppointmentEditor(context)],
               ),
             ),
-            /*floatingActionButton:FloatingActionButton(
+            floatingActionButton:FloatingActionButton(
                     onPressed: () {
-                      if (_selectedAppointment != null) {
-                        int remove = 0;
-                        for (int i = 0; i < _events.appointments!.length; i++) {
-                          Booking b = _events.appointments![i];
-                          if (b.key == _selectedAppointment!.key) {
-                            print('find');
-                            remove = i;
-                            break;
-                          }
-                        }
-                        _events.appointments!.removeAt(remove);
+                      List<Booking> bookings = [_selectedAppointment!];
+                      setState(() {
+                        _events.appointments!.removeAt(_selectedStatusIndex);
                         _events.notifyListeners(CalendarDataSourceAction.remove,
-                            <Booking>[]..add(_selectedAppointment!));
-                        try {
-                          colRef.doc(_selectedAppointment?.key).delete();
-                        } catch (e) {}
-                        _selectedAppointment = null;
-                        Navigator.pop(context);
-                      }
+                            bookings);
+                      });
+                      try {
+                        colRef.doc(_selectedAppointment?.key).delete();
+                      } catch (e) {}
+                      _selectedAppointment = null;
+                      Navigator.pop(context);
                     },
                     child: const Text(
                       'Cancel',
@@ -465,7 +470,7 @@ class BookingEditorTState extends State<BookingEditorT> {
                     ),
                     /*const Icon(Icons.delete_outline, color: Colors.white),*/
                     backgroundColor: Colors.red,
-                  )*/));
+                  )));
   }
 
   Future<String> getKey(List<String> oldkeys) async {
@@ -498,5 +503,14 @@ class BookingEditorTState extends State<BookingEditorT> {
 
   String getTile() {
     return _subject.isEmpty ? 'New event' : 'Event details';
+  }
+  String displayText(String statusNam) {
+    if(statusNam == 'Pending'){
+      return 'Click to Confirm Booking';
+    }else if (statusNam == 'Working'){
+      return 'Click to complete Work';
+    }else{
+      return 'No Action Required';
+    }
   }
 }
