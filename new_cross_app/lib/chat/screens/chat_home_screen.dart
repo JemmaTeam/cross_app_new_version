@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 import '../../Routes/route_const.dart';
 import '../widgets/my_tab_bar.dart';
 
+//聊天室列表页面
+
 class ChatRoom extends StatefulWidget {
   String userId;
   ChatRoom({super.key, required this.userId}) {
