@@ -49,6 +49,7 @@ class _ProfileHomeState extends State<ProfileHome> {
   num workEnd = 0;
   bool workWeekend = false;
   num rate = 0;
+  num tOrders = 0;
   String workDescription = "";
 
   @override
@@ -89,6 +90,7 @@ class _ProfileHomeState extends State<ProfileHome> {
         workStart = data['workStart'];
         workEnd = data['workEnd'];
         rate = data['rate'];
+        tOrders = data['tOrders'];
         if (data.containsKey('lincensePic')) {
           if(!data['lincensePic'].isEmpty){
             lincensePic = data['lincensePic'];
@@ -369,6 +371,14 @@ class _ProfileHomeState extends State<ProfileHome> {
   }
 
   Container ratingInfo(Size size) {
+    // Set the average rating scores
+    num averageRate = 0;
+    if (tOrders == 0){
+      averageRate = rate;
+    }
+    else {
+      averageRate = rate / tOrders;
+    }
     return Container(
       width: 40.pw(size),
       constraints: const BoxConstraints(minWidth: 320),
@@ -387,7 +397,7 @@ class _ProfileHomeState extends State<ProfileHome> {
         ),
         SizedBox(height: 2.ph(size)),
         // Create a row to display rating stars and actual rating number
-        buildRateStars(rate, 'start'),
+        buildRateStars(averageRate, 'start'),
       ]),
     );
   }
