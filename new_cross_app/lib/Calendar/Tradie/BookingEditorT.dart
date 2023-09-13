@@ -451,7 +451,7 @@ class BookingEditorTState extends State<BookingEditorT> {
               ),
             ),
             floatingActionButton:FloatingActionButton(
-                    onPressed: () {
+                    onPressed: () async {
                       List<Booking> bookings = [_selectedAppointment!];
                       setState(() {
                         _events.appointments!.removeAt(_selectedStatusIndex);
@@ -460,6 +460,11 @@ class BookingEditorTState extends State<BookingEditorT> {
                       });
                       try {
                         colRef.doc(_selectedAppointment?.key).delete();
+                        await usersRef.doc(_tradieId).get().then((DocumentSnapshot doc){
+                          final data = doc.data() as Map<String, dynamic>;
+                          var orders = data['tOrders'];
+                          usersRef.doc(_tradieId).update({'tOrders': orders-1});
+                        });
                       } catch (e) {}
                       _selectedAppointment = null;
                       Navigator.pop(context);

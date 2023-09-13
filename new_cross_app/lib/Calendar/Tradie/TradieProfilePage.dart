@@ -54,8 +54,9 @@ num _rating = 0;
 String user_subject = '';
 late num quote;
 
-final databaseReference = FirebaseFirestore.instance;
-final CollectionReference colRef = databaseReference.collection('bookings');
+final db = FirebaseFirestore.instance;
+final CollectionReference colRef = db.collection('bookings');
+final usersRef = db.collection('users');
 
 class TradieProfileState extends State<TradieProfilePage> {
   String tradie = '';

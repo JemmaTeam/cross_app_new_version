@@ -10,7 +10,6 @@ import '../../Calendar/Consumer/Booking.dart';
 import '../../Routes/route_const.dart';
 import '../stripe_web/stripe_payment_web.dart';
 
-
 class Rating extends StatefulWidget {
   String bookingId;
   Rating({required this.bookingId});
@@ -28,6 +27,7 @@ class _RatingState extends State<Rating> {
     super.initState();
     bookingFuture = getBooking(widget.bookingId);
   }
+
   Future<Booking> getBooking(bookingId) async {
     var data = await FirebaseFirestore.instance
         .collection('bookings')
@@ -42,8 +42,8 @@ class _RatingState extends State<Rating> {
       consumerId: data['consumerId'] ?? '',
       comment: data['comment'] ?? '',
       rating: data['rating'] ?? 0,
-      quote: data['quote']?? 0,
-      eventName: data['eventName']?? '',
+      quote: data['quote'] ?? 0,
+      eventName: data['eventName'] ?? '',
     );
     return booking;
   }
@@ -140,7 +140,7 @@ class _RatingState extends State<Rating> {
                     Container(height: 15.0),
                     ElevatedButton(
                       child: Text('Submit'),
-                      onPressed: () {
+                      onPressed: () async {
                         String comment = _textEditingController.text.trim();
                         double serviceRating = _serviceRating;
                         FirebaseFirestore.instance
@@ -151,34 +151,33 @@ class _RatingState extends State<Rating> {
                           'rating': serviceRating,
                           // Update the service rating field
                         });
-                        // Todo: Get accountId & quote from firebase
+                        // Transfer funds
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(booking.tradieId)
+                            .get().then(
+                              (DocumentSnapshot doc) async {
+                            final data = doc.data() as Map<String, dynamic>;
+                            
+                            if(data!=null){
+                              // Update tradie's overall rating
+                              await FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(booking.tradieId).update({'rate':data['rate']+serviceRating});
+                              await confirmWork({
+                                'accountId': data['stripeId'],
+                                //TODO: Get Amount after deducting fee
+                                'amount': (booking.quote*100*0.95).toString(),
+                              });
+                              
+                            }
+                          },
+                          onError: (e) => print("Error getting document: $e"),
+                        );
+                      
+                        
                         GoRouter.of(context).pop();
                       },
-                      /*child: ElevatedButton(
-                        child: Text('Submit'),
-                        onPressed: () async{
-                          var accountId;
-                          print(booking.tradieId);
-                          await FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(booking.tradieId)
-                              .get().then(
-                                (DocumentSnapshot doc) async {
-                              final data = doc.data() as Map<String, dynamic>;
-                              if(data!=null){
-                                await confirmWork({
-                                  'accountId': data['stripeId'],
-                                  //TODO: Get Amount after deducting fee
-                                  'amount': (booking.quote*100*0.95).toString(),
-                                });
-                              }
-                            },
-                            onError: (e) => print("Error getting document: $e"),
-                          );;
-
-                          GoRouter.of(context).pop();
-                        },
-                      ),*/
                     ),
                   ],
                 ),

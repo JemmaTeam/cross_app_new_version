@@ -331,8 +331,7 @@ class BookingEditorState extends State<BookingEditor> {
                     ),
                     onPressed: () async {
                       AlertDialog alert_outBound;
-                      if (_startDate.hour < workStart ||
-                          _endDate.hour > workEnd) {
+                      if (!weekend && _startDate.weekday>5){
                         Widget OKButton = TextButton(
                           child: const Text("Ok"),
                           onPressed: () {
@@ -353,6 +352,30 @@ class BookingEditorState extends State<BookingEditor> {
                           },
                         );
                         return;
+                      }else{
+                        if (_startDate.hour < workStart ||
+                            _endDate.hour > workEnd ){
+                          Widget OKButton = TextButton(
+                            child: const Text("Ok"),
+                            onPressed: () {
+                              Navigator.pop(context, true);
+                            },
+                          );
+                          alert_outBound = AlertDialog(
+                            title: const Text("Alert"),
+                            content: const Text('Out of Tradie Working Time'),
+                            actions: [
+                              OKButton,
+                            ],
+                          );
+                          await showDialog<bool>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return alert_outBound;
+                            },
+                          );
+                          return;
+                        }
                       }
                       final Booking? newTimeAppointment =
                           _isInterceptExistingAppointments(
@@ -404,18 +427,7 @@ class BookingEditorState extends State<BookingEditor> {
                         _bookings.appointments!.add(meetings[0]);
                         _bookings.notifyListeners(
                             CalendarDataSourceAction.add, meetings);
-                        List<String> keys = <String>[];
-                        // store old bookings' key
-                        if (_bookings.appointments!.isNotEmpty ||
-                            _bookings.appointments != null) {
-                          for (int i = 0;
-                              i < _bookings.appointments!.length;
-                              i++) {
-                            Booking b = _bookings.appointments![i];
-                            keys.add(b.key);
-                          }
-                        }
-                        bookingRef.doc().set({
+                        DocumentReference br = await bookingRef.add({
                           'eventName': _subject,
                           'from': _startDate.toString(),
                           'to': _endDate.toString(),
@@ -430,8 +442,13 @@ class BookingEditorState extends State<BookingEditor> {
                           'rating': _rating,
                           'comment': _comment,
                         });
-                        var k = await getKey(keys);
-                        bookingRef.doc(k).update({'key': k});
+                        bookingRef.doc(br.id).update({'key': br.id});
+                        // update torder
+                        await usersRef.doc(_tradieId).get().then((DocumentSnapshot doc){
+                          final data = doc.data() as Map<String, dynamic>;
+                          var orders = data['tOrders'];
+                          usersRef.doc(_tradieId).update({'tOrders': orders+1});
+                        });
                       } else {
                         print('old booking');
                         setState(() {
@@ -479,7 +496,7 @@ class BookingEditorState extends State<BookingEditor> {
               ),
             ),
             floatingActionButton: FloatingActionButton(
-              onPressed: () {
+              onPressed: () async {
                 List<Booking> bookings = [_selectedAppointment!];
                 setState(() {
                   _bookings.appointments!.removeAt(_selectedStatusIndex);
@@ -488,6 +505,11 @@ class BookingEditorState extends State<BookingEditor> {
                 });
                 try {
                   bookingRef.doc(_selectedAppointment?.key).delete();
+                  await usersRef.doc(_tradieId).get().then((DocumentSnapshot doc){
+                    final data = doc.data() as Map<String, dynamic>;
+                    var orders = data['tOrders'];
+                    usersRef.doc(_tradieId).update({'tOrders': orders-1});
+                  });
                 } catch (e) {}
                 _selectedAppointment = null;
                 Navigator.pop(context);

@@ -83,6 +83,7 @@ class ConsumerBookingState extends State<ConsumerBooking> {
       user_subject = value.docs[0]['workTitle'],
       workStart=value.docs[0]['workStart'],
       workEnd=value.docs[0]['workEnd'],
+      weekend = value.docs[0]['workWeekend'],
     });
     await usersRef.where('uid', isEqualTo: consumerId).get().then((value) => user_consumerName=value.docs[0]['fullName']);
 
