@@ -41,10 +41,11 @@ class _ChatState extends State<Chat> {
 
   String TalkeruserName = '';
 
-  // //存储用户选择的图片
+  // 存储用户选择的图片
   File? selectedImage;
   // 追踪图片上传状态
   bool isUploading = false;
+  // 追踪图片上传的进度
   double uploadProgress = 0.0;
 
   Widget chatMessages() {
@@ -188,6 +189,13 @@ class _ChatState extends State<Chat> {
           Expanded(
             child: chatMessages(),
           ),
+          if (uploadProgress > 0.0 && uploadProgress < 1.0) // 当进度在这个范围内时显示
+            Column(
+              children: [
+                LinearProgressIndicator(value: uploadProgress),
+                Text("image is uploading..."),
+              ],
+            ),
           widget.selectedImage == null
               ? Container()
               : Padding(
@@ -265,34 +273,38 @@ class _ChatState extends State<Chat> {
                             try {
                               final mediaInfo = await ImagePickerWeb.getImageInfo;
                               if (mediaInfo != null && mediaInfo.data != null) {
-                                // 显示上传进度
-                                final snackBar = SnackBar(content: Text('Uploading image...'));
-                                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
                                 // 上传到 Firebase
                                 Reference storageReference = FirebaseStorage.instance.ref().child('chat_images/${mediaInfo.fileName}');
                                 UploadTask uploadTask = storageReference.putData(mediaInfo.data!);
+
+                                // 监听上传进度
+                                uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+                                  setState(() {
+                                    uploadProgress = snapshot.bytesTransferred.toDouble() / snapshot.totalBytes.toDouble();
+                                  });
+                                });
 
                                 // 等待上传完成并获取下载URL
                                 TaskSnapshot snapshot = await uploadTask.whenComplete(() => {});
                                 String imageUrl = await snapshot.ref.getDownloadURL();
 
-                                // 显示上传成功的提示
-                                final successSnackBar = SnackBar(content: Text('Image uploaded successfully!'));
-                                ScaffoldMessenger.of(context).showSnackBar(successSnackBar);
-
                                 // 保存图片URL到聊天数据库
                                 addImageMessage(imageUrl);
+
+                                // 重置上传进度
+                                setState(() {
+                                  uploadProgress = 0.0;
+                                });
                               }
                             } catch (error) {
                               print("An error occurred: $error");
-
                               // 显示上传失败的提示
                               final failSnackBar = SnackBar(content: Text('Image upload failed!'));
                               ScaffoldMessenger.of(context).showSnackBar(failSnackBar);
                             }
                           },
                         ),
+
                         const SizedBox(
                           width: 10,
                         ),
@@ -427,7 +439,17 @@ class MessageTile extends StatelessWidget {
               //     fontWeight: FontWeight.w300,
               //   ),
               child: isImage
-                  ? Image.network(message, fit: BoxFit.cover)  // 如果是图片，显示图片
+                  ? Container(//如果是图片显示图片
+                      width: MediaQuery.of(context).size.width / 4, // 设置宽度为屏幕的四分之一
+                      height: MediaQuery.of(context).size.height / 4, // 设置高度为屏幕的四分之一
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: Image.network(
+                          message,
+                          fit: BoxFit.cover,  // 使用 BoxFit.cover 使图片按比例缩放
+                        ),
+                      ),
+                    )
                   : Text(  // 如果不是图片，显示文本
                 message,
                 textAlign: sendByMe ? TextAlign.right : TextAlign.left,
