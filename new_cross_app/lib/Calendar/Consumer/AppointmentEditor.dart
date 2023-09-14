@@ -118,8 +118,7 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                     });
                     GoRouter.of(context).pushNamed(RouterName.Rate,
                         params: {'bookingId': selectedKey});
-                  } else if (_statusNames[_selectedStatusIndex] ==
-                      'Confirmed') {
+                  } else if (_statusNames[_selectedStatusIndex] == 'Confirmed') {
                     setState(() {
                       _selectedStatusIndex=_statusNames.indexOf('Working');
                     });
@@ -260,6 +259,8 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                     final List<Booking> meetings = <Booking>[];
                     //如果是已存在的appointment，从列表中移除，加上更改的
                     if (_selectedAppointment != null) {
+                      print('status change test');
+                      print(_selectedAppointment!.status);
                       meetings.add(_selectedAppointment!);
                       _events.appointments?.remove(_selectedAppointment);
                       _events.notifyListeners(CalendarDataSourceAction.remove, meetings);
@@ -267,8 +268,7 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                         _selectedAppointment!.from = _startDate;
                         _selectedAppointment!.to = _endDate;
                         _selectedAppointment!.tradieName = _tradieName;
-                        _selectedAppointment!.status =
-                        _statusNames[_selectedStatusIndex];
+                        _selectedAppointment!.status = _statusNames[_selectedStatusIndex];
                         _selectedAppointment!.consumerName = _consumerName;
                         _selectedAppointment!.description = _notes;
                         _selectedAppointment!.key = selectedKey;
@@ -282,6 +282,7 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                       _events.appointments?.add(_selectedAppointment);
                       final List<Booking> meetinga = <Booking>[];
                       meetinga.add(_selectedAppointment!);
+                      print(_selectedAppointment!.status);
                       _events.notifyListeners(CalendarDataSourceAction.add, meetinga);
                       bookingRef.doc(_selectedAppointment?.key).update({
                         'eventName': _subject,

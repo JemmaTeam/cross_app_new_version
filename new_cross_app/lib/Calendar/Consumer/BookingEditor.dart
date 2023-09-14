@@ -442,7 +442,7 @@ class BookingEditorState extends State<BookingEditor> {
                           'rating': _rating,
                           'comment': _comment,
                         });
-                        bookingRef.doc(br.id).update({'key': br.id});
+                        bookingRef.doc(br.id).update({'key': br.id.trim()});
                         // update torder
                         await usersRef.doc(_tradieId).get().then((DocumentSnapshot doc){
                           final data = doc.data() as Map<String, dynamic>;
