@@ -228,8 +228,14 @@ exports.monitorBookingNotifications = functions.firestore
         // Get booking data from snapshot
         const bookingData = snapshot.data();
 
+        if (!bookingData) {
+            console.error('Booking data not found.');
+            return null;
+        }
+
         // Use consumerId
         const consumerId = bookingData.consumerId;
+        const eventName = bookingData.eventName;
 
         if (!consumerId) {
             console.error('ConsumerId not found in booking data.');
@@ -237,7 +243,7 @@ exports.monitorBookingNotifications = functions.firestore
         }
 
         // Formulate your notification message
-        const notificationMessage = `Your booking is successful, the status is ${bookingData.status}`;
+        const notificationMessage = `Your booking for ${eventName} is successful, the status is ${bookingData.status}`;
 
         // Store this notification in a user-specific notifications collection
         await admin.firestore().collection('users').doc(consumerId).collection('notifications').add({
@@ -249,37 +255,38 @@ exports.monitorBookingNotifications = functions.firestore
         return null;
     });
 
-// Both consumer and tradie will receive notification when booking status changed.
+
 exports.monitorBookingStatusChange = functions.firestore
     .document('bookings/{bookingId}')
     .onUpdate(async (change, context) => {
-        // Get data before and after the change
+        // Get the data before and after the change
         const beforeData = change.before.data();
         const afterData = change.after.data();
 
         // Check if the status has changed
         if (beforeData.status !== afterData.status) {
-            const notificationMessage = `Your booking status has changed to ${afterData.status}`;
-
-            // Notify the consumer
+            // Assuming there's a field in bookingData for user ID (like consumerId)
             const consumerId = afterData.consumerId;
+            const tradieId = afterData.tradieId;  // Assuming tradieId exists in your booking data
+            const eventName = afterData.eventName;
+
+            // Formulate your notification message
+            const notificationMessage = `Your booking for ${eventName} status has changed to ${afterData.status}`;
+
+            // Send notification to the consumer
             await admin.firestore().collection('users').doc(consumerId).collection('notifications').add({
                 message: notificationMessage,
                 timestamp: admin.firestore.FieldValue.serverTimestamp(),
                 read: false
             });
 
-            // Notify the tradie, if tradieId exists
-            const tradieId = afterData.tradieId;
-            if (tradieId) {
-                await admin.firestore().collection('users').doc(tradieId).collection('notifications').add({
-                    message: notificationMessage,
-                    timestamp: admin.firestore.FieldValue.serverTimestamp(),
-                    read: false
-                });
-            }
+            // Send notification to the tradie
+            await admin.firestore().collection('users').doc(tradieId).collection('notifications').add({
+                message: notificationMessage,
+                timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                read: false
+            });
         }
-
         return null;
     });
 
