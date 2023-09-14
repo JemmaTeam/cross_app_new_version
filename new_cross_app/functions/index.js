@@ -249,6 +249,41 @@ exports.monitorBookingNotifications = functions.firestore
         return null;
     });
 
+// Both consumer and tradie will receive notification when booking status changed.
+exports.monitorBookingStatusChange = functions.firestore
+    .document('bookings/{bookingId}')
+    .onUpdate(async (change, context) => {
+        // Get data before and after the change
+        const beforeData = change.before.data();
+        const afterData = change.after.data();
+
+        // Check if the status has changed
+        if (beforeData.status !== afterData.status) {
+            const notificationMessage = `Your booking status has changed to ${afterData.status}`;
+
+            // Notify the consumer
+            const consumerId = afterData.consumerId;
+            await admin.firestore().collection('users').doc(consumerId).collection('notifications').add({
+                message: notificationMessage,
+                timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                read: false
+            });
+
+            // Notify the tradie, if tradieId exists
+            const tradieId = afterData.tradieId;
+            if (tradieId) {
+                await admin.firestore().collection('users').doc(tradieId).collection('notifications').add({
+                    message: notificationMessage,
+                    timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                    read: false
+                });
+            }
+        }
+
+        return null;
+    });
+
+
 
 
 //const functions = require('firebase-functions');
