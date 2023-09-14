@@ -1,31 +1,28 @@
-import 'dart:math';
+import 'dart:math'; // For mathematical operations
+import 'package:cloud_firestore/cloud_firestore.dart'; // For Firebase Firestore
+import 'package:firebase_auth/firebase_auth.dart'; // For Firebase Authentication
+import 'package:flutter/material.dart'; // Flutter Material Design
+import 'package:go_router/go_router.dart'; // For routing
+import 'package:google_fonts/google_fonts.dart'; // For custom fonts
+import 'package:new_cross_app/Login/utils/constants.dart'; // Constants
+import 'package:new_cross_app/Login/utils/responsive.dart'; // Responsive UI
+import 'package:new_cross_app/Login/widgets/login/input_fields.dart'; // Input fields widget
+import 'package:new_cross_app/Login/widgets/login/signup_row.dart'; // Signup row widget
+import 'package:new_cross_app/Sign_up/signup_customer.dart'; // Signup customer screen
+import 'package:logger/logger.dart'; // For logging
+import 'package:new_cross_app/Routes/route_const.dart'; // Route constants
+import 'package:new_cross_app/Home%20Page/home.dart'; // Home screen
+import 'package:new_cross_app/Sign_up/widgets/signup/show_snackbar.dart'; // Snackbar widget
+import 'package:new_cross_app/chat/screens/chat_home_screen.dart'; // Chat home screen
+import 'package:new_cross_app/helper/helper_function.dart'; // Helper functions
+import 'package:new_cross_app/services/auth_service.dart'; // Authentication service
+import 'package:new_cross_app/services/database_service.dart'; // Database service
+import 'package:sizer/sizer.dart'; // For responsive sizing
+import '../../helper/constants.dart'; // Helper constants
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:new_cross_app/Login/utils/constants.dart';
-import 'package:new_cross_app/Login/utils/responsive.dart';
-import 'package:new_cross_app/Login/widgets/login/input_fields.dart';
-import 'package:new_cross_app/Login/widgets/login/signup_row.dart';
-import 'package:new_cross_app/Sign_up/signup_customer.dart';
-import 'package:logger/logger.dart';
-import 'package:new_cross_app/Routes/route_const.dart';
-import 'package:new_cross_app/Home%20Page/home.dart';
-import 'package:new_cross_app/Sign_up/widgets/signup/show_snackbar.dart';
-//import 'package:new_cross_app/chat/chat_home_page.dart';
-import 'package:new_cross_app/chat/screens/chat_home_screen.dart';
-import 'package:new_cross_app/helper/helper_function.dart';
-import 'package:new_cross_app/services/auth_service.dart';
-import 'package:new_cross_app/services/database_service.dart';
-import 'package:sizer/sizer.dart';
-import '../../helper/constants.dart';
-
-import '../main.dart';
+import '../main.dart'; // Main entry point
 
 /// Screen through which users can login.
-
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
   @override
@@ -33,21 +30,27 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginState extends State<LoginPage> {
+// Controllers for email and password
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
+  // Loading state
   bool _isLoading = false;
+
+  // Authentication service instance
   AuthService authService = AuthService();
 
-  final logger = Logger(
-    printer: PrettyPrinter(),
-  );
+  // Logger instance
+  final logger = Logger(printer: PrettyPrinter());
 
+  // Title widget
   final jemmaTitle = Center(
     child: FittedBox(
         fit: BoxFit.contain,
         child: Text("Jemma", style: GoogleFonts.parisienne(fontSize: 40.sp))),
   );
 
+  // Form key
   final _formKey = GlobalKey<FormState>();
 
   Widget googleSignInButton() {
@@ -66,9 +69,10 @@ class _LoginState extends State<LoginPage> {
               await HelperFunctions.saveUserEmailSF(user.email!);
               await HelperFunctions.saveUserNameSF(user.displayName!);
               await HelperFunctions.saveUserIdSF(user.uid);
-              // Initialize Constants.myName
+              // Initialize Constants
               Constants.myName = user.displayName!;
               Constants.MyId = user.uid;
+              print("登录成功后当前用户的ID为: ${Constants.MyId}");
               // Navigate to the home page
               GoRouter.of(context)
                   .pushNamed(RouterName.homePage, params: {'userId': user.uid});
@@ -203,10 +207,11 @@ class _LoginState extends State<LoginPage> {
           await HelperFunctions.saveUserNameSF(snapshot.docs[0]['fullName']);
           await HelperFunctions.saveUserIdSF(snapshot.docs[0]['uid']);
 
-          // Initialize Constants.myName
+          // Initialize Constants
           Constants.myName = snapshot.docs[0]['fullName'];
           String userId = snapshot.docs[0]['uid'];
-          print(userId);
+          Constants.MyId = userId;
+          print("登录成功后当前用户的ID为: ${Constants.MyId}");
           GoRouter.of(context)
               .pushNamed(RouterName.homePage, params: {'userId': userId});
         } else {

@@ -2,25 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
-
-
 class NotificationPanel extends StatefulWidget {
-
   const NotificationPanel({Key? key}) : super(key: key);
 
   @override
   _NotificationPanelState createState() => _NotificationPanelState();
-
-
 }
 
 class _NotificationPanelState extends State<NotificationPanel> {
   final _read = new Set<String>();
   final _biggerFont = const TextStyle(fontSize: 16.0);
 
-  final consumerId = FirebaseAuth.instance.currentUser!
-      .uid; // This gets the current user's ID
+  final consumerId =
+      FirebaseAuth.instance.currentUser!.uid; // This gets the current user's ID
   late Stream<QuerySnapshot> userNotifications;
 
   @override
@@ -43,20 +37,16 @@ class _NotificationPanelState extends State<NotificationPanel> {
               content,
               // TODO: The real content can be accessed from database
             ),
-            trailing: new Icon(
-                alreadyRead ? Icons.remove_red_eye : Icons
-                    .assignment_turned_in_rounded
-            ),
+            trailing: new Icon(alreadyRead
+                ? Icons.remove_red_eye
+                : Icons.assignment_turned_in_rounded),
             onTap: () {
               setState(() {
                 if (!alreadyRead) {
                   _read.add(content);
                 }
-              }
-              );
-            }
-        )
-    );
+              });
+            }));
   }
 
   @override

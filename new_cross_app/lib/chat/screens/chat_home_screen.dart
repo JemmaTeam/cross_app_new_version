@@ -1,25 +1,26 @@
-//import 'package:chatapp/helper/authenticate.dart';
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 import 'package:new_cross_app/Login/utils/constants.dart';
 import 'package:new_cross_app/helper/constants.dart';
 import 'package:new_cross_app/helper/helper_function.dart';
-//import 'package:new_cross_app/helper/theme.dart';
 import 'package:new_cross_app/services/auth_service.dart';
 import 'package:new_cross_app/services/database_service.dart';
 import 'package:new_cross_app/chat/screens/chat_screen.dart';
 import 'package:new_cross_app/chat/screens/search_page.dart';
 import 'package:flutter/material.dart';
-
 import '../../Routes/route_const.dart';
-import '../../main.dart';
 import '../widgets/my_tab_bar.dart';
+
+//聊天室列表页面
 
 class ChatRoom extends StatefulWidget {
   String userId;
-  ChatRoom({super.key, required this.userId});
+  ChatRoom({super.key, required this.userId}) {
+    if (userId == null || userId.isEmpty) {
+      throw ArgumentError("userId cannot be null or empty");
+    }
+  }
 
   @override
   _ChatRoomState createState() => _ChatRoomState(userId);
@@ -30,14 +31,13 @@ final chatRef = FirebaseFirestore.instance.collection('chatRoom');
 class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   String userId = '';
   late Stream<QuerySnapshot> chatRooms;
+
+  // 构造函数
   _ChatRoomState(String id) {
+    if (id == null || id.isEmpty) {
+      throw ArgumentError("userId cannot be null or empty");
+    }
     this.userId = id;
-    print("User ID: $userId"); // 修改这里以显示userId
-    chatRef.where('user', arrayContains: userId).snapshots().listen(
-        (event) =>
-            print("get query for userId: $userId in chatroom"), // 修改这里以显示userId
-        onError: (error) => print(
-            "Listen failed for userId: $userId, Error: $error")); // 修改这里以显示userId
     chatRooms = chatRef.where('users', arrayContains: userId).snapshots();
   }
 
@@ -50,6 +50,7 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     });
   }
 
+  // 聊天室列表
   Widget chatRoomsList() {
     return StreamBuilder(
       stream: chatRooms,
@@ -57,11 +58,10 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
         if (snapshot.hasError) {
           return const Text('Something went wrong');
         }
-
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Text("Loading");
         }
-        if (!snapshot.hasData || snapshot.data?.docs.length == 0) {
+        if (snapshot.data == null || snapshot.data!.docs.isEmpty) {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 25),
             child: const Center(
@@ -85,19 +85,19 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
           );
         } else {
           return ListView.builder(
-              itemCount: snapshot.data?.docs.length ?? 0,
+              itemCount: snapshot.data!.docs.length,
               shrinkWrap: true,
               itemBuilder: (context, index) {
-                var ulist = snapshot.data!.docs[index]['users'];
-                var talkerId = '';
+                var ulist = snapshot.data!.docs[index]['users'] ?? [];
+                var TalkerId = '';
                 for (var u in ulist) {
                   if (u != userId) {
-                    talkerId = u;
+                    TalkerId = u;
                     break;
                   }
                 }
                 return ChatRoomsTile(
-                  TalkerId: talkerId,
+                  TalkerId: TalkerId,
                   chatRoomId: snapshot.data!.docs[index]["chatRoomId"],
                 );
               });
@@ -108,46 +108,36 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
 
   @override
   void initState() {
+    super.initState();
+    print("聊天室主页当前用户的ID为: ${Constants.MyId}");
     tabController = TabController(length: 1, vsync: this);
-
     tabController.addListener(() {
       onTabChange();
     });
-    super.initState();
-    getUserInfogetChats();
+    //getUserInfogetChats();
   }
 
   @override
   void dispose() {
-    tabController.addListener(() {
-      onTabChange();
-    });
-
     tabController.dispose();
-
     super.dispose();
   }
 
+  // 获取用户信息和聊天
   getUserInfogetChats() async {
     Constants.MyId = (await HelperFunctions.getUserIdFromSF())!;
-    //print(Constants.MyId);
     DatabaseService().getUserChats(Constants.MyId).then((snapshots) {
       setState(() {
         chatRooms = snapshots;
-        print(
-            "we got the data + ${chatRooms.toString()} this is name  ${Constants.myName}");
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    String userId = widget.userId;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Jemma',
-        ),
+        title: const Text('Jemma'),
         leading: IconButton(
           onPressed: () {
             GoRouter.of(context).pushNamed(RouterName.homePage, params: {
@@ -167,7 +157,6 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
               child: MyTabBar(tabController: tabController),
             ),
           ),
-          //MyTabBar(tabController: tabController),
           Expanded(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -205,23 +194,24 @@ class ChatRoomsTile extends StatelessWidget {
 
   ChatRoomsTile({Key? key, required this.TalkerId, required this.chatRoomId})
       : super(key: key);
-  String userName = 'Test_User';
+  String TalkeruserName = '';
 
   Stream<Map<String, dynamic>> GetLastMessage() async* {
     final controller = StreamController<Map<String, dynamic>>();
     controller.onListen = () async {
       try {
-        userName = (await HelperFunctions.getUserNameFromId(TalkerId))!;
+        // 添加了空值默认处理
+        TalkeruserName = (await HelperFunctions.getUserNameFromId(TalkerId)) ??
+            'Unknown User';
         print("聊天的对象是");
-        print(userName);
-        FirebaseFirestore.instance
+        print(TalkeruserName);
+        await for (var querySnapshot in FirebaseFirestore.instance
             .collection('chatRoom')
             .doc(chatRoomId)
             .collection('chats')
             .orderBy('time', descending: true)
             .limit(1)
-            .snapshots()
-            .listen((QuerySnapshot querySnapshot) {
+            .snapshots()) {
           if (querySnapshot.docs.isNotEmpty) {
             Map<String, dynamic> messageData =
                 (querySnapshot.docs[0].data() as Map<String, dynamic>);
@@ -229,19 +219,22 @@ class ChatRoomsTile extends StatelessWidget {
             String sender = messageData['sendBy'];
             bool Readstatus = messageData['Isread'];
             bool isUnreadAndNotSentByUser =
-                Readstatus == false && sender != Constants.myName;
+                Readstatus == false && sender != Constants.MyId;
             controller
                 .add({'text': messageText, 'status': isUnreadAndNotSentByUser});
           } else {
             controller.add({'text': "Start your chat!", 'status': false});
           }
-        });
+        }
       } catch (e) {
         print(e.toString());
+        controller.addError(e);
       }
     };
     yield* controller.stream;
-    controller.onCancel = () {};
+    controller.onCancel = () {
+      controller.close();
+    };
   }
 
   @override
@@ -249,12 +242,21 @@ class ChatRoomsTile extends StatelessWidget {
     return StreamBuilder<Map<String, dynamic>>(
       stream: GetLastMessage(),
       builder: (context, snapshot) {
-        String latestMessage =
-            snapshot.hasData ? snapshot.data!['text'] : "Start your chat!";
-        bool isUnreadAndNotSentByUser =
-            snapshot.hasData && snapshot.data!['status'] != null
-                ? snapshot.data!['status']
-                : false;
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Text("Loading..."); // 添加加载状态
+        }
+        if (snapshot.hasError) {
+          return Text("Error: ${snapshot.error}"); // 添加错误状态
+        }
+
+        // 检查 snapshot.data 是否为 null
+        if (snapshot.data == null) {
+          return Text("Start your chat!"); // 或其他默认文本
+        }
+
+        // 使用空安全操作符
+        String latestMessage = snapshot.data?['text'] ?? "Start your chat!";
+        bool isUnreadAndNotSentByUser = snapshot.data?['status'] ?? false;
 
         return GestureDetector(
           onTap: () {
@@ -262,6 +264,8 @@ class ChatRoomsTile extends StatelessWidget {
               'userId': Constants.MyId,
               'chatRoomId': chatRoomId,
             });
+
+            DatabaseService().updateMessageReadStatus(chatRoomId);
           },
           child: Container(
             color: Colors.white,
@@ -278,7 +282,7 @@ class ChatRoomsTile extends StatelessWidget {
                   child: Center(
                     child: Text(
                       //TODO: username
-                      userName,
+                      TalkeruserName,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Color.fromARGB(255, 87, 87, 87),
@@ -300,7 +304,7 @@ class ChatRoomsTile extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            userName,
+                            TalkeruserName,
                             textAlign: TextAlign.start,
                             style: const TextStyle(
                               color: Color.fromARGB(255, 87, 87, 87),
@@ -328,11 +332,18 @@ class ChatRoomsTile extends StatelessWidget {
                         height: 16,
                         width: 16,
                         decoration: BoxDecoration(
-                          color: isUnreadAndNotSentByUser
+                          color: isUnreadAndNotSentByUser // 这里是您的条件
                               ? Colors.green
                               : Colors.transparent,
                           shape: BoxShape.circle,
                         ),
+                        child: isUnreadAndNotSentByUser // 添加这个条件判断
+                            ? Icon(
+                                Icons.circle,
+                                size: 16.0,
+                                color: Colors.green,
+                              )
+                            : null, // 如果不满足条件，则不显示图标
                       ),
                     ],
                   ),

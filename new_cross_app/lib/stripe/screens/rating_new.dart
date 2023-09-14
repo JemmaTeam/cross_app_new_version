@@ -38,11 +38,12 @@ class _RatingState extends State<Rating> {
       to: DateFormat('yyyy-MM-dd HH:mm:ss.sss').parse(data['to']),
       key: data['key'] ?? '',
       tradieId: data['tradieId'] ?? '',
+      tradieName: data['tradieName'] ?? '',
       consumerId: data['consumerId'] ?? '',
       comment: data['comment'] ?? '',
       rating: data['rating'] ?? 0,
-      quote: data['quote']?? 0,
-      eventName: data['eventName']?? '',
+      quote: data['quote'] ?? 0,
+      eventName: data['eventName'] ?? '',
     );
     return booking;
   }
@@ -76,6 +77,10 @@ class _RatingState extends State<Rating> {
                       style: TextStyle(fontSize: 30.0),
                     ),
                     SizedBox(height: 10.0),
+                    Text(
+                      'Please remember that other reviews helped you to find a great tradie so help others too by leaving a review.',
+                      style: TextStyle(fontSize: 15.0),
+                    ),
                     /*Text(
                       booking.key,
                       style: TextStyle(fontSize: 15.0),
@@ -85,7 +90,7 @@ class _RatingState extends State<Rating> {
                         child: Row(children: [
                       Icon(Icons.star, size: 15.0, color: Colors.amber),
                       Text(
-                        booking.rating.toString(),
+                        booking.tradieName.toString(),
                         style: TextStyle(fontSize: 15.0),
                       ),
                     ])),
@@ -134,7 +139,8 @@ class _RatingState extends State<Rating> {
                     Divider(height: 0.0, indent: 10.0, color: Colors.black),
                     Container(height: 15.0),
                     ElevatedButton(
-                      onPressed: () {
+                      child: Text('Submit'),
+                      onPressed: () async {
                         String comment = _textEditingController.text.trim();
                         double serviceRating = _serviceRating;
                         FirebaseFirestore.instance
@@ -145,33 +151,33 @@ class _RatingState extends State<Rating> {
                           'rating': serviceRating,
                           // Update the service rating field
                         });
-                        // Todo: Get accountId & quote from firebase
+                        // Transfer funds
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(booking.tradieId)
+                            .get().then(
+                              (DocumentSnapshot doc) async {
+                            final data = doc.data() as Map<String, dynamic>;
+                            
+                            if(data!=null){
+                              // Update tradie's overall rating
+                              await FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(booking.tradieId).update({'rate':data['rate']+serviceRating});
+                              await confirmWork({
+                                'accountId': data['stripeId'],
+                                //TODO: Get Amount after deducting fee
+                                'amount': (booking.quote*100*0.95).toString(),
+                              });
+                              
+                            }
+                          },
+                          onError: (e) => print("Error getting document: $e"),
+                        );
+                      
+                        
+                        GoRouter.of(context).pop();
                       },
-                      child: ElevatedButton(
-                        child: Text('Submit'),
-                        onPressed: () async{
-                          var accountId;
-                          print(booking.tradieId);
-                          await FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(booking.tradieId)
-                              .get().then(
-                                (DocumentSnapshot doc) async {
-                              final data = doc.data() as Map<String, dynamic>;
-                              if(data!=null){
-                                await confirmWork({
-                                  'accountId': data['stripeId'],
-                                  //TODO: Get Amount after deducting fee
-                                  'amount': (booking.quote*100*0.95).toString(),
-                                });
-                              }
-                            },
-                            onError: (e) => print("Error getting document: $e"),
-                          );;
-
-                          GoRouter.of(context).pop();
-                        },
-                      ),
                     ),
                   ],
                 ),

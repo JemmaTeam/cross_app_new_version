@@ -27,6 +27,7 @@ import 'package:provider/provider.dart';
 import 'Calendar/RatePage.dart';
 import 'Login/providers/login.dart';
 import 'firebase_options.dart';
+import 'stripe/create_success.dart';
 
 import 'package:hive/hive.dart';
 import 'package:new_cross_app/Login/repository.dart';

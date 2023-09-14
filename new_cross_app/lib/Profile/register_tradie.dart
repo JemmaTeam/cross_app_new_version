@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,7 +10,6 @@ import 'package:logger/logger.dart';
 import 'package:new_cross_app/Profile/profile_home.dart';
 import 'package:new_cross_app/services/auth_service.dart';
 import 'package:sizer/sizer.dart';
-import '../main.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -17,6 +19,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class RegisterTradiePage extends StatefulWidget { // 定义一个新的有状态小部件RegisterTradiePage
   final String uid;
   RegisterTradiePage({Key? key, required this.uid}) : super(key: key);
+
   @override
   State<RegisterTradiePage> createState() => _RegisterTradiePage(); // 创建一个_State
 }
@@ -41,8 +44,12 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
   final TextEditingController postcodeController = TextEditingController(); // 创建一个新的控制器用于postcode的输入框
 
   String? selectedWorkingType; //定义一个String变量以保存选定的“working type
-  File? _imageFile;//添加一个File对象，用于存储选择的图片
 
+  double? uploadProgress;  // 添加一个新的状态变量来存储上传进度
+
+  bool isUploading = false;  // 是否正在上传
+
+  bool isImageUploaded = false;  // 是否已经上传了
 
   @override
   Widget build(BuildContext context) { // build函数，用于构建界面
@@ -145,98 +152,154 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                 ),
                               ),
                               SizedBox(height: 10), // 空间填充，垂直间距
-                              // ElevatedButton(
-                              //   onPressed: () async {
-                              //     // 定义一个异步的onPressed函数，这个函数在按钮被点击后触发
-                              //
-                              //     try {
-                              //       FilePickerResult? result = await FilePicker.platform.pickFiles(
-                              //         type: FileType.custom,
-                              //         allowedExtensions: ['jpg', 'png', 'jpeg'],
-                              //       );
-                              //
-                              //     print("Result: $result");
-                              //     print("Path: ${result?.files.single.path}");
-                              //
-                              //     if (result != null && result.files.single.path != null) {  // 如果用户成功选取了一个文件
-                              //
-                              //       print("Result: $result");
-                              //       print("Path: ${result?.files.single.path}");
-                              //
-                              //       File file = File(result.files.single.path!);  // 从选取结果中获取文件
-                              //       String fileName = DateTime.now().millisecondsSinceEpoch.toString();  // 创建一个基于当前时间的文件名
-                              //
-                              //       FirebaseStorage storage = FirebaseStorage.instance;  // 获取FirebaseStorage的实例
-                              //       // 在Firebase Storage引用路径中包括userId，这样每个用户都将在其自己的文件夹中有文件。
-                              //       UploadTask task = storage.ref('users/${widget.uid}/$fileName').putFile(file);
-                              //
-                              //       task.snapshotEvents.listen((TaskSnapshot snapshot) {
-                              //         double progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                              //         print('Upload progress: $progress%');
-                              //         // You can update UI with progress here if needed
-                              //       }, onError: (Object e) {
-                              //         // Handle error during upload
-                              //         ScaffoldMessenger.of(context).showSnackBar(
-                              //           SnackBar(
-                              //             content: Text("图片上传失败"),
-                              //           ),
-                              //         );
-                              //       });
-                              //
-                              //       try {
-                              //         await task;  // 等待任务完成
-                              //         final String downloadUrl = await task.snapshot.ref.getDownloadURL();
-                              //         await FirebaseFirestore.instance
-                              //             .collection('users')
-                              //             .doc(widget.uid)
-                              //             .update({'lincensePic': downloadUrl});
-                              //
-                              //         ScaffoldMessenger.of(context).showSnackBar(
-                              //           SnackBar(
-                              //             content: Text("图片上传成功"),
-                              //           ),
-                              //         );
-                              //       } catch (error) {
-                              //         ScaffoldMessenger.of(context).showSnackBar(
-                              //           SnackBar(
-                              //             content: Text("图片上传失败"),
-                              //           ),
-                              //         );
-                              //       }
-                              //     } else {
-                              //       print("FilePickerResult is null or path is null");
-                              //       ScaffoldMessenger.of(context).showSnackBar(
-                              //         SnackBar(
-                              //           content: Text("没有选取文件"),
-                              //         ),
-                              //       );
-                              //     }
-                              //   }
-                              //     catch (e) {
-                              //     print("Error picking file: $e");
-                              //     ScaffoldMessenger.of(context).showSnackBar(
-                              //     SnackBar(
-                              //     content: Text("文件选择出错"),
-                              //     ),
-                              //     );
-                              //     }
-                              //   },
-                              //   style: ElevatedButton.styleFrom(
-                              //     backgroundColor: kLogoColor,
-                              //     minimumSize: Size(300, 60), // 调整按钮尺寸
-                              //   ),
-                              //   child: Row(
-                              //     mainAxisSize: MainAxisSize.min, // 水平方向上尽可能小的尺寸
-                              //     children: [
-                              //       Icon(Icons.upload),
-                              //       SizedBox(width: 5),
-                              //       Text("Upload License Picture"), // 添加按钮的提示
-                              //     ],
-                              //   ),
-                              // ),
+
+
+                              // 如果上传进度不为 null，显示进度条
+                              if (isUploading) ...[  // 如果正在上传，显示进度条
+                                SizedBox(
+                                  width: 290,  // 与按钮的宽度相同
+                                  child: LinearProgressIndicator(
+                                    value: uploadProgress,  // 设置进度值
+                                    color: Color.lerp(Colors.red, Colors.green, uploadProgress ?? 0),  // 进度条的颜色
+                                  ),
+                                ),
+                                SizedBox(height: 2),  // 为了视觉效果，提供一些间距
+                              ],
+                              ElevatedButton(
+                                onPressed: isUploading ? null : () async { // 如果正在上传，则禁用按钮
+                                  if (isImageUploaded) {
+                                    // 如果图片已经上传，我们可以允许用户点击按钮进行新的上传
+                                    isImageUploaded = false;
+                                    setState(() {}); // 更新UI
+                                  }
+                                  // 定义一个异步的onPressed函数，这个函数在按钮被点击后触发
+
+                                  try {
+                                    FilePickerResult? result = await FilePicker.platform.pickFiles(
+                                      type: FileType.custom,
+                                      allowedExtensions: ['jpg', 'png', 'jpeg'],
+                                    );
+                                    if (result != null) {
+                                      Uint8List? fileBytes;
+                                      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+                                      FirebaseStorage storage = FirebaseStorage.instance;
+
+                                      if (kIsWeb) {  // 检查是否在Web平台上
+                                        fileBytes = result.files.single.bytes;
+                                      } else {
+                                        // 在非Web平台上，我们可以尝试访问path
+                                        if (result.files.single.path != null) {
+                                          File file = File(result.files.single.path!);
+                                          fileBytes = await file.readAsBytes();
+                                        }
+                                      }
+
+                                      if (fileBytes != null) {
+
+                                        setState(() {
+                                          isUploading = true;  // 设置为正在上传
+                                        });
+
+                                        UploadTask task = storage.ref('users/${widget.uid}/$fileName').putData(fileBytes);
+                                        //为上传任务创建了一个监听器。监听器的作用是监视上传过程的每一个阶段，并为每个阶段提供反馈
+                                        task.snapshotEvents.listen((TaskSnapshot snapshot) {
+                                          double progress = (snapshot.bytesTransferred / snapshot.totalBytes);
+                                          setState(() {
+                                            uploadProgress = progress;  // 更新状态变量
+                                          });
+                                          print('Upload progress: ${progress * 100}%');
+                                        }, onError: (Object e) {
+                                          setState(() {
+                                            isUploading = false;  // 设置为不再上传
+                                          });
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text("Image upload failed"),
+                                            ),
+                                          );
+                                        });
+
+                                        try {
+                                          await task;  // 等待任务完成
+                                          final String downloadUrl = await task.snapshot.ref.getDownloadURL();
+                                          print('Download URL: $downloadUrl');
+                                          //如果上传成功，会获取文件的下载链接，更新 Firestore 数据库
+                                          await FirebaseFirestore.instance
+                                              .collection('users')
+                                              .doc(widget.uid)
+                                              .update({'lincensePic': downloadUrl});
+
+                                          setState(() {   // <--- 添加这里
+                                            isImageUploaded = true;
+                                          });
+
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text("Image uploaded successfully"),
+                                            ),
+                                          );
+
+                                          setState(() {   // <--- 添加这里
+                                            isImageUploaded = true;
+                                            isUploading = false; // 这里也应该设置 isUploading 为 false
+                                          });
+
+                                        } catch (error) {
+                                          setState(() {
+                                            isUploading = false;  // 设置为不再上传
+                                          });
+                                          print("Error during upload: $error");
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text("Image upload failed"),
+                                            ),
+                                          );
+                                        }
+                                      } else {
+                                        print("File bytes are null");
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text("File selection error"),
+                                          ),
+                                        );
+                                      }
+                                    } else {
+                                      print("FilePickerResult is null");
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text("No file selected"),
+                                        ),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    print("Error picking file: $e");
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text("File selection error"),
+                                      ),
+                                    );
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: isImageUploaded ? Colors.grey : (isUploading
+                                      ? Color.lerp(Colors.red, Colors.green, uploadProgress ?? 0)
+                                      : kLogoColor),
+                                  minimumSize: Size(300, 60),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.upload),
+                                    SizedBox(width: 5),
+                                    Text(isImageUploaded ? "License Uploaded" : (isUploading ? "Uploading..." : "Upload License Picture")),
+                                  ],
+                                ),
+                              ),
+
                             ],
                           ),
-                          SizedBox(height: max(2.ph(size), 20)), // 空间填充，垂直间距
+
+                              SizedBox(height: max(2.ph(size), 20)), // 空间填充，垂直间距
 
 
                           SizedBox( // 注册按钮的约束框
@@ -258,6 +321,10 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                       String tradieLicense = licenseController.text;
 
                                       try {
+                                        DocumentSnapshot docSnapshot = await colRef.doc(widget.uid).get();
+                                        Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>;
+                                        // 判断该用户是否已经注册过，如果未注册过，则更新全部tradie字段
+                                        if (!data.containsKey('workType')) {
                                         // 更新用户的 Firestore 文档
                                         await FirebaseFirestore.instance
                                             .collection('users')
@@ -276,6 +343,18 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                           'workDescription' : "",
                                           'tOrders' : 0,
                                         });
+                                        }
+                                        // 如果已经注册过，则只更新tradie的worktype,postcode和licenseNumber
+                                        else {
+                                          await FirebaseFirestore.instance
+                                              .collection('users')
+                                              .doc(widget.uid)
+                                              .update({
+                                            'workType': workingType,
+                                            'postcode': postcode,
+                                            'licenseNumber': tradieLicense,
+                                          });
+                                        }
 
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
@@ -305,8 +384,7 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                         ]),
                   ),
                 ),
-              ],
-            ),
+            ]),
           ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.startFloat, // 悬浮按钮位置
