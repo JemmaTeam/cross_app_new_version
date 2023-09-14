@@ -116,7 +116,7 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                     setState(() {
                       _selectedStatusIndex=_statusNames.indexOf('Complete');
                     });
-                    GoRouter.of(context).pushNamed(RouterName.Rate,
+                    GoRouter.of(context).pushReplacementNamed(RouterName.Rate,
                         params: {'bookingId': selectedKey});
                   } else if (_statusNames[_selectedStatusIndex] == 'Confirmed') {
                     setState(() {
@@ -216,9 +216,7 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                 Icons.rate_review,
                 color: Colors.black87,
               ),
-              title: _comment == ''
-                  ? const Text('Your comment will display here.')
-                  :Text(_comment),
+              title:Text(_comment),
             ),
             const Divider(
               height: 1.0,

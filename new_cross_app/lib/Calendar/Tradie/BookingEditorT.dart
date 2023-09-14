@@ -319,9 +319,7 @@ class BookingEditorTState extends State<BookingEditorT> {
                 Icons.rate_review,
                 color: Colors.black87,
               ),
-              title: _comment == ''
-                  ? const Text('Your comment will display here.')
-                  :Text(_comment),
+              title:Text(_comment),
             ),
           ],
         ));
