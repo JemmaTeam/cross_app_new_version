@@ -116,6 +116,7 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                     setState(() {
                       _selectedStatusIndex=_statusNames.indexOf('Complete');
                     });
+                    update();
                     GoRouter.of(context).pushReplacementNamed(RouterName.Rate,
                         params: {'bookingId': selectedKey});
                   } else if (_statusNames[_selectedStatusIndex] == 'Confirmed') {
@@ -254,51 +255,7 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                     color: Colors.white,
                   ),
                   onPressed: () {
-                    final List<Booking> meetings = <Booking>[];
-                    //如果是已存在的appointment，从列表中移除，加上更改的
-                    if (_selectedAppointment != null) {
-                      print('status change test');
-                      print(_selectedAppointment!.status);
-                      meetings.add(_selectedAppointment!);
-                      _events.appointments?.remove(_selectedAppointment);
-                      _events.notifyListeners(CalendarDataSourceAction.remove, meetings);
-                      setState(() {
-                        _selectedAppointment!.from = _startDate;
-                        _selectedAppointment!.to = _endDate;
-                        _selectedAppointment!.tradieName = _tradieName;
-                        _selectedAppointment!.status = _statusNames[_selectedStatusIndex];
-                        _selectedAppointment!.consumerName = _consumerName;
-                        _selectedAppointment!.description = _notes;
-                        _selectedAppointment!.key = selectedKey;
-                        _selectedAppointment!.tradieId = _tradieId;
-                        _selectedAppointment!.consumerId = _consumerId;
-                        _selectedAppointment!.quote = quote;
-                        _selectedAppointment!.rating = _rating;
-                        _selectedAppointment!.comment = _comment;
-                        _selectedAppointment!.eventName = _subject;
-                      });
-                      _events.appointments?.add(_selectedAppointment);
-                      final List<Booking> meetinga = <Booking>[];
-                      meetinga.add(_selectedAppointment!);
-                      print(_selectedAppointment!.status);
-                      _events.notifyListeners(CalendarDataSourceAction.add, meetinga);
-                      bookingRef.doc(_selectedAppointment?.key).update({
-                        'eventName': _subject,
-                        'from': _startDate.toString(),
-                        'to': _endDate.toString(),
-                        'status': _statusNames[_selectedStatusIndex],
-                        'tradieName': _tradieName,
-                        'consumerName': _consumerName,
-                        'description': _notes,
-                        'key': selectedKey,
-                        'tradieId': _tradieId,
-                        'consumerId': _consumerId,
-                        'quote': quote,
-                        'rating': _rating,
-                        'comment': _comment,
-                      }).whenComplete(() => print('update successful'));
-                    }
-                    _selectedAppointment = null;
+                    update();
                     //_consumer.bookings.add(meetings[0]);
                     GoRouter.of(context).pop();
                   })
@@ -341,6 +298,54 @@ class AppointmentEditorState extends State<AppointmentEditor> {
 
   String getTile() {
     return _subject.isEmpty ? 'New event' : 'Event details';
+  }
+
+  void update() {
+    final List<Booking> meetings = <Booking>[];
+    //如果是已存在的appointment，从列表中移除，加上更改的
+    if (_selectedAppointment != null) {
+      print('status change test');
+      print(_selectedAppointment!.status);
+      meetings.add(_selectedAppointment!);
+      _events.appointments?.remove(_selectedAppointment);
+      _events.notifyListeners(CalendarDataSourceAction.remove, meetings);
+      setState(() {
+        _selectedAppointment!.from = _startDate;
+        _selectedAppointment!.to = _endDate;
+        _selectedAppointment!.tradieName = _tradieName;
+        _selectedAppointment!.status = _statusNames[_selectedStatusIndex];
+        _selectedAppointment!.consumerName = _consumerName;
+        _selectedAppointment!.description = _notes;
+        _selectedAppointment!.key = selectedKey;
+        _selectedAppointment!.tradieId = _tradieId;
+        _selectedAppointment!.consumerId = _consumerId;
+        _selectedAppointment!.quote = quote;
+        _selectedAppointment!.rating = _rating;
+        _selectedAppointment!.comment = _comment;
+        _selectedAppointment!.eventName = _subject;
+      });
+      _events.appointments?.add(_selectedAppointment);
+      final List<Booking> meetinga = <Booking>[];
+      meetinga.add(_selectedAppointment!);
+      print(_selectedAppointment!.status);
+      _events.notifyListeners(CalendarDataSourceAction.add, meetinga);
+      bookingRef.doc(_selectedAppointment?.key).update({
+        'eventName': _subject,
+        'from': _startDate.toString(),
+        'to': _endDate.toString(),
+        'status': _statusNames[_selectedStatusIndex],
+        'tradieName': _tradieName,
+        'consumerName': _consumerName,
+        'description': _notes,
+        'key': selectedKey,
+        'tradieId': _tradieId,
+        'consumerId': _consumerId,
+        'quote': quote,
+        'rating': _rating,
+        'comment': _comment,
+      }).whenComplete(() => print('update successful'));
+    }
+    _selectedAppointment = null;
   }
 }
 
