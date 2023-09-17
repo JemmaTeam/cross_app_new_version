@@ -4,7 +4,6 @@ import 'package:new_cross_app/Home%20Page/responsive.dart';
 import '../Home Page/constants.dart';
 import '../services/auth_service.dart';
 
-
 class CustomerInfoEdit extends StatefulWidget {
   final String userID;
   CustomerInfoEdit({required this.userID});
@@ -64,14 +63,14 @@ class _CustomerInfoEditState extends State<CustomerInfoEdit> {
       'address': address,
     };
 
-    // update fullName, phone and address
+    // Update fullName, phone, and address in Firestore
     try {
       await colRef.doc(widget.userID).update(updatedInfo);
     } catch (e) {
       print("Error updating document: $e");
     }
 
-    // update password
+    // Update password if provided
     if (password != '') {
       bool result = await AuthService().updatePassword(password);
       if (result) {
@@ -84,9 +83,7 @@ class _CustomerInfoEditState extends State<CustomerInfoEdit> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery
-        .of(context)
-        .size;
+    final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit Profile'),
@@ -95,44 +92,40 @@ class _CustomerInfoEditState extends State<CustomerInfoEdit> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // name
-            attributeEdit(size,nameController,'name','Enter your new name here',false),
+            // Name
+            attributeEdit(size, nameController, 'Name', 'Enter your new name here', false),
             SizedBox(height: 2.5.ph(size)),
 
-            // phone number
-            attributeEdit(size,phoneController,'phone','Enter your new phone number here',false),
+            // Phone number
+            attributeEdit(size, phoneController, 'Phone', 'Enter your new phone number here', false),
             SizedBox(height: 2.5.ph(size)),
 
-            // new password (leave it empty if not change)
-            attributeEdit(size,passwordController,'new password','Enter your new password here. Leave it empty if not change.',true),
+            // New password (leave it empty if not changing)
+            attributeEdit(size, passwordController, 'New Password', 'Enter your new password here. Leave it empty if not changing.', true),
             SizedBox(height: 2.5.ph(size)),
 
-            // confirm the new password (leave it empty if not change)
-            attributeEdit(size,confirmPasswordController,'confirm new password','Confirm your new password. Leave it empty if not change.',true),
+            // Confirm the new password (leave it empty if not changing)
+            attributeEdit(size, confirmPasswordController, 'Confirm New Password', 'Confirm your new password. Leave it empty if not changing.', true),
             SizedBox(height: 2.5.ph(size)),
 
-            // address
-            attributeEdit(size,addressController,'address','Put your new address here',false),
+            // Address
+            attributeEdit(size, addressController, 'Address', 'Put your new address here', false),
             SizedBox(height: 2.5.ph(size)),
 
-            // update information button
+            // Update information button
             ElevatedButton(
               onPressed: () async {
-                // before update information, check if the new password has been confirmed
-                if (passwordController.text == confirmPasswordController.text){
+                // Before updating information, check if the new password has been confirmed
+                if (passwordController.text == confirmPasswordController.text) {
                   await _updateData();
-                  Navigator.pop(context, 'update');  //return to the former page, with a parameter to indicate the information has been updated
-                }
-                else {
+                  Navigator.pop(context, 'update');  // Return to the previous page, with a parameter to indicate that the information has been updated
+                } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Passwords do not match'),
                     ),
                   );
                 }
-
-                // await _updateData();
-                // Navigator.pop(context, 'update');  //return to the former page, with a parameter to indicate the information has been updated
               },
               child: Text('Update'),
             ),
@@ -142,23 +135,23 @@ class _CustomerInfoEditState extends State<CustomerInfoEdit> {
     );
   }
 
-  // Each input text field
+  // Widget for each input text field
   Container attributeEdit(Size size, TextEditingController controller, String labelText, String hintText, bool obscure) {
     return Container(
-            width: 50.pw(size),
-            constraints: const BoxConstraints(minWidth: 400),
-            child: TextField(
-              controller: controller,
-              decoration: InputDecoration(
-                labelText: labelText,
-                hintText: hintText,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                  borderSide: const BorderSide(color: kLogoColor, width: 1.0),
-                ),
-              ),
-              obscureText: obscure, // Hide password input
-            ),
-          );
+      width: 50.pw(size),
+      constraints: const BoxConstraints(minWidth: 400),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: labelText,
+          hintText: hintText,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: const BorderSide(color: kLogoColor, width: 1.0),
+          ),
+        ),
+        obscureText: obscure, // Hide password input
+      ),
+    );
   }
 }
