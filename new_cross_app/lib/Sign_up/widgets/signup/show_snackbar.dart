@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// Function to display a Snackbar message with specified color and message
 void showSnackbar(context, color, message) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(

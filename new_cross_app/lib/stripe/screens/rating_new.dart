@@ -158,12 +158,14 @@ class _RatingState extends State<Rating> {
                             .get().then(
                               (DocumentSnapshot doc) async {
                             final data = doc.data() as Map<String, dynamic>;
-                            
                             if(data!=null){
                               // Update tradie's overall rating
                               await FirebaseFirestore.instance
                                   .collection('users')
                                   .doc(booking.tradieId).update({'rate':data['rate']+serviceRating});
+                              print('transfer test');
+                              print(data['stripeId']);
+                              print((booking.quote*100*0.95).toString());
                               await confirmWork({
                                 'accountId': data['stripeId'],
                                 //TODO: Get Amount after deducting fee

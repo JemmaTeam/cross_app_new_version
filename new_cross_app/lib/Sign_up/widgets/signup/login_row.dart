@@ -8,9 +8,9 @@ import 'package:new_cross_app/Sign_up/signup_customer.dart';
 //import 'package:new_cross_app/Sign_up/signup_tradeperson.dart';
 import 'package:new_cross_app/Login/utils/responsive.dart';
 
-///  Login
+/// Widget for the login row displayed on the Sign Up screen.
 class LoginRow extends StatelessWidget {
-  /// [size] is the size of the [Sign Up] screen.
+  /// [size] is the size of the Sign Up screen.
   const LoginRow({
     Key? key,
     required this.size,
@@ -30,11 +30,14 @@ class LoginRow extends StatelessWidget {
               padding: EdgeInsets.zero,
             ),
             onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const LoginPage()));
+              // Navigate to the login page when the text is tapped
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
             },
             child: const Text(
-              'Already have a account? Login now',
+              'Already have an account? Login now',
               style: TextStyle(
                 color: Colors.blue,
               ),

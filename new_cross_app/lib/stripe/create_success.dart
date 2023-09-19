@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// Widget for displaying a success message after registration
 class CreateSuccess extends StatelessWidget {
   const CreateSuccess({Key? key}) : super(key: key);
 

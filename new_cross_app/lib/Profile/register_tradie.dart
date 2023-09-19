@@ -49,6 +49,8 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
 
   bool isUploading = false;  // 是否正在上传
 
+  bool isImageUploaded = false;  // 是否已经上传了
+
   @override
   Widget build(BuildContext context) { // build函数，用于构建界面
     var size = MediaQuery.of(context).size; // 获取当前媒体查询数据，例如屏幕尺寸
@@ -164,7 +166,12 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                 SizedBox(height: 2),  // 为了视觉效果，提供一些间距
                               ],
                               ElevatedButton(
-                                onPressed: isUploading ? null : () async {  // 如果正在上传，则禁用按钮
+                                onPressed: isUploading ? null : () async { // 如果正在上传，则禁用按钮
+                                  if (isImageUploaded) {
+                                    // 如果图片已经上传，我们可以允许用户点击按钮进行新的上传
+                                    isImageUploaded = false;
+                                    setState(() {}); // 更新UI
+                                  }
                                   // 定义一个异步的onPressed函数，这个函数在按钮被点击后触发
 
                                   try {
@@ -222,11 +229,21 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                               .doc(widget.uid)
                                               .update({'lincensePic': downloadUrl});
 
+                                          setState(() {   // <--- 添加这里
+                                            isImageUploaded = true;
+                                          });
+
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(
                                               content: Text("Image uploaded successfully"),
                                             ),
                                           );
+
+                                          setState(() {   // <--- 添加这里
+                                            isImageUploaded = true;
+                                            isUploading = false; // 这里也应该设置 isUploading 为 false
+                                          });
+
                                         } catch (error) {
                                           setState(() {
                                             isUploading = false;  // 设置为不再上传
@@ -238,8 +255,6 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                             ),
                                           );
                                         }
-
-
                                       } else {
                                         print("File bytes are null");
                                         ScaffoldMessenger.of(context).showSnackBar(
@@ -266,20 +281,21 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: isUploading
-                                      ? Color.lerp(Colors.red, Colors.green, uploadProgress ?? 0)  // 使用 ?? 运算符提供默认值
-                                      : kLogoColor,
-                                  minimumSize: Size(300, 60), // 调整按钮尺寸
+                                  backgroundColor: isImageUploaded ? Colors.grey : (isUploading
+                                      ? Color.lerp(Colors.red, Colors.green, uploadProgress ?? 0)
+                                      : kLogoColor),
+                                  minimumSize: Size(300, 60),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(Icons.upload),
                                     SizedBox(width: 5),
-                                    Text(isUploading ? "uploading..." : "Upload License Picture"),  // 根据上传状态更改文本
+                                    Text(isImageUploaded ? "License Uploaded" : (isUploading ? "Uploading..." : "Upload License Picture")),
                                   ],
                                 ),
                               ),
+
                             ],
                           ),
 
