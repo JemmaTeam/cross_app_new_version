@@ -266,7 +266,6 @@ class Carousel extends StatelessWidget {
 
   static const Map<String, String> tradieImageTextMap = {
     "assets/images/money.png": "Financial security through escrow payments.",
-    "assets/images/list.png": "Itemised quotes, jobs and more!",
     "assets/images/payment.png": "Instant payments upon completion.",
     "assets/images/organize.png": "Public viewable calendar.",
     "assets/images/balance.png": "Better work-life balance.",
@@ -293,7 +292,6 @@ class Carousel extends StatelessWidget {
 
   static const Map<String, String> tradieBenefitTextMap = {
     "assets/images/money.png": "Most people pay what they owe however we're also aware that some don't.\n\nEven though this is only a small percentage of troublesome customers, it's still a lot of time and money spent chasing up invoices and potential time spent in civil court.\n\nYou don't need that hassle so Jemma provides an escrow service where the agreed upon amount for commissioned work is held upfront in a trust account until the works are completed.Put simply, the customer books you in, you both agree on a set amount and estimated timeframe for the job and the customer deposits that amount in the trust account. This money is held while you complete the job, giving you the confidence that as long as the job is completed satisfactorily, you'll get paid upon completion.\n\nOnce both parties are happy then the customer signs off through the website/app and the amount owed is released to you and an invoice is issued to both parties.\n\nNo more chasing up payments, you've got more important things to do.",
-    "assets/images/list.png": "Itemised quotes, jobs and more!",
     "assets/images/payment.png": "Payment cycles are a pain, we get it. You did the job so why should you have to wait a few weeks to be paid for it? It's a hassle to keep track of and it makes your bookkeeping more stressful than it should be.\n\nWith Jemma's escrow and instant sign-off features you'll get paid when you complete the work because that's when you deserve to get paid.",
     "assets/images/organize.png": "How many phone calls do you take each day asking you when you're available? How many times do you answer the same questions each day and have to check your calendar?\n\nYour profile will feature your calendar which will show customers when you're available. To ensure confidentiality, only the times and dates will be visible to the public, however as a member of Jemma this is your tool to see the details of upcoming and previous work. Only you can see those details in case you need to check what you're doing later. You can also block out dates and times for those times when you need a holiday, or something else.\n\nJust let Jemma know when you're available and we'll do the rest.",
     "assets/images/balance.png": "Our research indicates that tradies spend too much time filling out paperwork, invoicing and other admin related duties.\n\nIf you're wondering 'why has this not been automated yet?', it has. You're looking at it.\n\nJemma was specifically designed to take the burden from you. Admin, taxes and other paperwork are a hassle that you don't need, but they're necessary for your business to survive. So let us do the hard work for you because that's what we do.\n\nYou're great with the tools and we're great with the computery stuff.\n\nMeanwhile, take that extra time you'll have to spend time with your family, or exercising, or taking on extra work, or maybe just down the pub catching up with mates.\n\nEither way it's more free time for you.",
@@ -305,6 +303,8 @@ class Carousel extends StatelessWidget {
     "assets/images/mediation.png": "Sometimes we don’t all get along and as much as we try hard to ensure everyone has a great experience, unfortunately there will be the occasional problem or miscommunication.\n\nWe’re here to help with that. If this does arise we can intervene and mediate which removes the tradie from any conflict.\n\nWe don’t want you to feel intimidated into not being paid for something you did correctly so let us handle it for you.\n\nAll communications should be carried out through Jemma’s internal messaging system, that way if conflicts do arise Jemma can easily track who said what and the agreed upon details so there’s no ‘he said, she said’ complications.\n\nWe’re on no-one’s side, we just want everyone to be happy.",
   };
 
+
+
   @override
   Widget build(BuildContext context) {
     var imageTextMap =
@@ -313,7 +313,6 @@ class Carousel extends StatelessWidget {
     isCustomerSelected ? customerBenefitTextMap : tradieBenefitTextMap;
     var size = MediaQuery.of(context).size;
     return GFCarousel(
-      // pagination: true,
       hasPagination: true,
       activeIndicator: Colors.green,
       passiveIndicator: Colors.black,
@@ -359,10 +358,21 @@ class Carousel extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(text),
-          content: SingleChildScrollView(
-            child: Text(description),
+          backgroundColor: Colors.white.withOpacity(0.8),
+          title: Text(text,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 20.0,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          content: Container(
+            width: 600.0,
+            child: SingleChildScrollView(
+              child: Text(description),
+            ),
+          ),
+          contentPadding: EdgeInsets.symmetric(vertical: 40.0, horizontal: 30.0),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -371,6 +381,9 @@ class Carousel extends StatelessWidget {
               child: Text('Close'),
             ),
           ],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
         );
       },
     );

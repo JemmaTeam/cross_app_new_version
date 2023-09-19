@@ -282,13 +282,10 @@ class HomeState extends State<Home> {
                   child: Column(children: [
                     SizedBox(height: 2.5.ph(size)),
                     const GraphicalBanner(),
-                    Transform.translate(
-                        offset: const Offset(
-                            0, -GraphicalBanner.bannerHeight * 0.1),
-                        child:
-                        SearchBar(
+                    SizedBox(height: 5.ph(size)),
+                    SearchBar(
                           userId: userId,
-                        )),
+                        ),
                     SizedBox(height: 5.ph(size)),
                     const AboutJemma(),
                     SizedBox(height: 5.ph(size)),
