@@ -8,13 +8,13 @@ import 'package:sizer/sizer.dart';
 /// Reusable widget which is primarily used for aesthetics.
 class GraphicalBanner extends StatelessWidget {
 
-  static const bannerHeight = 175.0;
+  //static bannerHeight = MediaQuery.of(context).size.height*0.5;
   const GraphicalBanner({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: bannerHeight,
+        height: MediaQuery.of(context).size.height*0.2,
         decoration: BoxDecoration(
             image: const DecorationImage(
                 image: AssetImage("assets/images/banner_background.png"),
@@ -36,7 +36,7 @@ class GraphicalBanner extends StatelessWidget {
                     TypewriterAnimatedText("Life made easier.",speed: const Duration(milliseconds: 150)),
                     TypewriterAnimatedText("Get things fixed quicker.",speed: const Duration(milliseconds: 150))
                   ],
-                  pause: const Duration(seconds: 10),
+                  pause: const Duration(seconds: 5),
                   repeatForever: true,
                 )
             ),
