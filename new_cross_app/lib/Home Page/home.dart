@@ -259,6 +259,15 @@ class HomeState extends State<Home> {
                         });
                       },
                     ),
+                    ListTile(
+                      title: const Text('History Boookings'),
+                      onTap: () {
+                        GoRouter.of(context)
+                            .pushNamed(RouterName.BookingHistory, params: {
+                          'userId': userId,
+                        });
+                      },
+                    ),
                     /*
                   ListTile(
                     title: Text(
