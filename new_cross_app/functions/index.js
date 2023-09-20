@@ -290,85 +290,58 @@ exports.monitorBookingStatusChange = functions.firestore
         return null;
     });
 
+// Cloud Function to monitor new messages in chats subcollection
+exports.monitorNewMessages = functions.firestore
+    .document('chatRoom/{chatRoomId}/chats/{chatId}')
+    .onCreate(async (snapshot, context) => {
+        // Get message data from snapshot
+        const messageData = snapshot.data();
 
+        if (!messageData) {
+            console.error('Message data not found.');
+            return null;
+        }
 
+        // Extract fields from message data
+        const isRead = messageData.Isread;
+        const message = messageData.message;
+        const senderId = messageData.sendBy;
+        const time = messageData.time;
 
-//const functions = require('firebase-functions');
-//const admin = require('firebase-admin');
-//admin.initializeApp();
-//
-//// const stripe = require('stripe')('sk_test_51MxqKoCLNEXP0Gmv34Ixc05ATpLLTkXxK1VmLe4rng6eaiPqiyiDn5iYhaeGA9iZXEdDYIEDZDuTQMMvy4lRKW3J003L5D13iI');
-//
-//exports.createPayment = functions.https.onCall(async (data, context) => {
-//  // check if the user login
-//  if (!context.auth) {
-//    throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
-//  }
-//
-//  const paymentMethodId = data.paymentMethodId;
-//  const destinationAccountId = data.destinationAccountId;
-//
-//  try {
-//    const paymentIntent = await stripe.paymentIntents.create({
-//      payment_method: paymentMethodId,
-//      amount: 1000, // Amount in cents
-//      currency: 'usd',
-//      confirmation_method: 'manual',
-//      confirm: true,
-//      application_fee_amount: 100, // Application fee in cents
-//      transfer_data: {
-//        destination: destinationAccountId,
-//      },
-//    });
-//
-//    return {status: 'success'};
-//  } catch (error) {
-//    console.error(error);
-//    throw new functions.https.HttpsError('internal', 'Failed to create the payment: ' + error.message);
-//  }
-//});
+        // Get sender's name
+        const senderSnapshot = await admin.firestore().collection('users').doc(senderId).get();
+        const senderData = senderSnapshot.data();
+        const senderName = senderData ? senderData.fullName : 'Unknown';
 
-/*
-//发送电子邮件提醒
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
-const nodemailer = require('nodemailer');
+        // Get chat room data to find the other user
+        const chatRoomId = context.params.chatRoomId;
+        const chatRoomSnapshot = await admin.firestore().collection('chatRoom').doc(chatRoomId).get();
+        const chatRoomData = chatRoomSnapshot.data();
 
-admin.initializeApp();
+        if (!chatRoomData || !chatRoomData.users) {
+            console.error('Chat room data or users field not found.');
+            return null;
+        }
 
-// 配置电子邮件发送
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: functions.config().email.auth.user,
-    pass: functions.config().email.auth.pass
-  }
-});
+        const users = chatRoomData.users;
+        const receiverId = users.find(userId => userId !== senderId);
 
-exports.onNewMessage = functions.firestore
-  .document('chatRoom/{chatRoomId}/chats/{messageId}')
-  .onCreate(async (snapshot, context) => {
-    const newMessage = snapshot.data();
-    const recipientId = newMessage['sendBy'];  // 假设字段名为'sendBy'
+        if (!receiverId) {
+            console.error('ReceiverId not found in chat room data.');
+            return null;
+        }
 
-    // 获取接收者的电子邮件地址（您需要根据您的数据库结构进行调整）
-    const recipientDoc = await admin.firestore().collection('users').doc(recipientId).get();
-    const recipientEmail = recipientDoc.data().email;
+        // Formulate your notification message
+        const notificationMessage = `New message from ${senderName}.`;
 
-    // 设置电子邮件内容
-    const mailOptions = {
-      from: 'your-email@gmail.com',
-      to: recipientEmail,
-      subject: 'New Message Notification',
-      text: `You have a new message from ${newMessage['sendBy']}`
-    };
+        // Send notification to the receiver
+        await admin.firestore().collection('users').doc(receiverId).collection('notifications').add({
+            message: notificationMessage,
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            read: false
+        });
 
-    // 发送电子邮件
-    return transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        return console.log(error);
-      }
-      console.log('Message sent: %s', info.messageId);
+        return null;
     });
-  });
-*/
+
+
