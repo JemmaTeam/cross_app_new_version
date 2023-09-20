@@ -33,11 +33,11 @@ class _NotificationPanelState extends State<NotificationPanel> {
     final alreadyRead = _read.contains(content);
     return Card(
         child: ListTile(
-            title: new Text(
+            title: Text(
               content,
               // TODO: The real content can be accessed from database
             ),
-            trailing: new Icon(alreadyRead
+            trailing: Icon(alreadyRead
                 ? Icons.remove_red_eye
                 : Icons.assignment_turned_in_rounded),
             onTap: () {
@@ -53,7 +53,7 @@ class _NotificationPanelState extends State<NotificationPanel> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.only(
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(75),
           bottomLeft: Radius.circular(75),
         ),
@@ -64,11 +64,11 @@ class _NotificationPanelState extends State<NotificationPanel> {
         stream: userNotifications,
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
-            return Text('Something went wrong');
+            return const Text('Something went wrong');
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Text("Loading...");
+            return const Text("Loading...");
           }
 
           final notifications = snapshot.data!.docs;
@@ -77,7 +77,7 @@ class _NotificationPanelState extends State<NotificationPanel> {
             itemCount: notifications.length + 2, // +2 for header and footer
             itemBuilder: (context, index) {
               if (index == 0) {
-                return DrawerHeader(
+                return const DrawerHeader(
                   child: Center(
                     child: Text('Notifications',
                         style: TextStyle(
@@ -87,7 +87,7 @@ class _NotificationPanelState extends State<NotificationPanel> {
               } else if (index == notifications.length + 1) {
                 return Container(
                   padding: const EdgeInsets.all(32.0),
-                  child: Text(
+                  child: const Text(
                     "That's all your notifications from the last 30 days.",
                     softWrap: true,
                   ),
