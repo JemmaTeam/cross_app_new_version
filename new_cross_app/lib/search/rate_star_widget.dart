@@ -10,7 +10,7 @@ Row buildRateStars(dynamic rate, String align) {
       const SizedBox(width: 4),
       // Display the rating number
       Text(
-        rate.toString(),
+        rate.toStringAsFixed(1),
         style: const TextStyle(
           fontSize: 14,
           color: Colors.grey,
