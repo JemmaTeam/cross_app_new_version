@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class ErrorPage extends StatelessWidget{
+// Widget for displaying an error page when a page is not found
+class ErrorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -13,5 +14,4 @@ class ErrorPage extends StatelessWidget{
       ),
     );
   }
-
 }

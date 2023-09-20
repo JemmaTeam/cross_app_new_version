@@ -37,6 +37,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  // Build the body of the app
   Widget _buildBody(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection('bookings').snapshots(),
@@ -48,13 +49,15 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _buildList(BuildContext context, List<DocumentSnapshot> snapshot)  {
+  // Build the list of baby names and their votes
+  Widget _buildList(BuildContext context, List<DocumentSnapshot> snapshot) {
     return ListView(
       padding: const EdgeInsets.only(top: 20.0),
       children: snapshot.map((data) => _buildListItem(context, data)).toList(),
     );
   }
 
+  // Build a single list item for a baby name and its votes
   Widget _buildListItem(BuildContext context, DocumentSnapshot data) {
     final record = Record.fromSnapshot(data);
 
@@ -81,12 +84,14 @@ class Record {
   final int votes;
   final DocumentReference reference;
 
+  // Create a Record from a Map
   Record.fromMap(Map<String, dynamic> map, {required this.reference})
       : assert(map['name'] != null),
         assert(map['votes'] != null),
         name = map['name'],
         votes = map['votes'];
 
+  // Create a Record from a DocumentSnapshot
   Record.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data as Map<String, dynamic>, reference: snapshot.reference);
 
