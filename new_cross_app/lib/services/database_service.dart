@@ -24,6 +24,7 @@ class DatabaseService {
       "Chatlist": [],
       "profilePic": "",
       "uid": uid,
+      "NeedEmailInformed": false,
     });
   }
 

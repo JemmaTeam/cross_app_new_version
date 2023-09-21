@@ -67,16 +67,36 @@ class HomeState extends State<Home> {
   HomeState({required this.userId});
   static const borderRadius = 40.0;
   static const maxWidth = 1080.0;
-
+  //bool hasUnreadNotifications = false;
+  late Stream<QuerySnapshot>
+      unreadNotificationsStream; // Stream for unread notifications
   //bool _isLoggedIn = false;
+  String? userNameInitial;
 
   @override
   void initState() {
     super.initState();
     _checkLoginStatus();
-    isConsumer(userId).then((value) {
-      _isConsumer = value;
-    });
+    if (_isLoggedIn) {
+      fetchUserNameInitial(); // Fetch the initial of the username
+      unreadNotificationsStream = FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('notifications')
+          .where('read', isEqualTo: false)
+          .snapshots();
+    } else {
+      unreadNotificationsStream =
+          Stream.empty(); // Initialize with an empty stream if not logged in
+    }
+  }
+
+  // Function to fetch the initial of the username from Firestore
+  Future<String?> fetchUserNameInitial() async {
+    var doc =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    var userName = doc.data()?['fullName'] ?? '';
+    return userName.isNotEmpty ? userName[0].toUpperCase() : null;
   }
 
   void _checkLoginStatus() async {
@@ -134,33 +154,80 @@ class HomeState extends State<Home> {
         endDrawer: const NotificationPanel(),
         appBar: AppBar(
           actions: [
-            if (_isLoggedIn)
+            if (_isLoggedIn) ...[
+              // Use spread operator to conditionally add multiple widgets
               Builder(
-                builder: (context) => IconButton(
-                    onPressed: () => Scaffold.of(context).openEndDrawer(),
-                    icon: const Icon(Icons.notifications)),
+                builder: (context) => StreamBuilder<QuerySnapshot>(
+                  stream: unreadNotificationsStream,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+                      return IconButton(
+                        onPressed: () => Scaffold.of(context).openEndDrawer(),
+                        icon: Stack(
+                          children: [
+                            Icon(Icons.notifications),
+                            Positioned(
+                              right: 0,
+                              child: Container(
+                                padding: EdgeInsets.all(1),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                constraints: BoxConstraints(
+                                  minWidth: 12,
+                                  minHeight: 12,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      );
+                    } else {
+                      return IconButton(
+                        onPressed: () => Scaffold.of(context).openEndDrawer(),
+                        icon: Icon(Icons.notifications),
+                      );
+                    }
+                  },
+                ),
               ),
-            if (_isLoggedIn)
               IconButton(
-                icon: CircleAvatar(
-                  backgroundColor: Colors.lightGreen, // 你可以选择任何颜色
-                  child: Text(
-                    userId.isNotEmpty
-                        ? userId[0].toUpperCase()
-                        : '', // TODO:将id首字母替换成名字首字母或者头像
-                    style: TextStyle(color: Colors.white),
-                  ),
+                icon: FutureBuilder<String?>(
+                  future: fetchUserNameInitial(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      // Return a placeholder or a loading indicator while waiting
+                      return CircleAvatar(
+                        backgroundColor: Colors.lightGreen,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                        ),
+                      );
+                    } else if (snapshot.hasError) {
+                      // Handle any errors
+                      return Icon(Icons.error);
+                    } else {
+                      // Display the initial when data is available
+                      return CircleAvatar(
+                        backgroundColor: Colors.lightGreen,
+                        child: Text(
+                          snapshot.data ?? '',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      );
+                    }
+                  },
                 ),
                 onPressed: () {
                   GoRouter.of(context).pushNamed(RouterName.profilePage,
-                      params: {'userId': userId}); // 跳转至用户的profile页面
+                      params: {'userId': userId});
                 },
               ),
-            if (_isLoggedIn)
               PopupMenuButton<String>(
                 onSelected: (value) {
                   if (value == 'logout') {
-                    _showLogoutDialog(); // 使用_logoutDialog方法显示弹出对话框
+                    _showLogoutDialog();
                   }
                 },
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -170,27 +237,15 @@ class HomeState extends State<Home> {
                   ),
                 ],
               ),
+            ],
             if (!_isLoggedIn)
               IconButton(
-                icon: Icon(Icons.login), // 登录图标
+                icon: Icon(Icons.login),
                 onPressed: () {
-                  GoRouter.of(context).pushNamed(RouterName.Login); // 跳转至登录页面
+                  GoRouter.of(context).pushNamed(RouterName.Login);
                 },
               ),
           ],
-          /*title: ValueListenableBuilder<User?>(
-              valueListenable: Repository().user,
-              builder: (BuildContext context, User? user, Widget? child) {
-
-                return Row(
-                  children:  [
-                    const Text("Home"),
-                    const Spacer(),
-                    if(user == null)
-                    const LoginButton(),
-                  ],
-                );
-              })*/
         ),
         drawer: Drawer(
           child: userId == '' || !_isLoggedIn
@@ -292,15 +347,19 @@ class HomeState extends State<Home> {
                       margin: const EdgeInsets.all(10),
                       constraints: const BoxConstraints(maxWidth: maxWidth),
                       child: Column(children: [
-                        SizedBox(height:  MediaQuery.of(context).size.height*0.1),
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.1),
                         const GraphicalBanner(),
-                        SizedBox(height: MediaQuery.of(context).size.height*0.1),
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.1),
                         SearchBar(
                           userId: userId,
                         ),
-                        SizedBox(height: MediaQuery.of(context).size.height*0.1),
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.1),
                         const AboutJemma(),
-                        SizedBox(height:  MediaQuery.of(context).size.height*0.1),
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.1),
                         WhyJemma(),
                       ]),
                     ),
@@ -316,13 +375,13 @@ class HomeState extends State<Home> {
 
 Future<bool> isConsumer(userId) async {
   bool result = false;
-  if(userId!='' || userId == null){
+  if (userId != '' || userId == null) {
     await FirebaseFirestore.instance
         .collection('users')
         .where('uid', isEqualTo: userId)
         .get()
         .then(
-          (querySnapshot) {
+      (querySnapshot) {
         if (querySnapshot.docs[0].data()['Is_Tradie']) {
           result = true;
         } else {

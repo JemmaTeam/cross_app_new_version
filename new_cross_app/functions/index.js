@@ -3,6 +3,8 @@
 */
 const functions = require("firebase-functions");
 const admin = require('firebase-admin');
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey('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');
 admin.initializeApp();
 const stripe = require("stripe")('sk_test_51MxqKoCLNEXP0Gmv34Ixc05ATpLLTkXxK1VmLe4rng6eaiPqiyiDn5iYhaeGA9iZXEdDYIEDZDuTQMMvy4lRKW3J003L5D13iI');
 // const stripe = require('stripe')(functions.config().stripe.secret_key);
@@ -245,6 +247,29 @@ exports.monitorBookingNotifications = functions.firestore
         // Formulate your notification message
         const notificationMessage = `Your booking for ${eventName} is successful, the status is ${bookingData.status}`;
 
+        // Check if the user has NeedEmailInformed set to true
+        const userSnapshot = await admin.firestore().collection('users').doc(consumerId).get();
+        const userData = userSnapshot.data();
+        if (userData && userData.NeedEmailInformed) {
+            // Send an email to the user using SendGrid
+            const email = userData.email; // Assuming the user document has an email field
+            const emailMessage = notificationMessage;
+            
+            const msg = {
+                to: email,
+                from: 'jemmaaugroup@gmail.com', // Your verified sender address
+                subject: 'Booking Notification',
+                text: emailMessage,
+                // html: '<strong>Optional HTML content</strong>', // Optional HTML content
+            };
+
+            try {
+                await sgMail.send(msg);
+            } catch (error) {
+                console.error('Error sending email:', error);
+            }
+        }
+
         // Store this notification in a user-specific notifications collection
         await admin.firestore().collection('users').doc(consumerId).collection('notifications').add({
             message: notificationMessage,
@@ -255,7 +280,7 @@ exports.monitorBookingNotifications = functions.firestore
         return null;
     });
 
-
+// Cloud Function to monitor bookings
 exports.monitorBookingStatusChange = functions.firestore
     .document('bookings/{bookingId}')
     .onUpdate(async (change, context) => {
@@ -273,14 +298,58 @@ exports.monitorBookingStatusChange = functions.firestore
             // Formulate your notification message
             const notificationMessage = `Your booking for ${eventName} status has changed to ${afterData.status}`;
 
-            // Send notification to the consumer
+            // Check if the consumer has NeedEmailInformed set to true
+            const consumerSnapshot = await admin.firestore().collection('users').doc(consumerId).get();
+            const consumerData = consumerSnapshot.data();
+            if (consumerData && consumerData.NeedEmailInformed) {
+                // Send an email to the consumer using SendGrid
+                const email = consumerData.email;
+                const emailMessage = notificationMessage;
+                
+                const msg = {
+                    to: email,
+                    from: 'jemmaaugroup@gmail.com', // Your verified sender address
+                    subject: 'Booking Status Change Notification',
+                    text: emailMessage,
+                };
+
+                try {
+                    await sgMail.send(msg);
+                } catch (error) {
+                    console.error('Error sending email to consumer:', error);
+                }
+            }
+
+            // Check if the tradie has NeedEmailInformed set to true
+            const tradieSnapshot = await admin.firestore().collection('users').doc(tradieId).get();
+            const tradieData = tradieSnapshot.data();
+            if (tradieData && tradieData.NeedEmailInformed) {
+                // Send an email to the tradie using SendGrid
+                const email = tradieData.email;
+                const emailMessage = notificationMessage;
+                
+                const msg = {
+                    to: email,
+                    from: 'jemmaaugroup@gmail.com', // Your verified sender address
+                    subject: 'Booking Status Change Notification',
+                    text: emailMessage,
+                };
+
+                try {
+                    await sgMail.send(msg);
+                } catch (error) {
+                    console.error('Error sending email to tradie:', error);
+                }
+            }
+
+            // Send notification to the consumer in Firestore
             await admin.firestore().collection('users').doc(consumerId).collection('notifications').add({
                 message: notificationMessage,
                 timestamp: admin.firestore.FieldValue.serverTimestamp(),
                 read: false
             });
 
-            // Send notification to the tradie
+            // Send notification to the tradie in Firestore
             await admin.firestore().collection('users').doc(tradieId).collection('notifications').add({
                 message: notificationMessage,
                 timestamp: admin.firestore.FieldValue.serverTimestamp(),
@@ -341,7 +410,28 @@ exports.monitorNewMessages = functions.firestore
             read: false
         });
 
+        // Check if the receiver has NeedEmailInformed set to true
+        const receiverSnapshot = await admin.firestore().collection('users').doc(receiverId).get();
+        const receiverData = receiverSnapshot.data();
+        if (receiverData && receiverData.NeedEmailInformed) {
+            // Send an email to the receiver using SendGrid
+            const email = receiverData.email; // Assuming the user document has an email field
+            const emailMessage = `You have a new message from ${senderName}: ${message}`;
+            
+            const msg = {
+                to: email,
+                from: 'jemmaaugroup@gmail.com', // Your verified sender address
+                subject: 'New Message Notification',
+                text: emailMessage,
+                // html: '<strong>Optional HTML content</strong>', // Optional HTML content
+            };
+
+            try {
+                await sgMail.send(msg);
+            } catch (error) {
+                console.error('Error sending email:', error);
+            }
+        }
+
         return null;
     });
-
-
