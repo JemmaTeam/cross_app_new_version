@@ -24,6 +24,7 @@ class GraphicalBanner extends StatelessWidget {
 
         // AnimatedText container
         child: Container(
+          margin: EdgeInsets.all(10.0),
           child: FittedBox(
             child: Align(
               alignment: const Alignment(0, -.55),
