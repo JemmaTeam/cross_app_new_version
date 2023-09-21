@@ -126,7 +126,7 @@ flutter:
     - assets/images/
     - images/five_star.png
     - images/certificate.png
-    - assets/images/banner_background.png
+    - public/assets/images/banner_background.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
