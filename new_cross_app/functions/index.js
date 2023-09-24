@@ -255,7 +255,7 @@ exports.monitorBookingNotifications = functions.firestore
         return null;
     });
 
-
+// monitor status changed.
 exports.monitorBookingStatusChange = functions.firestore
     .document('bookings/{bookingId}')
     .onUpdate(async (change, context) => {
