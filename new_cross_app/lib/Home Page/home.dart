@@ -2,6 +2,8 @@ library home;
 
 //import 'dart:js_interop';
 
+// import 'dart:html';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -65,16 +67,36 @@ class HomeState extends State<Home> {
   HomeState({required this.userId});
   static const borderRadius = 40.0;
   static const maxWidth = 1080.0;
-
+  //bool hasUnreadNotifications = false;
+  late Stream<QuerySnapshot>
+      unreadNotificationsStream; // Stream for unread notifications
   //bool _isLoggedIn = false;
+  String? userNameInitial;
 
   @override
   void initState() {
     super.initState();
     _checkLoginStatus();
-    isConsumer(userId).then((value) {
-      _isConsumer = value;
-    });
+    if (_isLoggedIn) {
+      fetchUserNameInitial(); // Fetch the initial of the username
+      unreadNotificationsStream = FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('notifications')
+          .where('read', isEqualTo: false)
+          .snapshots();
+    } else {
+      unreadNotificationsStream =
+          Stream.empty(); // Initialize with an empty stream if not logged in
+    }
+  }
+
+  // Function to fetch the initial of the username from Firestore
+  Future<String?> fetchUserNameInitial() async {
+    var doc =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    var userName = doc.data()?['fullName'] ?? '';
+    return userName.isNotEmpty ? userName[0].toUpperCase() : null;
   }
 
   void _checkLoginStatus() async {
@@ -129,135 +151,179 @@ class HomeState extends State<Home> {
     var size = MediaQuery.of(context).size;
     var scrollController = ScrollController();
     return Scaffold(
-      endDrawer: const NotificationPanel(),
-      appBar: AppBar(
-        actions: [
-          if (_isLoggedIn)
-            Builder(
-              builder: (context) => IconButton(
-                  onPressed: () => Scaffold.of(context).openEndDrawer(),
-                  icon: const Icon(Icons.notifications)),
-            ),
-          if (_isLoggedIn)
-            IconButton(
-              icon: CircleAvatar(
-                backgroundColor: Colors.lightGreen, // 你可以选择任何颜色
-                child: Text(
-                  userId.isNotEmpty
-                      ? userId[0].toUpperCase()
-                      : '', // TODO:将id首字母替换成名字首字母或者头像
-                  style: TextStyle(color: Colors.white),
+        endDrawer: const NotificationPanel(),
+        appBar: AppBar(
+          actions: [
+            if (_isLoggedIn) ...[
+              // Use spread operator to conditionally add multiple widgets
+              Builder(
+                builder: (context) => StreamBuilder<QuerySnapshot>(
+                  stream: unreadNotificationsStream,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+                      return IconButton(
+                        onPressed: () => Scaffold.of(context).openEndDrawer(),
+                        icon: Stack(
+                          children: [
+                            Icon(Icons.notifications),
+                            Positioned(
+                              right: 0,
+                              child: Container(
+                                padding: EdgeInsets.all(1),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                constraints: BoxConstraints(
+                                  minWidth: 12,
+                                  minHeight: 12,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      );
+                    } else {
+                      return IconButton(
+                        onPressed: () => Scaffold.of(context).openEndDrawer(),
+                        icon: Icon(Icons.notifications),
+                      );
+                    }
+                  },
                 ),
               ),
-              onPressed: () {
-                GoRouter.of(context).pushNamed(RouterName.profilePage,
-                    params: {'userId': userId}); // 跳转至用户的profile页面
-              },
-            ),
-          if (_isLoggedIn)
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                if (value == 'logout') {
-                  _showLogoutDialog(); // 使用_logoutDialog方法显示弹出对话框
-                }
-              },
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                const PopupMenuItem<String>(
-                  value: 'logout',
-                  child: Text('Log Out'),
-                ),
-              ],
-            ),
-          if (!_isLoggedIn)
-            IconButton(
-              icon: Icon(Icons.login), // 登录图标
-              onPressed: () {
-                GoRouter.of(context).pushNamed(RouterName.Login); // 跳转至登录页面
-              },
-            ),
-        ],
-        /*title: ValueListenableBuilder<User?>(
-              valueListenable: Repository().user,
-              builder: (BuildContext context, User? user, Widget? child) {
-
-                return Row(
-                  children:  [
-                    const Text("Home"),
-                    const Spacer(),
-                    if(user == null)
-                    const LoginButton(),
-                  ],
-                );
-              })*/
-      ),
-      drawer: Drawer(
-        child: userId == '' || !_isLoggedIn
-            ? ListView(
-                children: [
-                  const DrawerHeader(
-                    padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
-                    child: Text(
-                      'Please Login First',
-                      textAlign: TextAlign.center,
-                      textScaleFactor: 2.0,
-                    ),
-                  ),
-                  TextButton(
-                      onPressed: () {
-                        GoRouter.of(context).pushNamed(RouterName.Login);
-                      },
-                      child: const Text(
-                        'Login',
-                        textScaleFactor: 2.0,
-                      )),
-                  TextButton(
-                      onPressed: () {
-                        GoRouter.of(context).pushNamed(RouterName.SignUp);
-                      },
-                      child: const Text(
-                        'Sign Up',
-                        textScaleFactor: 2.0,
-                      ))
-                ],
-              )
-            : ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  const DrawerHeader(
-                    decoration: BoxDecoration(
-                      color: Colors.lightGreen,
-                    ),
-                    child: Text(
-                      'Menu',
-                    ),
-                  ),
-                  ListTile(
-                    title: const Text('Profile'),
-                    onTap: () {
-                      GoRouter.of(context)
-                          .pushNamed(RouterName.profilePage, params: {
-                        'userId': userId,
-                      });
-                    },
-                  ),
-                      ListTile(
-                          title: const Text('Calendar'),
-                          onTap: () {
-                            context.pushNamed(RouterName.CalendarConsumer,
-                                params: {
-                                  'userId': userId,
-                                });
-                          },
+              IconButton(
+                icon: FutureBuilder<String?>(
+                  future: fetchUserNameInitial(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      // Return a placeholder or a loading indicator while waiting
+                      return CircleAvatar(
+                        backgroundColor: Colors.lightGreen,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
                         ),
-                  ListTile(
-                    title: const Text('Chat'),
-                    onTap: () {
-                      GoRouter.of(context).pushNamed(RouterName.chat, params: {
-                        'userId': userId,
-                      });
-                    },
+                      );
+                    } else if (snapshot.hasError) {
+                      // Handle any errors
+                      return Icon(Icons.error);
+                    } else {
+                      // Display the initial when data is available
+                      return CircleAvatar(
+                        backgroundColor: Colors.lightGreen,
+                        child: Text(
+                          snapshot.data ?? '',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      );
+                    }
+                  },
+                ),
+                onPressed: () {
+                  GoRouter.of(context).pushNamed(RouterName.profilePage,
+                      params: {'userId': userId});
+                },
+              ),
+              PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'logout') {
+                    _showLogoutDialog();
+                  }
+                },
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'logout',
+                    child: Text('Log Out'),
                   ),
-                  /*
+                ],
+              ),
+            ],
+            if (!_isLoggedIn)
+              IconButton(
+                icon: Icon(Icons.login),
+                onPressed: () {
+                  GoRouter.of(context).pushNamed(RouterName.Login);
+                },
+              ),
+          ],
+        ),
+        drawer: Drawer(
+          child: userId == '' || !_isLoggedIn
+              ? ListView(
+                  children: [
+                    const DrawerHeader(
+                      padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+                      child: Text(
+                        'Please Login First',
+                        textAlign: TextAlign.center,
+                        textScaleFactor: 2.0,
+                      ),
+                    ),
+                    TextButton(
+                        onPressed: () {
+                          GoRouter.of(context).pushNamed(RouterName.Login);
+                        },
+                        child: const Text(
+                          'Login',
+                          textScaleFactor: 2.0,
+                        )),
+                    TextButton(
+                        onPressed: () {
+                          GoRouter.of(context).pushNamed(RouterName.SignUp);
+                        },
+                        child: const Text(
+                          'Sign Up',
+                          textScaleFactor: 2.0,
+                        ))
+                  ],
+                )
+              : ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    const DrawerHeader(
+                      decoration: BoxDecoration(
+                        color: Colors.lightGreen,
+                      ),
+                      child: Text(
+                        'Menu',
+                      ),
+                    ),
+                    ListTile(
+                      title: const Text('Profile'),
+                      onTap: () {
+                        GoRouter.of(context)
+                            .pushNamed(RouterName.profilePage, params: {
+                          'userId': userId,
+                        });
+                      },
+                    ),
+                    ListTile(
+                      title: const Text('Calendar'),
+                      onTap: () {
+                        context.pushNamed(RouterName.CalendarConsumer, params: {
+                          'userId': userId,
+                        });
+                      },
+                    ),
+                    ListTile(
+                      title: const Text('Chat'),
+                      onTap: () {
+                        GoRouter.of(context)
+                            .pushNamed(RouterName.chat, params: {
+                          'userId': userId,
+                        });
+                      },
+                    ),
+                    ListTile(
+                      title: const Text('History Boookings'),
+                      onTap: () {
+                        GoRouter.of(context)
+                            .pushNamed(RouterName.BookingHistory, params: {
+                          'userId': userId,
+                        });
+                      },
+                    ),
+                    /*
                   ListTile(
                     title: Text(
                       _isLoggedIn ? 'Logout' : 'Login',
@@ -265,60 +331,65 @@ class HomeState extends State<Home> {
                     onTap: _isLoggedIn ? _showLogoutDialog : () {},
                   ),
                   */
-                ],
-              ),
-      ),
-      body: Scrollbar(
-        isAlwaysShown: isWeb(),
-        controller: scrollController,
-        child: SingleChildScrollView(
-          controller: scrollController,
-          child: Container(
-            child: Column(
-              children: [
-                Container(
-                  margin: const EdgeInsets.all(10),
-                  constraints: const BoxConstraints(maxWidth: maxWidth),
-                  child: Column(children: [
-                    SizedBox(height: 2.5.ph(size)),
-                    const GraphicalBanner(),
-                    SizedBox(height: 5.ph(size)),
-                    SearchBar(
+                  ],
+                ),
+        ),
+        body: SafeArea(
+          child: Scrollbar(
+            isAlwaysShown: isWeb(),
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: Container(
+                child: Column(
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.all(10),
+                      constraints: const BoxConstraints(maxWidth: maxWidth),
+                      child: Column(children: [
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.1),
+                        const GraphicalBanner(),
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.1),
+                        SearchBar(
                           userId: userId,
                         ),
-                    SizedBox(height: 5.ph(size)),
-                    const AboutJemma(),
-                    SizedBox(height: 5.ph(size)),
-                    WhyJemma(),
-                  ]),
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.1),
+                        const AboutJemma(),
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.1),
+                        WhyJemma(),
+                      ]),
+                    ),
+                    if (isWeb()) const WebFooter()
+                  ],
                 ),
-                if (isWeb()) const WebFooter()
-              ],
+              ),
             ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 }
 
 Future<bool> isConsumer(userId) async {
-  late bool result;
-  await FirebaseFirestore.instance
-      .collection('users')
-      .where('uid', isEqualTo: userId)
-      .get()
-      .then(
-    (querySnapshot) {
-      if (querySnapshot.docs.isNotEmpty) {
-        print('it is consumer');
-        result = true;
-      } else {
-        print('it is tradie');
-        result = false;
-      }
-    },
-    onError: (e) => print("Error completing: $e"),
-  );
+  bool result = false;
+  if (userId != '' || userId == null) {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .where('uid', isEqualTo: userId)
+        .get()
+        .then(
+      (querySnapshot) {
+        if (querySnapshot.docs[0].data()['Is_Tradie']) {
+          result = true;
+        } else {
+          result = false;
+        }
+      },
+      onError: (e) => print("Error completing: $e"),
+    );
+  }
   return result;
 }

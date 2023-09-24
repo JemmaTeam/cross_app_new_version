@@ -19,4 +19,5 @@ class RouterName{
   static const BookingEditorT='calendar_booking_tradie_editor';
   static const SearchOutcome = 'tradie_search_outcome';
   static const CreateSuccess = 'create_success';
+  static const BookingHistory = 'booking_history';
 }

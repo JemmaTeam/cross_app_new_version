@@ -14,7 +14,11 @@ import '../search/rate_star_widget.dart';
 import 'customer_info_edit.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'dart:js' as js;
+// import 'dart:js' as js;
+
+
+import '../services/platform_service.dart';
+
 
 class ProfileHome extends StatefulWidget {
   String userId;
@@ -28,6 +32,7 @@ class ProfileHome extends StatefulWidget {
 bool _isConsumer = true;
 final databaseReference = FirebaseFirestore.instance;
 final CollectionReference colRef = databaseReference.collection('users');
+final PlatformService platformService = PlatformService();
 
 class _ProfileHomeState extends State<ProfileHome> {
   String userId;
@@ -559,7 +564,8 @@ class _ProfileHomeState extends State<ProfileHome> {
         FirebaseFirestore.instance.collection('users').doc(userId).update({
           'stripeId': accountId,
         });
-        openExternalUrl(responseMap['url']!.toString());
+        platformService.openExternalUrl(responseMap['url']!.toString());
+        // openExternalUrl(responseMap['url']!.toString());
       } else {
         print('请求失败：${response.statusCode}');
       }
@@ -568,7 +574,7 @@ class _ProfileHomeState extends State<ProfileHome> {
     });
   }
 
-  void openExternalUrl(String url) {
-    js.context.callMethod('openExternalUrl', [url]);
-  }
+  // void openExternalUrl(String url) {
+  //   js.context.callMethod('openExternalUrl', [url]);
+  // }
 }

@@ -349,6 +349,8 @@ class AppointmentEditorState extends State<AppointmentEditor> {
   }
 }
 
+final PlatformService platformService = PlatformService();
+
 Future<String> createPaymentIntent(Map<String, String> body) async {
   await http
       .post(
@@ -361,7 +363,8 @@ Future<String> createPaymentIntent(Map<String, String> body) async {
       print('success');
       Map<String, dynamic> responseMap = json.decode(res.body);
       amount = int.parse(responseMap['amount']!.toString());
-      openExternalUrl(responseMap['url']!.toString());
+      // openExternalUrl(responseMap['url']!.toString());
+      platformService.openExternalUrl(responseMap['url']!.toString());
     } else {
       print('failed: ${res.body}');
     }
@@ -369,9 +372,10 @@ Future<String> createPaymentIntent(Map<String, String> body) async {
   return '';
 }
 
-void openExternalUrl(String url) {
-  js.context.callMethod('openExternalUrl', [url]);
-}
+// void openExternalUrl(String url) {
+//   js.context.callMethod('openExternalUrl', [url]);
+// }
+
 String displayText(String statusNam) {
   if(statusNam == 'Rating'){
     return 'Go to Rating Page';

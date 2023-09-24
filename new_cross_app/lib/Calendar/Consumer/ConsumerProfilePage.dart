@@ -1,5 +1,5 @@
 library booking_Calendar;
-import 'dart:js' as js;
+// import 'dart:js' as js;
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -19,6 +19,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher_string.dart';
+
+import '../../services/platform_service.dart';
 
 
 part 'StatusPicker.dart';
