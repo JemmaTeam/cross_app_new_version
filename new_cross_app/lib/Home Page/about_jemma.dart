@@ -13,9 +13,7 @@ class AboutJemma extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-
-    return IntrinsicHeight(
-        child:Container(
+    return Container(
         padding:
             EdgeInsets.symmetric(horizontal: 5.pw(size), vertical: 1.pw(size)),
         decoration: BoxDecoration(
@@ -23,6 +21,7 @@ class AboutJemma extends StatelessWidget {
             boxShadow: defaultShadows,
             borderRadius: BorderRadius.circular(40)),
         width: double.infinity,
+        height: size.height,
         child: Column(
           children: [
             SizedBox(
@@ -38,15 +37,15 @@ class AboutJemma extends StatelessWidget {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600))
             ]),
             SizedBox(
-              height: 0.75.ph(size),
+              height: 1.5.ph(size),
             ),
             _buildAboutJemmaOverflowBar(size),
             SizedBox(
-              height: 0.75.ph(size),
+              height: 1.5.ph(size),
             ),
             _buildHowItStartedOverflowBar(size),
           ],
-        )));
+        ));
   }
 
   Container _buildHowItStartedOverflowBar(Size size) {
