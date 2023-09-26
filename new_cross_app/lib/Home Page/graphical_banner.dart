@@ -24,7 +24,7 @@ class GraphicalBanner extends StatelessWidget {
 
         // AnimatedText container
         Container(
-          margin: EdgeInsets.all(10.0),
+          margin: const EdgeInsets.all(20.0),
           height: MediaQuery.of(context).size.height * 0.2,
           width: MediaQuery.of(context).size.width,
           decoration: BoxDecoration(
