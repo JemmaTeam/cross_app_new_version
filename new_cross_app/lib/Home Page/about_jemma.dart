@@ -114,8 +114,7 @@ class AboutJemma extends StatelessWidget {
 
   Container _buildAboutJemmaOverflowBar(Size size) {
     return Container(
-      child:
-      OverflowBar(
+      child: OverflowBar(
         overflowAlignment: OverflowBarAlignment.center,
         spacing: 1.5.pw(size),
         children:[
@@ -136,12 +135,12 @@ class AboutJemma extends StatelessWidget {
 
                   Container(
                     padding: const EdgeInsets.all(10),
-                    constraints: const BoxConstraints(maxWidth: 150),
-                    child:const Center(child:JemmaLogo(height:100.0,width: 100.0)),
+                    constraints: BoxConstraints(maxWidth: size.height*0.2),
+                    child: Center(child:JemmaLogo(height:size.height*0.15,width: size.height*0.15)),
                   ),
 
                   Container(
-                    width: 250,
+                    width: size.width*0.3,
                     child:Center(
                       child:SelectableText("Jemma is one of a kind online service that connects customers and tradies while also offering financial protection, better work-life balance, automated scheduling and much more."
                         ,style: GoogleFonts.roboto(),),

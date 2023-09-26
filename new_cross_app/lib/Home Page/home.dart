@@ -151,7 +151,7 @@ class HomeState extends State<Home> {
     var size = MediaQuery.of(context).size;
     var scrollController = ScrollController();
     return Scaffold(
-        backgroundColor: kLogoColor,
+        backgroundColor: kMenuColor,
         endDrawer: const NotificationPanel(),
         appBar: AppBar(
           actions: [

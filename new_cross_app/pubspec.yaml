@@ -122,8 +122,8 @@ flutter:
     - images/Tom.jpg
     - images/Jack.jpg
     - images/Jemma.png
-    - public/assets/icons/
-    - public/assets/images/
+    - assets/icons/
+    - assets/images/
     - images/five_star.png
     - images/certificate.png
 
