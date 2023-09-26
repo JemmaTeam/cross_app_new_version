@@ -13,42 +13,39 @@ class AboutJemma extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    return SingleChildScrollView(
-        child: Container(
-            padding: EdgeInsets.symmetric(
-                horizontal: 5.pw(size), vertical: 1.pw(size)),
-            decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: defaultShadows,
-                borderRadius: BorderRadius.circular(40)),
-            width: double.infinity,
-            height: size.height,
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 1.5.ph(size),
-                ),
-                Wrap(children: [
-                  const Text('About  ',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-                  Text('Jemma ',
-                      style: GoogleFonts.parisienne(
-                          fontSize: 20, fontWeight: FontWeight.w600)),
-                  const Text('and how it started?',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.w600))
-                ]),
-                SizedBox(
-                  height: 1.5.ph(size),
-                ),
-                _buildAboutJemmaOverflowBar(size),
-                SizedBox(
-                  height: 1.5.ph(size),
-                ),
-                _buildHowItStartedOverflowBar(size),
-              ],
-            )));
+    return Container(
+        padding:
+            EdgeInsets.symmetric(horizontal: 5.pw(size), vertical: 1.pw(size)),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: defaultShadows,
+            borderRadius: BorderRadius.circular(40)),
+        width: double.infinity,
+        height: size.height,
+        child: ListView(
+          children: [
+            SizedBox(
+              height: 1.5.ph(size),
+            ),
+            Wrap(children: [
+              const Text('About  ',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+              Text('Jemma ',
+                  style: GoogleFonts.parisienne(
+                      fontSize: 20, fontWeight: FontWeight.w600)),
+              const Text('and how it started?',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600))
+            ]),
+            SizedBox(
+              height: 1.5.ph(size),
+            ),
+            _buildAboutJemmaOverflowBar(size),
+            SizedBox(
+              height: 1.5.ph(size),
+            ),
+            _buildHowItStartedOverflowBar(size),
+          ],
+        ));
   }
 
   Container _buildHowItStartedOverflowBar(Size size) {
@@ -142,7 +139,8 @@ class AboutJemma extends StatelessWidget {
                   ),
                 ],
               )),
-          SizedBox(height: size.height * 0.01),
+          SizedBox(
+              height: size.height * 0.01),
           Container(
             width: 250,
             height: 200,
