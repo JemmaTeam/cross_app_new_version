@@ -144,7 +144,6 @@ class AboutJemma extends StatelessWidget {
                   ),
                 ],
               )),
-          SizedBox(height: size.height * 0.01),
           Container(
             width: 250,
             height: 200,
