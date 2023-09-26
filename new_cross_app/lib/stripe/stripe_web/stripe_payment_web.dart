@@ -10,10 +10,18 @@ void main() {
 late int amount;
 //String testPageUrl = 'http://localhost:3000';
 //TODO PRICE IS AMOUNT IN CENTS
-Map<String, String> body={
+
+//
+Map<String, String> body = {
   'price': '10000',
-  'userId':'0eGyXTXhWWeEcqzCoMmHWq0EYsv1',
-  'product_name': 'painting',};
+  'consumerId': '0eGyXTXhWWeEcqzCoMmHWq0EYsv1',
+  'product_name': 'painting',
+  'metadata': json.encode({
+    'consumerId': '0eGyXTXhWWeEcqzCoMmHWq0EYsv1'
+  })
+};
+
+
 Map<String, String> transfer = {
   'accountId': 'acct_1NfzPL2HVWGzklJ4',
   'amount':'500',
@@ -46,7 +54,7 @@ class MyApp extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () {
-                 //TODO get accountId and amount from firebase
+                  //TODO get accountId and amount from firebase
                   confirmWork();
 
                 },

@@ -8,6 +8,12 @@ sgMail.setApiKey('SG.St1NkeC0RRCZlHCdtUaSkA.3WYrd8YRne41_TWEhkT19CSGr-t3vknmvLCQ
 admin.initializeApp();
 const stripe = require("stripe")('sk_test_51MxqKoCLNEXP0Gmv34Ixc05ATpLLTkXxK1VmLe4rng6eaiPqiyiDn5iYhaeGA9iZXEdDYIEDZDuTQMMvy4lRKW3J003L5D13iI');
 // const stripe = require('stripe')(functions.config().stripe.secret_key);
+
+
+//const stripeFunctions = require('./path_to_server.js'); // adjust the path accordingly
+
+//exports.handleStripeWebhooks = stripeFunctions.handleStripeWebhooks;
+
 const sendLink=function(accountLinks){
     return accountLinks.url
 }
@@ -435,3 +441,52 @@ exports.monitorNewMessages = functions.firestore
 
         return null;
     });
+
+
+// move from server.js
+// Connect webhook notification function 1.Define a new Firebase Cloud Function to handle webhooks:
+
+
+
+// Add the Webhook Handling Cloud Function:
+exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.rawBody,
+      req.headers['stripe-signature'],
+      'whsec_bA8KhZrrEnOuOnxzBuk2QC4VYJcEJJVQ' // This is the webhook's Signing secret
+    );
+  } catch (err) {
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  // Handle the event
+  switch (event.type) {
+    case 'payment_intent.succeeded':
+      const paymentIntent = event.data.object;
+
+      // Assuming the consumerId (or any user identifier) is stored as metadata in the PaymentIntent
+      const consumerId = paymentIntent.metadata.consumerId;
+
+      if (consumerId) {
+        const notificationMessage = `Your payment of $${paymentIntent.amount / 100} was successful!`;
+        await admin.firestore().collection('users').doc(consumerId).collection('notifications').add({
+            message: notificationMessage,
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            read: false
+        });
+      } else {
+        console.error("ConsumerId not found in PaymentIntent metadata.");
+      }
+      break;
+    // Add more cases for other events
+    default:
+      // Unexpected event type
+      return res.status(400).end();
+  }
+
+  // Return a successful response to Stripe
+  res.json({ received: true });
+});
