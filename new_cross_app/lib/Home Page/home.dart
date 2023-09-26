@@ -151,6 +151,7 @@ class HomeState extends State<Home> {
     var size = MediaQuery.of(context).size;
     var scrollController = ScrollController();
     return Scaffold(
+        backgroundColor: kLogoColor,
         endDrawer: const NotificationPanel(),
         appBar: AppBar(
           actions: [
@@ -345,7 +346,7 @@ class HomeState extends State<Home> {
                   children: [
                     Container(
                       margin: const EdgeInsets.all(10),
-                      constraints: const BoxConstraints(maxWidth: maxWidth),
+                      constraints: BoxConstraints(maxWidth: size.width*0.8 ),
                       child: Column(children: [
                         SizedBox(
                             height: MediaQuery.of(context).size.height * 0.1),
