@@ -27,15 +27,20 @@ class AboutJemma extends StatelessWidget {
             SizedBox(
               height: 1.5.ph(size),
             ),
-            Wrap(children: [
-              const Text('About  ',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-              Text('Jemma ',
-                  style: GoogleFonts.parisienne(
-                      fontSize: 20, fontWeight: FontWeight.w600)),
-              const Text('and how it started?',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600))
-            ]),
+            Center(
+                child: Wrap(
+                    alignment: WrapAlignment.spaceEvenly,
+                    children: [
+                      const Text(
+                          'About  ',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+                      Text(
+                          'Jemma ',
+                          style: GoogleFonts.parisienne(fontSize: 20, fontWeight: FontWeight.w600)),
+                      const Text(
+                          'and how it started?',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600))
+            ])),
             SizedBox(
               height: 1.5.ph(size),
             ),
@@ -139,8 +144,7 @@ class AboutJemma extends StatelessWidget {
                   ),
                 ],
               )),
-          SizedBox(
-              height: size.height * 0.01),
+          SizedBox(height: size.height * 0.01),
           Container(
             width: 250,
             height: 200,
