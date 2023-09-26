@@ -14,7 +14,8 @@ class AboutJemma extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return Container(
+    return IntrinsicHeight(
+        child:Container(
         padding:
             EdgeInsets.symmetric(horizontal: 5.pw(size), vertical: 1.pw(size)),
         decoration: BoxDecoration(
@@ -45,7 +46,7 @@ class AboutJemma extends StatelessWidget {
             ),
             _buildHowItStartedOverflowBar(size),
           ],
-        ));
+        )));
   }
 
   Container _buildHowItStartedOverflowBar(Size size) {

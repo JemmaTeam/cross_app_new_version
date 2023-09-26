@@ -12,27 +12,19 @@ class GraphicalBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return /*Container(
+    return Container(
         height: MediaQuery.of(context).size.height * 0.2,
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
             image: const DecorationImage(
                 image: AssetImage("assets/images/banner_background.png"),
-                fit: BoxFit.fill),
+                fit: BoxFit.cover),
             boxShadow: defaultShadows,
-            borderRadius: BorderRadius.circular(HomeState.borderRadius)),*/
+            borderRadius: BorderRadius.circular(HomeState.borderRadius)),
 
         // AnimatedText container
-        Container(
+        child:Container(
           margin: const EdgeInsets.all(20.0),
-          height: MediaQuery.of(context).size.height * 0.2,
-          width: MediaQuery.of(context).size.width,
-          decoration: BoxDecoration(
-              image: const DecorationImage(
-                  image: AssetImage("assets/images/banner_background.png"),
-                  fit: BoxFit.cover),
-              boxShadow: defaultShadows,
-              borderRadius: BorderRadius.circular(HomeState.borderRadius)),
           child: FittedBox(
             child: Align(
               alignment: const Alignment(0, -.55),
@@ -53,6 +45,6 @@ class GraphicalBanner extends StatelessWidget {
                   )),
             ),
           ),
-        );
+        ));
   }
 }
