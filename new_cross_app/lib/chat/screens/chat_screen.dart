@@ -1,7 +1,8 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker_web/image_picker_web.dart';
+//import 'package:image_picker_web/image_picker_web.dart';
 import 'package:new_cross_app/chat/screens/chat_home_screen.dart';
 import 'package:new_cross_app/helper/constants.dart';
 import 'package:new_cross_app/services/database_service.dart';
@@ -14,6 +15,8 @@ import '../../Routes/route_const.dart';
 import '../../helper/helper_function.dart';
 import '../../main.dart';
 import 'package:path/path.dart' as Path;
+import 'package:file_picker/file_picker.dart';
+
 
 
 //Chat类是一个完整的聊天页面，包括显示消息、获取聊天对象的用户名、发送和接收消息等功能
@@ -21,9 +24,9 @@ import 'package:path/path.dart' as Path;
 class Chat extends StatefulWidget {
   final String chatRoomId;
   final String userId;
+
   //存储用户选择的图片
   File? selectedImage;
-  final picker = ImagePickerWeb();
 
 
   Chat({super.key, required this.chatRoomId, required this.userId});
@@ -271,30 +274,38 @@ class _ChatState extends State<Chat> {
                           icon: Icon(Icons.photo),
                           onPressed: () async {
                             try {
-                              final mediaInfo = await ImagePickerWeb.getImageInfo;
-                              if (mediaInfo != null && mediaInfo.data != null) {
-                                // 上传到 Firebase
-                                Reference storageReference = FirebaseStorage.instance.ref().child('chat_images/${mediaInfo.fileName}');
-                                UploadTask uploadTask = storageReference.putData(mediaInfo.data!);
+                              FilePickerResult? result = await FilePicker.platform.pickFiles(
+                                type: FileType.image,
+                              );
 
-                                // 监听上传进度
-                                uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
-                                  setState(() {
-                                    uploadProgress = snapshot.bytesTransferred.toDouble() / snapshot.totalBytes.toDouble();
+                              if (result != null) {
+                                PlatformFile file = result.files.first;
+                                Uint8List? imageData = file.bytes;
+
+                                if (imageData != null) {
+                                  // 上传到 Firebase
+                                  Reference storageReference = FirebaseStorage.instance.ref().child('chat_images/${file.name}');
+                                  UploadTask uploadTask = storageReference.putData(imageData);
+
+                                  // 监听上传进度
+                                  uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+                                    setState(() {
+                                      uploadProgress = snapshot.bytesTransferred.toDouble() / snapshot.totalBytes.toDouble();
+                                    });
                                   });
-                                });
 
-                                // 等待上传完成并获取下载URL
-                                TaskSnapshot snapshot = await uploadTask.whenComplete(() => {});
-                                String imageUrl = await snapshot.ref.getDownloadURL();
+                                  // 等待上传完成并获取下载URL
+                                  TaskSnapshot snapshot = await uploadTask.whenComplete(() => {});
+                                  String imageUrl = await snapshot.ref.getDownloadURL();
 
-                                // 保存图片URL到聊天数据库
-                                addImageMessage(imageUrl);
+                                  // 保存图片URL到聊天数据库
+                                  addImageMessage(imageUrl);
 
-                                // 重置上传进度
-                                setState(() {
-                                  uploadProgress = 0.0;
-                                });
+                                  // 重置上传进度
+                                  setState(() {
+                                    uploadProgress = 0.0;
+                                  });
+                                }
                               }
                             } catch (error) {
                               print("An error occurred: $error");
