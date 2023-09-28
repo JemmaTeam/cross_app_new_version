@@ -74,59 +74,41 @@ class _NotificationPanelState extends State<NotificationPanel> {
         color: Colors.grey[100],
       ),
       width: 300,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: Column(
-              children: [
-                Expanded(
-                  child: StreamBuilder<QuerySnapshot>(
-                    stream: userNotifications,
-                    builder: (BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                      if (snapshot.hasError) {
-                        return const Text('Something went wrong');
-                      }
+      child: StreamBuilder<QuerySnapshot>(
+        stream: userNotifications,
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return const Text('Something went wrong');
+          }
 
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Text("Loading...");
-                      }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Text("Loading...");
+          }
 
-                      final notifications = snapshot.data!.docs;
+          final notifications = snapshot.data!.docs;
 
-                      return ListView.builder(
-                        itemCount: notifications.length + 2,
-                        itemBuilder: (context, index) {
-                          if (index == 0) {
-                            return const DrawerHeader(
-                              child: Center(
-                                child: Text('Notifications',
-                                    style: TextStyle(
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.w500)),
-                              ),
-                            );
-                          } else if (index == notifications.length + 1) {
-                            return Container(
-                              padding: const EdgeInsets.all(32.0),
-                              child: const Text(
-                                "That's all your notifications from the last 30 days.",
-                                softWrap: true,
-                              ),
-                            );
-                          } else {
-                            final notification = notifications[index - 1];
-                            final content = notification.get('message');
-                            final docId = notification.id;
-                            final isRead = notification.get('read');
-                            return _buildNotifications(content, docId, isRead);
-                          }
-                        },
-                      );
-                    },
+          return ListView.builder(
+            itemCount: notifications.length +
+                3, // +3 to account for header, checkbox, and footer
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return const DrawerHeader(
+                  child: Center(
+                    child: Text('Notifications',
+                        style: TextStyle(
+                            fontSize: 25, fontWeight: FontWeight.w500)),
                   ),
-                ),
-                Padding(
+                );
+              } else if (index == notifications.length + 1) {
+                return Container(
+                  padding: const EdgeInsets.all(32.0),
+                  child: const Text(
+                    "That's all your notifications from the last 30 days.",
+                    softWrap: true,
+                  ),
+                );
+              } else if (index == notifications.length + 2) {
+                return Padding(
                   padding: const EdgeInsets.only(left: 50.0),
                   child: CheckboxListTile(
                     contentPadding: EdgeInsets.zero,
@@ -143,11 +125,17 @@ class _NotificationPanelState extends State<NotificationPanel> {
                       });
                     },
                   ),
-                )
-              ],
-            ),
-          ),
-        ],
+                );
+              } else {
+                final notification = notifications[index - 1];
+                final content = notification.get('message');
+                final docId = notification.id;
+                final isRead = notification.get('read');
+                return _buildNotifications(content, docId, isRead);
+              }
+            },
+          );
+        },
       ),
     );
   }
