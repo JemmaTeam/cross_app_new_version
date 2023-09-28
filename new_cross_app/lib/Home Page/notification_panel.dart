@@ -34,7 +34,7 @@ class _NotificationPanelState extends State<NotificationPanel> {
         .then((doc) {
       if (doc.exists && doc.data()!.containsKey('NeedEmailInformed')) {
         setState(() {
-          _wantEmailNotification = doc['NeedEmailInformed'];
+          _wantEmailNotification = doc.data()!['NeedEmailInformed'];
         });
       }
     });

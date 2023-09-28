@@ -76,19 +76,22 @@ class HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    _checkLoginStatus();
-    if (_isLoggedIn) {
-      fetchUserNameInitial(); // Fetch the initial of the username
-      unreadNotificationsStream = FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .collection('notifications')
-          .where('read', isEqualTo: false)
-          .snapshots();
-    } else {
-      unreadNotificationsStream =
-          Stream.empty(); // Initialize with an empty stream if not logged in
-    }
+    Future.delayed(Duration.zero, () async {
+      _checkLoginStatus();
+      if (_isLoggedIn) {
+        fetchUserNameInitial(); // Fetch the initial of the username
+        unreadNotificationsStream = FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .collection('notifications')
+            .where('read', isEqualTo: false)
+            .snapshots();
+        setState(() {}); // Trigger a rebuild to reflect the changes
+      } else {
+        unreadNotificationsStream =
+            Stream.empty(); // Initialize with an empty stream if not logged in
+      }
+    });
   }
 
   // Function to fetch the initial of the username from Firestore
@@ -102,7 +105,7 @@ class HomeState extends State<Home> {
   void _checkLoginStatus() async {
     bool? userLoggedIn = await HelperFunctions.getUserLoggedInStatus();
     setState(() {
-      _isLoggedIn = userLoggedIn ?? false;
+      _isLoggedIn = userLoggedIn;
     });
   }
 
@@ -346,7 +349,7 @@ class HomeState extends State<Home> {
                   children: [
                     Container(
                       margin: const EdgeInsets.all(10),
-                      constraints: BoxConstraints(maxWidth: size.width*0.8 ),
+                      constraints: BoxConstraints(maxWidth: size.width * 0.8),
                       child: Column(children: [
                         SizedBox(
                             height: MediaQuery.of(context).size.height * 0.1),
