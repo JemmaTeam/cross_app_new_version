@@ -419,17 +419,54 @@ exports.monitorNewMessages = functions.firestore
         // Check if the receiver has NeedEmailInformed set to true
         const receiverSnapshot = await admin.firestore().collection('users').doc(receiverId).get();
         const receiverData = receiverSnapshot.data();
+        const receiverName = receiverData ? receiverData.fullName : 'Unknown';  // Get the receiver's full name
         if (receiverData && receiverData.NeedEmailInformed) {
             // Send an email to the receiver using SendGrid
             const email = receiverData.email; // Assuming the user document has an email field
-            const emailMessage = `You have a new message from ${senderName}: ${message}`;
-            
+            const emailMessage = `
+<html>
+<head>
+    <style>
+        body {
+            background-color: #8BC34A; /* Light green background color */
+            font-family: Arial, sans-serif; /* Optional: Set a default font */
+        }
+        .content {
+            background-color: white; /* White background for the text content */
+            padding: 20px;
+            margin: 20px;
+            border-radius: 5px; /* Optional: Rounded corners for the content box */
+        }
+    </style>
+</head>
+<body>
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img src="https://storage.googleapis.com/jemma-b0fcd.appspot.com/Logo/logo.png" alt="Company Logo" width="200">
+    </div>
+    <hr> <!-- Horizontal line to separate the logo and the content -->
+    <div class="content">
+        Dear ${receiverName},<br><br>
+
+        We hope this email finds you well.<br><br>
+
+        You have received a new message from ${senderName}. Below is the content of the message:<br><br>
+
+        <strong style="font-size: 1.3em;">"${message}"</strong><br><br>  <!-- Increased font size and made it bold -->
+
+        Please do not hesitate to reach out if you have any questions or require further information.<br><br>
+
+        Kind regards,<br>
+        Jemma
+    </div>
+</body>
+</html>
+`;
+
             const msg = {
                 to: email,
                 from: 'jemmaaugroup@gmail.com', // Your verified sender address
-                subject: 'New Message Notification',
-                text: emailMessage,
-                // html: '<strong>Optional HTML content</strong>', // Optional HTML content
+                subject: 'New Chat Message Notification',
+                html: emailMessage, // Use the HTML content
             };
 
             try {
@@ -441,6 +478,7 @@ exports.monitorNewMessages = functions.firestore
 
         return null;
     });
+
 
 
 // move from server.js
