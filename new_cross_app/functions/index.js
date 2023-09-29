@@ -4,7 +4,9 @@
 const functions = require("firebase-functions");
 const admin = require('firebase-admin');
 const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey('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');
+// 获取SendGrid API密钥
+const sendgridApiKey = functions.config().sendgrid.key;
+sgMail.setApiKey(sendgridApiKey);
 admin.initializeApp();
 const stripe = require("stripe")('sk_test_51MxqKoCLNEXP0Gmv34Ixc05ATpLLTkXxK1VmLe4rng6eaiPqiyiDn5iYhaeGA9iZXEdDYIEDZDuTQMMvy4lRKW3J003L5D13iI');
 // const stripe = require('stripe')(functions.config().stripe.secret_key);
