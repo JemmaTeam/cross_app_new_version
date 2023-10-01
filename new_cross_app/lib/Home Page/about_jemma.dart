@@ -164,7 +164,6 @@ class AboutJemma extends StatelessWidget {
                       child: SelectableText(
                         "Jemma is one of a kind online service that connects customers and tradies while also offering financial protection, better work-life balance, automated scheduling and much more.",
                         style: GoogleFonts.roboto(),
-                        textScaleFactor: 1.5,
                       ),
                     ),
                   ),
