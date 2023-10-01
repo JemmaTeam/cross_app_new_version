@@ -451,7 +451,7 @@ exports.monitorNewMessages = functions.firestore
 // Add the Webhook Handling Cloud Function:
 exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
   let event;
-
+  const consumerId = req.body
   try {
     event = stripe.webhooks.constructEvent(
       req.rawBody,
