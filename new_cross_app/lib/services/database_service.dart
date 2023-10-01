@@ -15,17 +15,28 @@ class DatabaseService {
 
   // Save user data
   Future savingCustomerData(String fullName, String email) async {
-    return await UserCollection.doc(uid).set({
-      "fullName": fullName,
-      "email": email,
-      "Is_Tradie": false,
-      "Phone": "",
-      "address": "",
-      "Chatlist": [],
-      "profilePic": "",
-      "uid": uid,
-      "NeedEmailInformed": false,
-    });
+    DocumentSnapshot userDoc = await UserCollection.doc(uid).get();
+
+    if (userDoc.exists) {
+      // User already exists, update the user data without overwriting NeedEmailInformed
+      return await UserCollection.doc(uid).update({
+        "fullName": fullName,
+        "email": email,
+      });
+    } else {
+      // New user, set the initial data
+      return await UserCollection.doc(uid).set({
+        "fullName": fullName,
+        "email": email,
+        "Is_Tradie": false,
+        "Phone": "",
+        "address": "",
+        "Chatlist": [],
+        "profilePic": "",
+        "uid": uid,
+        "NeedEmailInformed": false,
+      });
+    }
   }
 
   // Get user data by email

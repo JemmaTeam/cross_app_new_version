@@ -37,9 +37,9 @@ class HelperFunctions {
   }
 
   // Retrieve user login status from Shared Preferences
-  static Future<bool?> getUserLoggedInStatus() async {
+  static Future<bool> getUserLoggedInStatus() async {
     SharedPreferences sf = await SharedPreferences.getInstance();
-    return sf.getBool(userLoggedInKey);
+    return sf.getBool(userLoggedInKey) ?? false; // Provide a default value
   }
 
   // Retrieve user email from Shared Preferences
