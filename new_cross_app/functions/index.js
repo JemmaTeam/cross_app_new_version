@@ -4,7 +4,9 @@
 const functions = require("firebase-functions");
 const admin = require('firebase-admin');
 const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey('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');
+// 获取SendGrid API密钥
+const sendgridApiKey = functions.config().sendgrid.key;
+sgMail.setApiKey(sendgridApiKey);
 admin.initializeApp();
 const stripe = require("stripe")('sk_test_51MxqKoCLNEXP0Gmv34Ixc05ATpLLTkXxK1VmLe4rng6eaiPqiyiDn5iYhaeGA9iZXEdDYIEDZDuTQMMvy4lRKW3J003L5D13iI');
 // const stripe = require('stripe')(functions.config().stripe.secret_key);
@@ -245,27 +247,70 @@ exports.monitorBookingNotifications = functions.firestore
         const consumerId = bookingData.consumerId;
         const eventName = bookingData.eventName;
 
+
         if (!consumerId) {
             console.error('ConsumerId not found in booking data.');
             return null;
         }
-
+        
         // Formulate your notification message
         const notificationMessage = `Your booking for ${eventName} is successful, the status is ${bookingData.status}`;
 
         // Check if the user has NeedEmailInformed set to true
         const userSnapshot = await admin.firestore().collection('users').doc(consumerId).get();
         const userData = userSnapshot.data();
+        const ConsumerfullName = userData ? userData.fullName : null;
         if (userData && userData.NeedEmailInformed) {
             // Send an email to the user using SendGrid
             const email = userData.email; // Assuming the user document has an email field
-            const emailMessage = notificationMessage;
+
+            // Formulate your email message
+        const emailMessage = `
+        <html>
+        <head>
+            <style>
+            body {
+              font-family: Arial, sans-serif; /* Optional: Set a default font */
+          }
+          .content {
+              background-color: white; /* White background for the text content */
+              padding: 20px;
+              margin: 20px;
+              border-radius: 5px; /* Optional: Rounded corners for the content box */
+          }
+          .logo-container {
+              text-align: center; 
+              margin-bottom: 20px;
+              max-width: 100%; /* Ensure the container doesn't exceed the viewport width */
+          }
+          .logo-container img {
+              width: 100%; /* Make the logo take up the full width of its container */
+          }
+            </style>
+        </head>
+        <body>
+            <div class="logo-container">
+                <img src="https://storage.googleapis.com/jemma-b0fcd.appspot.com/Logo/logo.png" alt="Company Logo">
+            </div>
+            <hr>
+            <div class="content">
+                Dear ${ConsumerfullName},<br><br>
+                We hope this email finds you well.<br><br>
+                Your booking for ${eventName} is successful. Below is the status of your booking:<br><br>
+                <strong style="font-size: 1.3em;">${bookingData.status}</strong><br><br>
+                Please do not hesitate to reach out if you have any questions or require further information.<br><br>
+                Kind regards,<br>
+                Jemma
+            </div>
+        </body>
+        </html>
+    `;
             
             const msg = {
                 to: email,
                 from: 'jemmaaugroup@gmail.com', // Your verified sender address
                 subject: 'Booking Notification',
-                text: emailMessage,
+                html: emailMessage,
                 // html: '<strong>Optional HTML content</strong>', // Optional HTML content
             };
 
@@ -307,10 +352,50 @@ exports.monitorBookingStatusChange = functions.firestore
             // Check if the consumer has NeedEmailInformed set to true
             const consumerSnapshot = await admin.firestore().collection('users').doc(consumerId).get();
             const consumerData = consumerSnapshot.data();
+            const ConsumerfullName = consumerData? consumerData.fullName : null;
             if (consumerData && consumerData.NeedEmailInformed) {
                 // Send an email to the consumer using SendGrid
                 const email = consumerData.email;
-                const emailMessage = notificationMessage;
+                const emailMessage = `
+                <html>
+                <head>
+                    <style>
+                    body {
+                      font-family: Arial, sans-serif; /* Optional: Set a default font */
+                  }
+                  .content {
+                      background-color: white; /* White background for the text content */
+                      padding: 20px;
+                      margin: 20px;
+                      border-radius: 5px; /* Optional: Rounded corners for the content box */
+                  }
+                  .logo-container {
+                      text-align: center; 
+                      margin-bottom: 20px;
+                      max-width: 100%; /* Ensure the container doesn't exceed the viewport width */
+                  }
+                  .logo-container img {
+                      width: 100%; /* Make the logo take up the full width of its container */
+                  }
+                    </style>
+                </head>
+                <body>
+                    <div class="logo-container">
+                        <img src="https://storage.googleapis.com/jemma-b0fcd.appspot.com/Logo/logo.png" alt="Company Logo">
+                    </div>
+                    <hr>
+                    <div class="content">
+                        Dear ${ConsumerfullName},<br><br>
+                        We hope this email finds you well.<br><br>
+                        Your booking for ${eventName} status has changed. Below is the updated status of your booking:<br><br>
+                        <strong style="font-size: 1.3em;">${afterData.status}</strong><br><br>
+                        Please do not hesitate to reach out if you have any questions or require further information.<br><br>
+                        Kind regards,<br>
+                        Jemma
+                    </div>
+                </body>
+                </html>
+            `;
                 
                 const msg = {
                     to: email,
@@ -329,10 +414,50 @@ exports.monitorBookingStatusChange = functions.firestore
             // Check if the tradie has NeedEmailInformed set to true
             const tradieSnapshot = await admin.firestore().collection('users').doc(tradieId).get();
             const tradieData = tradieSnapshot.data();
+            const tradiefullName = tradieData ? tradieData.fullName : null;
             if (tradieData && tradieData.NeedEmailInformed) {
                 // Send an email to the tradie using SendGrid
                 const email = tradieData.email;
-                const emailMessage = notificationMessage;
+                const emailMessage = `
+                <html>
+                <head>
+                    <style>
+                    body {
+                      font-family: Arial, sans-serif; /* Optional: Set a default font */
+                  }
+                  .content {
+                      background-color: white; /* White background for the text content */
+                      padding: 20px;
+                      margin: 20px;
+                      border-radius: 5px; /* Optional: Rounded corners for the content box */
+                  }
+                  .logo-container {
+                      text-align: center; 
+                      margin-bottom: 20px;
+                      max-width: 100%; /* Ensure the container doesn't exceed the viewport width */
+                  }
+                  .logo-container img {
+                      width: 100%; /* Make the logo take up the full width of its container */
+                  }
+                    </style>
+                </head>
+                <body>
+                    <div class="logo-container">
+                        <img src="https://storage.googleapis.com/jemma-b0fcd.appspot.com/Logo/logo.png" alt="Company Logo">
+                    </div>
+                    <hr>
+                    <div class="content">
+                        Dear ${tradiefullName},<br><br>
+                        We hope this email finds you well.<br><br>
+                        Your booking for ${eventName} status has changed. Below is the updated status of your booking:<br><br>
+                        <strong style="font-size: 1.3em;">${afterData.status}</strong><br><br>
+                        Please do not hesitate to reach out if you have any questions or require further information.<br><br>
+                        Kind regards,<br>
+                        Jemma
+                    </div>
+                </body>
+                </html>
+            `;
                 
                 const msg = {
                     to: email,
@@ -419,17 +544,61 @@ exports.monitorNewMessages = functions.firestore
         // Check if the receiver has NeedEmailInformed set to true
         const receiverSnapshot = await admin.firestore().collection('users').doc(receiverId).get();
         const receiverData = receiverSnapshot.data();
+        const receiverName = receiverData ? receiverData.fullName : 'Unknown';  // Get the receiver's full name
         if (receiverData && receiverData.NeedEmailInformed) {
             // Send an email to the receiver using SendGrid
             const email = receiverData.email; // Assuming the user document has an email field
-            const emailMessage = `You have a new message from ${senderName}: ${message}`;
+            const emailMessage = `
+            <html>
+            <head>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif; /* Optional: Set a default font */
+                    }
+                    .content {
+                        background-color: white; /* White background for the text content */
+                        padding: 20px;
+                        margin: 20px;
+                        border-radius: 5px; /* Optional: Rounded corners for the content box */
+                    }
+                    .logo-container {
+                        text-align: center; 
+                        margin-bottom: 20px;
+                        max-width: 100%; /* Ensure the container doesn't exceed the viewport width */
+                    }
+                    .logo-container img {
+                        width: 100%; /* Make the logo take up the full width of its container */
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="logo-container">
+                    <img src="https://storage.googleapis.com/jemma-b0fcd.appspot.com/Logo/logo.png" alt="Company Logo">
+                </div>
+                <hr> <!-- Horizontal line to separate the logo and the content -->
+                <div class="content">
+                    Dear ${receiverName},<br><br>
             
+                    We hope this email finds you well.<br><br>
+            
+                    You have received a new message from ${senderName}. Below is the content of the message:<br><br>
+            
+                    <strong style="font-size: 1.3em;">${message}</strong><br><br>  <!-- Increased font size and made it bold -->
+            
+                    Please do not hesitate to reach out if you have any questions or require further information.<br><br>
+            
+                    Kind regards,<br>
+                    Jemma
+                </div>
+            </body>
+            </html>            
+`;
+
             const msg = {
                 to: email,
                 from: 'jemmaaugroup@gmail.com', // Your verified sender address
-                subject: 'New Message Notification',
-                text: emailMessage,
-                // html: '<strong>Optional HTML content</strong>', // Optional HTML content
+                subject: 'New Chat Message Notification',
+                html: emailMessage, // Use the HTML content
             };
 
             try {
@@ -498,6 +667,7 @@ const handleDeauthorization = (connectedAccountId, application) => {
 app.listen(4242, () => console.log(`Node server listening on port ${4242}!`));
 
 
+
 // move from server.js
 // Connect webhook notification function 1.Define a new Firebase Cloud Function to handle webhooks:
 
@@ -506,7 +676,7 @@ app.listen(4242, () => console.log(`Node server listening on port ${4242}!`));
 // Add the Webhook Handling Cloud Function:
 exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
   let event;
-
+  const consumerId = req.body
   try {
     event = stripe.webhooks.constructEvent(
       req.rawBody,

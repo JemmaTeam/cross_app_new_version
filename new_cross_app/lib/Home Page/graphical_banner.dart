@@ -18,12 +18,13 @@ class GraphicalBanner extends StatelessWidget {
         decoration: BoxDecoration(
             image: const DecorationImage(
                 image: AssetImage("assets/images/banner_background.png"),
-                fit: BoxFit.fill),
+                fit: BoxFit.cover),
             boxShadow: defaultShadows,
             borderRadius: BorderRadius.circular(HomeState.borderRadius)),
 
         // AnimatedText container
-        child: Container(
+        child:Container(
+          margin: const EdgeInsets.all(20.0),
           child: FittedBox(
             child: Align(
               alignment: const Alignment(0, -.55),

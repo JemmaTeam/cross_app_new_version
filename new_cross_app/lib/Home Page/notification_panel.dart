@@ -34,7 +34,7 @@ class _NotificationPanelState extends State<NotificationPanel> {
         .then((doc) {
       if (doc.exists && doc.data()!.containsKey('NeedEmailInformed')) {
         setState(() {
-          _wantEmailNotification = doc['NeedEmailInformed'];
+          _wantEmailNotification = doc.data()!['NeedEmailInformed'];
         });
       }
     });
@@ -74,80 +74,77 @@ class _NotificationPanelState extends State<NotificationPanel> {
         color: Colors.grey[100],
       ),
       width: 300,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: Column(
-              children: [
-                Expanded(
-                  child: StreamBuilder<QuerySnapshot>(
-                    stream: userNotifications,
-                    builder: (BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                      if (snapshot.hasError) {
-                        return const Text('Something went wrong');
-                      }
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            StreamBuilder<QuerySnapshot>(
+              stream: userNotifications,
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  return const Text('Something went wrong');
+                }
 
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Text("Loading...");
-                      }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Text("Loading...");
+                }
 
-                      final notifications = snapshot.data!.docs;
+                final notifications = snapshot.data!.docs;
 
-                      return ListView.builder(
-                        itemCount: notifications.length + 2,
-                        itemBuilder: (context, index) {
-                          if (index == 0) {
-                            return const DrawerHeader(
-                              child: Center(
-                                child: Text('Notifications',
-                                    style: TextStyle(
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.w500)),
-                              ),
-                            );
-                          } else if (index == notifications.length + 1) {
-                            return Container(
-                              padding: const EdgeInsets.all(32.0),
-                              child: const Text(
-                                "That's all your notifications from the last 30 days.",
-                                softWrap: true,
-                              ),
-                            );
-                          } else {
-                            final notification = notifications[index - 1];
-                            final content = notification.get('message');
-                            final docId = notification.id;
-                            final isRead = notification.get('read');
-                            return _buildNotifications(content, docId, isRead);
-                          }
-                        },
+                return ListView.builder(
+                  shrinkWrap:
+                      true, // This ensures that the ListView doesn't scroll separately
+                  physics:
+                      NeverScrollableScrollPhysics(), // This ensures that the ListView doesn't interfere with the outer SingleChildScrollView
+                  itemCount: notifications.length +
+                      2, // +2 to account for header and footer
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return const DrawerHeader(
+                        child: Center(
+                          child: Text('Notifications',
+                              style: TextStyle(
+                                  fontSize: 25, fontWeight: FontWeight.w500)),
+                        ),
                       );
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 50.0),
-                  child: CheckboxListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text("Do you want email notifications?"),
-                    value: _wantEmailNotification,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        _wantEmailNotification = value!;
-                        FirebaseFirestore.instance
-                            .collection('users')
-                            .doc(consumerId)
-                            .update(
-                                {'NeedEmailInformed': _wantEmailNotification});
-                      });
-                    },
-                  ),
-                )
-              ],
+                    } else if (index == notifications.length + 1) {
+                      return Container(
+                        padding: const EdgeInsets.all(32.0),
+                        child: const Text(
+                          "That's all your notifications from the last 30 days.",
+                          softWrap: true,
+                        ),
+                      );
+                    } else {
+                      final notification = notifications[index - 1];
+                      final content = notification.get('message');
+                      final docId = notification.id;
+                      final isRead = notification.get('read');
+                      return _buildNotifications(content, docId, isRead);
+                    }
+                  },
+                );
+              },
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.only(left: 50.0),
+              child: CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text("Do you want email notifications?"),
+                value: _wantEmailNotification,
+                onChanged: (bool? value) {
+                  setState(() {
+                    _wantEmailNotification = value!;
+                    FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(consumerId)
+                        .update({'NeedEmailInformed': _wantEmailNotification});
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
