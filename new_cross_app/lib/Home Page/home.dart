@@ -340,7 +340,7 @@ class HomeState extends State<Home> {
         ),
         body: SafeArea(
           child: Scrollbar(
-            isAlwaysShown: isWeb(),
+            thumbVisibility: isWeb(),
             controller: scrollController,
             child: SingleChildScrollView(
               controller: scrollController,
