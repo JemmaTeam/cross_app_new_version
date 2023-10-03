@@ -233,7 +233,6 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                             isImageUploaded = true;
                                           });
 
-
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(
                                               content: Text("Image uploaded successfully"),
