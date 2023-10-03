@@ -401,7 +401,7 @@ exports.monitorBookingStatusChange = functions.firestore
                     to: email,
                     from: 'jemmaaugroup@gmail.com', // Your verified sender address
                     subject: 'Booking Status Change Notification',
-                    text: emailMessage,
+                    html: emailMessage,
                 };
 
                 try {
@@ -463,7 +463,7 @@ exports.monitorBookingStatusChange = functions.firestore
                     to: email,
                     from: 'jemmaaugroup@gmail.com', // Your verified sender address
                     subject: 'Booking Status Change Notification',
-                    text: emailMessage,
+                    html: emailMessage,
                 };
 
                 try {
