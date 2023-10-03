@@ -259,7 +259,7 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                         print("File bytes are null");
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
-                                            content: Text("File selection error"),
+                                            content: Text("File selection error1"),
                                           ),
                                         );
                                       }
@@ -275,7 +275,7 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                     print("Error picking file: $e");
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text("File selection error"),
+                                        content: Text("File selection error2"),
                                       ),
                                     );
                                   }
