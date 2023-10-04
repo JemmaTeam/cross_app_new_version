@@ -8,11 +8,12 @@ const sgMail = require('@sendgrid/mail');
 const sendgridApiKey = functions.config().sendgrid.key;
 sgMail.setApiKey(sendgridApiKey);
 admin.initializeApp();
+
+const express = require('express');
+const bodyParser = require('body-parser');
+const app = express();
 const stripe = require("stripe")('sk_test_51MxqKoCLNEXP0Gmv34Ixc05ATpLLTkXxK1VmLe4rng6eaiPqiyiDn5iYhaeGA9iZXEdDYIEDZDuTQMMvy4lRKW3J003L5D13iI');
-// const stripe = require('stripe')(functions.config().stripe.secret_key);
-
-
-//const stripeFunctions = require('./path_to_server.js'); // adjust the path accordingly
+const endpointSecret = 'whsec_j8jlLf5euoIVW2LESEFPp7mxWuXwpZqD';
 
 //exports.handleStripeWebhooks = stripeFunctions.handleStripeWebhooks;
 
@@ -611,52 +612,72 @@ exports.monitorNewMessages = functions.firestore
         return null;
     });
 
+    // Using the Spark framework (http://sparkjava.com)
 
+    public Object handle(Request request, Response response) {
+      String payload = request.body();
+      Event event = null;
 
-// move from server.js
-// Connect webhook notification function 1.Define a new Firebase Cloud Function to handle webhooks:
+      try {
+        event = ApiResource.GSON.fromJson(payload, Event.class);
+      } catch (JsonSyntaxException e) {
+        // Invalid payload
+        response.status(400);
+        return "";
+      }
 
+      // Deserialize the nested object inside the event
+      EventDataObjectDeserializer dataObjectDeserializer = event.getDataObjectDeserializer();
+      StripeObject stripeObject = null;
+      if (dataObjectDeserializer.getObject().isPresent()) {
+        stripeObject = dataObjectDeserializer.getObject().get();
+      } else {
+        // Deserialization failed, probably due to an API version mismatch.
+        // Refer to the Javadoc documentation on `EventDataObjectDeserializer` for
+        // instructions on how to handle this case, or return an error here.
+      }
 
-
-// Add the Webhook Handling Cloud Function:
-exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
-  let event;
-  const consumerId = req.body
-  try {
-    event = stripe.webhooks.constructEvent(
-      req.rawBody,
-      req.headers['stripe-signature'],
-      'whsec_bA8KhZrrEnOuOnxzBuk2QC4VYJcEJJVQ' // This is the webhook's Signing secret
-    );
-  } catch (err) {
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+app.use(bodyParser.json({
+  verify: (req, res, buf) => {
+    req.rawBody = buf.toString();
   }
+}));
+
+
+// Handle Stripe events
+app.post('/webhook', (request, response) => {
+  const sig = request.headers['stripe-signature'];
+
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(request.rawBody, sig, endpointSecret);
+  } catch (err) {
+    return response.status(400).send(`Webhook error: ${err.message}`);
+  }
+
 
   // Handle the event
   switch (event.type) {
-    case 'payment_intent.succeeded':
-      const paymentIntent = event.data.object;
-
-      // Assuming the consumerId (or any user identifier) is stored as metadata in the PaymentIntent
-      const consumerId = paymentIntent.metadata.consumerId;
-
-      if (consumerId) {
-        const notificationMessage = `Your payment of $${paymentIntent.amount / 100} was successful!`;
-        await admin.firestore().collection('users').doc(consumerId).collection('notifications').add({
-            message: notificationMessage,
-            timestamp: admin.firestore.FieldValue.serverTimestamp(),
-            read: false
-        });
-      } else {
-        console.error("ConsumerId not found in PaymentIntent metadata.");
-      }
+    case 'checkout.session.completed':
+      message = 'Checkout session has been completed.';
       break;
-    // Add more cases for other events
+    case 'charge.succeeded':
+      message = 'Charge has been successful.';
+      break;
+    case 'payment_intent.succeeded':
+      message = 'Payment intent was successful.';
+      break;
+    case 'payment_intent.created':
+      message = 'A new payment intent was created.';
+      break;
     default:
-      // Unexpected event type
-      return res.status(400).end();
+      console.log(`Unhandled event type ${event.type}`);
   }
 
-  // Return a successful response to Stripe
-  res.json({ received: true });
-});
+
+
+  // Return a response to acknowledge receipt of the event
+    response.json({received: true});
+  });
+
+  app.listen(4242, () => console.log('Running on port 4242'));
