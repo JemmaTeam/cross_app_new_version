@@ -612,40 +612,24 @@ exports.monitorNewMessages = functions.firestore
         return null;
     });
 
-    // Using the Spark framework (http://sparkjava.com)
-
-    public Object handle(Request request, Response response) {
-      String payload = request.body();
-      Event event = null;
-
-      try {
-        event = ApiResource.GSON.fromJson(payload, Event.class);
-      } catch (JsonSyntaxException e) {
-        // Invalid payload
-        response.status(400);
-        return "";
-      }
-
-      // Deserialize the nested object inside the event
-      EventDataObjectDeserializer dataObjectDeserializer = event.getDataObjectDeserializer();
-      StripeObject stripeObject = null;
-      if (dataObjectDeserializer.getObject().isPresent()) {
-        stripeObject = dataObjectDeserializer.getObject().get();
-      } else {
-        // Deserialization failed, probably due to an API version mismatch.
-        // Refer to the Javadoc documentation on `EventDataObjectDeserializer` for
-        // instructions on how to handle this case, or return an error here.
-      }
 
 app.use(bodyParser.json({
   verify: (req, res, buf) => {
     req.rawBody = buf.toString();
   }
 }));
+app.use((req, res, next) => {
+  if (req.originalUrl === "/webhook") {
+    next();
+  } else {
+    bodyParser.json()(req, res, next);
+  }
+});
+
 
 
 // Handle Stripe events
-app.post('/webhook', (request, response) => {
+app.post('/webhook', bodyParser.raw({type: 'application/json'}),  (request, response) => {
   const sig = request.headers['stripe-signature'];
 
   let event;
@@ -654,7 +638,6 @@ app.post('/webhook', (request, response) => {
   } catch (err) {
     return response.status(400).send(`Webhook error: ${err.message}`);
   }
-
 
   // Handle the event
   switch (event.type) {
@@ -673,9 +656,6 @@ app.post('/webhook', (request, response) => {
     default:
       console.log(`Unhandled event type ${event.type}`);
   }
-
-
-
   // Return a response to acknowledge receipt of the event
     response.json({received: true});
   });
