@@ -642,24 +642,12 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {co
     }
     switch (event.type) {
         case 'checkout.session.completed':
-          const paymentIntentId = event.data.object.payment_intent;
-          const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-          if (paymentIntent.status === 'succeeded') {
-            //userId:
-            const userId = event.data.object.metadata.userId;
-            // TODO:支付成功
-          } else {
-            // TODO:支付失败
-          }
+          message = 'Checkout completed.';
           break;
         case 'charge.succeeded':
           message = 'Charge has been successful.';
           break;
         case 'payment_intent.succeeded':
-          await admin.firestore().collection('webhook').doc().add({
-                    succeed: event.data.object.customer
-                });
-          //admin.firestore().collection('webhook').add({succeed:event.data.object.customer});
           message = 'Payment intent was successful.';
           break;
         case 'payment_intent.created':
