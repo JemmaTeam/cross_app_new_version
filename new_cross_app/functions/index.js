@@ -618,11 +618,13 @@ exports.monitorNewMessages = functions.firestore
     });
 
 
+
 app.use(bodyParser.json({
   verify: (req, res, buf) => {
     req.rawBody = buf.toString();
   }
 }));
+
 app.use((req, res, next) => {
   if (req.originalUrl === "/webhook") {
     next();
@@ -631,11 +633,12 @@ app.use((req, res, next) => {
   }
 });
 
-//Account webhook
 exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
     let event;
     const signature = req.headers["stripe-signature"];
     let message = '';
+    let userId;
+
     try {
         event = stripe.webhooks.constructEvent(req.rawBody, signature, endpointSecret);
     } catch (err) {
@@ -645,55 +648,35 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
 
     switch (event.type) {
         case 'checkout.session.completed':
-            message = 'Checkout completed.';
+            const paymentIntentId = event.data.object.payment_intent;
+            const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+            if (paymentIntent.status === 'succeeded') {
+                if(event.data.object.metadata && event.data.object.metadata.userId) {
+                    userId = event.data.object.metadata.userId;
+                    message = 'Payment was successful.';
+                }
+            } else {
+                // Handle payment failure.
+                console.log('Payment failed.');
+                res.json({received: true});
+                return;
+            }
             break;
-        case 'charge.succeeded':
-            message = 'Charge has been successful.';
-            break;
-        case 'payment_intent.succeeded':
-            message = 'Payment intent was successful.';
-            break;
-        case 'payment_intent.created':
-            message = 'A new payment intent was created.';
-            break;
+
         default:
             console.log(`Unhandled event type ${event.type}`);
             res.json({received: true});
             return;
     }
 
-    const userId = event.data.object.metadata.userId;
-
-    // Check if the user has NeedEmailInformed set to true
-    const userSnapshot = await admin.firestore().collection('users').doc(userId).get();
-    const userData = userSnapshot.data();
-
-    if (userData && userData.NeedEmailInformed) {
-        const emailMessage = `
-        <html>
-        //email template like above
-        </html>
-    `;
-
-        const msg = {
-            to: userData.email,
-            from: 'jemmaaugroup@gmail.com',
-            subject: 'Stripe Notification',
-            html: emailMessage,
-        };
-
-        try {
-            await sgMail.send(msg);
-        } catch (error) {
-            console.error('Error sending email:', error);
-        }
+    if (message && userId) {
+        await admin.firestore().collection('users').doc(userId).collection('notifications').add({
+            message: message,
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            read: false
+        });
     }
-
-    await admin.firestore().collection('users').doc(userId).collection('notifications').add({
-        message: message,
-        timestamp: admin.firestore.FieldValue.serverTimestamp(),
-        read: false
-    });
 
     res.json({received: true});
 });
