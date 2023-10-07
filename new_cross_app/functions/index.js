@@ -632,32 +632,70 @@ app.use((req, res, next) => {
 });
 
 //Account webhook
-exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {cors(req, res,async () =>{
+exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
     let event;
     const signature = req.headers["stripe-signature"];
-    try{
-        event = stripe.webhooks.constructEvent(req.rawBody, signature,endpointSecret);
-    }catch (err) {
+    let message = '';
+    try {
+        event = stripe.webhooks.constructEvent(req.rawBody, signature, endpointSecret);
+    } catch (err) {
         res.status(400).send(`Webhook Error: ${err.message}`);
+        return;
     }
+
     switch (event.type) {
         case 'checkout.session.completed':
-          message = 'Checkout completed.';
-          break;
+            message = 'Checkout completed.';
+            break;
         case 'charge.succeeded':
-          message = 'Charge has been successful.';
-          break;
+            message = 'Charge has been successful.';
+            break;
         case 'payment_intent.succeeded':
-          message = 'Payment intent was successful.';
-          break;
+            message = 'Payment intent was successful.';
+            break;
         case 'payment_intent.created':
-          message = 'A new payment intent was created.';
-          break;
+            message = 'A new payment intent was created.';
+            break;
         default:
-          console.log(`Unhandled event type ${event.type}`);
-      }
-      res.json({received: true});
+            console.log(`Unhandled event type ${event.type}`);
+            res.json({received: true});
+            return;
+    }
 
+    const userId = event.data.object.metadata.userId;
+
+    // Check if the user has NeedEmailInformed set to true
+    const userSnapshot = await admin.firestore().collection('users').doc(userId).get();
+    const userData = userSnapshot.data();
+
+    if (userData && userData.NeedEmailInformed) {
+        const emailMessage = `
+        <html>
+        //email template like above
+        </html>
+    `;
+
+        const msg = {
+            to: userData.email,
+            from: 'jemmaaugroup@gmail.com',
+            subject: 'Stripe Notification',
+            html: emailMessage,
+        };
+
+        try {
+            await sgMail.send(msg);
+        } catch (error) {
+            console.error('Error sending email:', error);
+        }
+    }
+
+    await admin.firestore().collection('users').doc(userId).collection('notifications').add({
+        message: message,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        read: false
+    });
+
+    res.json({received: true});
 });
-});
+
 
