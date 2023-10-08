@@ -12,10 +12,12 @@ admin.initializeApp();
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
+app.use(express.json());
+const Stripe = require('stripe');
 const stripe = require("stripe")('sk_test_51MxqKoCLNEXP0Gmv34Ixc05ATpLLTkXxK1VmLe4rng6eaiPqiyiDn5iYhaeGA9iZXEdDYIEDZDuTQMMvy4lRKW3J003L5D13iI');
 const endpointSecret = 'whsec_j8jlLf5euoIVW2LESEFPp7mxWuXwpZqD';
 
-//exports.handleStripeWebhooks = stripeFunctions.handleStripeWebhooks;
+
 
 const sendLink=function(accountLinks){
     return accountLinks.url
@@ -59,6 +61,9 @@ exports.StripeCheckOut = functions.https.onRequest(async (req, res) => {
     const { price, userId, product_name } = req.body;
     try {
       const session = await stripe.checkout.sessions.create({
+        metadata: {
+            userId: userId, // Record userId
+          },
         mode: 'payment',
         line_items: [
           {
@@ -612,30 +617,7 @@ exports.monitorNewMessages = functions.firestore
         return null;
     });
 
-    // Using the Spark framework (http://sparkjava.com)
 
-    public Object handle(Request request, Response response) {
-      String payload = request.body();
-      Event event = null;
-
-      try {
-        event = ApiResource.GSON.fromJson(payload, Event.class);
-      } catch (JsonSyntaxException e) {
-        // Invalid payload
-        response.status(400);
-        return "";
-      }
-
-      // Deserialize the nested object inside the event
-      EventDataObjectDeserializer dataObjectDeserializer = event.getDataObjectDeserializer();
-      StripeObject stripeObject = null;
-      if (dataObjectDeserializer.getObject().isPresent()) {
-        stripeObject = dataObjectDeserializer.getObject().get();
-      } else {
-        // Deserialization failed, probably due to an API version mismatch.
-        // Refer to the Javadoc documentation on `EventDataObjectDeserializer` for
-        // instructions on how to handle this case, or return an error here.
-      }
 
 app.use(bodyParser.json({
   verify: (req, res, buf) => {
@@ -643,41 +625,60 @@ app.use(bodyParser.json({
   }
 }));
 
-
-// Handle Stripe events
-app.post('/webhook', (request, response) => {
-  const sig = request.headers['stripe-signature'];
-
-  let event;
-  try {
-    event = stripe.webhooks.constructEvent(request.rawBody, sig, endpointSecret);
-  } catch (err) {
-    return response.status(400).send(`Webhook error: ${err.message}`);
+app.use((req, res, next) => {
+  if (req.originalUrl === "/webhook") {
+    next();
+  } else {
+    bodyParser.json()(req, res, next);
   }
+});
+
+exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
+    let event;
+    const signature = req.headers["stripe-signature"];
+    let message = '';
+    let userId;
+
+    try {
+        event = stripe.webhooks.constructEvent(req.rawBody, signature, endpointSecret);
+    } catch (err) {
+        res.status(400).send(`Webhook Error: ${err.message}`);
+        return;
+    }
+
+    switch (event.type) {
+        case 'checkout.session.completed':
+            const paymentIntentId = event.data.object.payment_intent;
+            const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+            if (paymentIntent.status === 'succeeded') {
+                if(event.data.object.metadata && event.data.object.metadata.userId) {
+                    userId = event.data.object.metadata.userId;
+                    message = 'Payment was successful.';
+                }
+            } else {
+                // Handle payment failure.
+                console.log('Payment failed.');
+                res.json({received: true});
+                return;
+            }
+            break;
+
+        default:
+            console.log(`Unhandled event type ${event.type}`);
+            res.json({received: true});
+            return;
+    }
+
+    if (message && userId) {
+        await admin.firestore().collection('users').doc(userId).collection('notifications').add({
+            message: message,
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            read: false
+        });
+    }
+
+    res.json({received: true});
+});
 
 
-  // Handle the event
-  switch (event.type) {
-    case 'checkout.session.completed':
-      message = 'Checkout session has been completed.';
-      break;
-    case 'charge.succeeded':
-      message = 'Charge has been successful.';
-      break;
-    case 'payment_intent.succeeded':
-      message = 'Payment intent was successful.';
-      break;
-    case 'payment_intent.created':
-      message = 'A new payment intent was created.';
-      break;
-    default:
-      console.log(`Unhandled event type ${event.type}`);
-  }
-
-
-
-  // Return a response to acknowledge receipt of the event
-    response.json({received: true});
-  });
-
-  app.listen(4242, () => console.log('Running on port 4242'));

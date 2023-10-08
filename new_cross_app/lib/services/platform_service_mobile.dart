@@ -11,3 +11,5 @@ class PlatformServiceMobile implements PlatformService {
     }
   }
 }
+
+PlatformService createPlatformService() => PlatformServiceMobile();
