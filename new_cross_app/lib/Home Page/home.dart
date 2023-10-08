@@ -158,7 +158,7 @@ class HomeState extends State<Home> {
         endDrawer: const NotificationPanel(),
         appBar: AppBar(
           actions: [
-            if (_isLoggedIn) ...[
+            if (userId != '' && _isLoggedIn) ...[
               // Use spread operator to conditionally add multiple widgets
               Builder(
                 builder: (context) => StreamBuilder<QuerySnapshot>(
@@ -242,7 +242,7 @@ class HomeState extends State<Home> {
                 ],
               ),
             ],
-            if (!_isLoggedIn)
+            if (userId == '' || !_isLoggedIn)
               IconButton(
                 icon: Icon(Icons.login),
                 onPressed: () {
