@@ -58,11 +58,13 @@ exports.createConnectAccount = functions.https.onRequest(async (req, res) => {co
 //NOTE: this is function for checkout
 exports.StripeCheckOut = functions.https.onRequest(async (req, res) => {
   cors(req, res, async () => {
-    const { price, userId, product_name } = req.body;
+    const { price, consumerId, tradieId, product_name,consumerName } = req.body;
     try {
       const session = await stripe.checkout.sessions.create({
         metadata: {
-            userId: userId, // Record userId
+            consumerId: consumerId,
+             tradieId: tradieId,
+             consumerName: consumerName,// Record userId
           },
         mode: 'payment',
         line_items: [
@@ -634,51 +636,68 @@ app.use((req, res, next) => {
 });
 
 exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
-    let event;
-    const signature = req.headers["stripe-signature"];
-    let message = '';
-    let userId;
+    cors(req, res, async () => {
+        let event;
+        const signature = req.headers["stripe-signature"];
+        let message_consumer = '';
+        let message_tradie = '';
+        let consumerId;
+        let tradieId;
+        let consumerName;
 
-    try {
-        event = stripe.webhooks.constructEvent(req.rawBody, signature, endpointSecret);
-    } catch (err) {
-        res.status(400).send(`Webhook Error: ${err.message}`);
-        return;
-    }
-
-    switch (event.type) {
-        case 'checkout.session.completed':
-            const paymentIntentId = event.data.object.payment_intent;
-            const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-
-            if (paymentIntent.status === 'succeeded') {
-                if(event.data.object.metadata && event.data.object.metadata.userId) {
-                    userId = event.data.object.metadata.userId;
-                    message = 'Payment was successful.';
-                }
-            } else {
-                // Handle payment failure.
-                console.log('Payment failed.');
-                res.json({received: true});
-                return;
-            }
-            break;
-
-        default:
-            console.log(`Unhandled event type ${event.type}`);
-            res.json({received: true});
+        try {
+            event = stripe.webhooks.constructEvent(req.rawBody, signature, endpointSecret);
+        } catch (err) {
+            res.status(400).send(`Webhook Error: ${err.message}`);
             return;
-    }
+        }
 
-    if (message && userId) {
-        await admin.firestore().collection('users').doc(userId).collection('notifications').add({
-            message: message,
-            timestamp: admin.firestore.FieldValue.serverTimestamp(),
-            read: false
-        });
-    }
+        switch (event.type) {
+            case 'checkout.session.completed':
+                const paymentIntentId = event.data.object.payment_intent;
+                const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-    res.json({received: true});
+                if (paymentIntent.status === 'succeeded') {
+                    if (event.data.object.metadata && event.data.object.metadata.userId) {
+                        consumerId = event.data.object.metadata.consumerId;
+                        tradieId = event.data.object.metadata.tradieId;
+                        consumerName = event.data.object.metadata.consumerName;
+                        message_consumer = 'Payment was successful.';
+                        message_tradie = consumerName + ' has paid your quote';
+                    }
+                } else {
+
+                    console.log('Payment failed.');
+                    res.json({ received: true });
+                    return;
+                }
+                break;
+
+            default:
+                console.log(`Unhandled event type ${event.type}`);
+                res.json({ received: true });
+                return;
+        }
+
+        if (message_consumer && consumerId) {
+            await admin.firestore().collection('users').doc(consumerId).collection('notifications').add({
+                message: message_consumer,
+                timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                read: false
+            });
+
+        }
+
+        if (message_tradie && tradieId) {
+            await admin.firestore().collection('users').doc(tradieId).collection('notifications').add({
+                message: message_tradie,
+                timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                read: false
+            });
+        }
+        res.json({ received: true });
+    });
 });
+
 
 

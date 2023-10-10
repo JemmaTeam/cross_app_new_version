@@ -230,8 +230,10 @@ class BookingEditorState extends State<BookingEditor> {
                         if(quote != 0){
                           await createPaymentIntent({
                             'price':(quote*100).toString(),
-                            'userId': _consumerId,
+                            'consumerId': _consumerId,
+                            'tradieId': _tradieId,
                             'product_name': _subject,
+                            'consumerName': _consumerName,
                           });
                         }
                         bookingRef
