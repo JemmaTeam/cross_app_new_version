@@ -96,6 +96,10 @@ Future<String> createPaymentIntent(Map<String,String> body) async{
     if(res.statusCode == 200){
       print('success');
       Map<String, dynamic> responseMap = json.decode(res.body);
+      print('check');
+      print(responseMap['consumerId']);
+      print(responseMap['tradieId']);
+      print(responseMap['consumerName']);
       amount = int.parse(responseMap['amount']!.toString());
       _launchURL(responseMap['url']!.toString());
     }else{

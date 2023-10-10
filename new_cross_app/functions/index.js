@@ -62,9 +62,9 @@ exports.StripeCheckOut = functions.https.onRequest(async (req, res) => {
     try {
       const session = await stripe.checkout.sessions.create({
         metadata: {
-            'consumerId': consumerId,
-            'tradieId': tradieId,
-            'consumerName': consumerName,// Record information
+            consumerId: consumerId,
+            tradieId: tradieId,
+            consumerName: consumerName, // Record information
         },
         mode: 'payment',
         line_items: [
@@ -636,7 +636,7 @@ app.use((req, res, next) => {
 });
 
 exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
-    cors(req, res, async () => {
+    //cors(req, res, async () => {
         let event;
         const signature = req.headers["stripe-signature"];
         let message_consumer = '';
@@ -666,7 +666,6 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
                         message_tradie = consumerName + ' has paid your quote';
                     }
                 } else {
-
                     console.log('Payment failed.');
                     res.json({ received: true });
                     return;
@@ -696,7 +695,7 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
             });
         }
         res.json({ received: true });
-    });
+  //  });
 });
 
 

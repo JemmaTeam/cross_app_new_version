@@ -141,8 +141,10 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                     }else{
                       await createPaymentIntent({
                         'price':(quote*100).toString(),
-                        'userId': _consumerId,
+                        'consumerId': _consumerId,
+                        'tradieId': _tradieId,
                         'product_name': _subject,
+                        'consumerName': _consumerName,
                       });
                     }
                     bookingRef
