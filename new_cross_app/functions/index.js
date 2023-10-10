@@ -58,14 +58,14 @@ exports.createConnectAccount = functions.https.onRequest(async (req, res) => {co
 //NOTE: this is function for checkout
 exports.StripeCheckOut = functions.https.onRequest(async (req, res) => {
   cors(req, res, async () => {
-    const { price, consumerId, tradieId, product_name,consumerName } = req.body;
+    const { price, consumerId, tradieId, product_name, consumerName } = req.body;
     try {
       const session = await stripe.checkout.sessions.create({
         metadata: {
-            consumerId: consumerId,
-             tradieId: tradieId,
-             consumerName: consumerName,// Record userId
-          },
+            'consumerId': consumerId,
+            'tradieId': tradieId,
+            'consumerName': consumerName,// Record information
+        },
         mode: 'payment',
         line_items: [
           {
