@@ -663,12 +663,13 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
                         message_consumer = 'Payment was successful.';
                         message_tradie = consumerName + ' has paid your quote';
                     }
+                    console.log(`message ${message_consumer}`);
                 } else {
                     console.log('Payment failed.');
                     res.json({ received: true });
                     return;
                 }
-                //break;
+                break;
 
             default:
                 console.log(`Unhandled event type ${event.type}`);
@@ -678,19 +679,20 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
         try{
             if (message_consumer && consumerId) {
                 await admin.firestore().collection('users').doc(consumerId).collection('notifications').add({
-                                            message: message_consumer,
-                                            timestamp: admin.firestore.FieldValue.serverTimestamp(),
-                                            read: false
+                    message: message_consumer,
+                    timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                    read: false,
                 });
             }
             if (message_tradie && tradieId) {
                 await admin.firestore().collection('users').doc(tradieId).collection('notifications').add({
-                                                        message: message_tradie,
-                                                        timestamp: admin.firestore.FieldValue.serverTimestamp(),
-                                                        read: false
+                    message: message_tradie,
+                    timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                    read: false,
+
                 });
             }
-
+            console.log(`message passed`);
 
         }catch(error){
             return res.send({error: error});
