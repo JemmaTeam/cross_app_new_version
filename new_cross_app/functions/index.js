@@ -8,7 +8,6 @@ const sgMail = require('@sendgrid/mail');
 const sendgridApiKey = functions.config().sendgrid.key;
 sgMail.setApiKey(sendgridApiKey);
 admin.initializeApp();
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
@@ -636,15 +635,14 @@ app.use((req, res, next) => {
 });
 
 exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
-    //cors(req, res, async () => {
+    cors(req, res, async () => {
         let event;
         const signature = req.headers["stripe-signature"];
-        let message_consumer = '';
-        let message_tradie = '';
+        message_consumer = '';
+        message_tradie = '';
         let consumerId;
         let tradieId;
         let consumerName;
-
         try {
             event = stripe.webhooks.constructEvent(req.rawBody, signature, endpointSecret);
         } catch (err) {
@@ -658,7 +656,7 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
                 const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
                 if (paymentIntent.status === 'succeeded') {
-                    if (event.data.object.metadata && event.data.object.metadata.userId) {
+                    if (event.data.object.metadata) {
                         consumerId = event.data.object.metadata.consumerId;
                         tradieId = event.data.object.metadata.tradieId;
                         consumerName = event.data.object.metadata.consumerName;
@@ -670,32 +668,36 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
                     res.json({ received: true });
                     return;
                 }
-                break;
+                //break;
 
             default:
                 console.log(`Unhandled event type ${event.type}`);
                 res.json({ received: true });
                 return;
         }
+        try{
+            if (message_consumer && consumerId) {
+                await admin.firestore().collection('users').doc(consumerId).collection('notifications').add({
+                                            message: message_consumer,
+                                            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                                            read: false
+                });
+            }
+            if (message_tradie && tradieId) {
+                await admin.firestore().collection('users').doc(tradieId).collection('notifications').add({
+                                                        message: message_tradie,
+                                                        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                                                        read: false
+                });
+            }
 
-        if (message_consumer && consumerId) {
-            await admin.firestore().collection('users').doc(consumerId).collection('notifications').add({
-                message: message_consumer,
-                timestamp: admin.firestore.FieldValue.serverTimestamp(),
-                read: false
-            });
 
+        }catch(error){
+            return res.send({error: error});
         }
 
-        if (message_tradie && tradieId) {
-            await admin.firestore().collection('users').doc(tradieId).collection('notifications').add({
-                message: message_tradie,
-                timestamp: admin.firestore.FieldValue.serverTimestamp(),
-                read: false
-            });
-        }
         res.json({ received: true });
-  //  });
+    });
 });
 
 
