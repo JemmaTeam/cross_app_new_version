@@ -107,8 +107,8 @@ exports.Transfer = functions.https.onRequest(async (req, res)=>{cors(req, res, a
             tradieId: tradieId,
             consumerName: consumerName,
             tradieName: tradieName,
-            amount: (parseInt(amount)/100).toString(),
-          }
+            amount: (parseInt(amount) / 100).toFixed(2), // Convert to human-readable currency format
+          },
         });
         return res.send(transfer.amount);
     }catch(error){
@@ -680,6 +680,11 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
                 }
                 break;
             case 'charge.succeeded':
+                const charge = event.data.object.charge;
+                const fund = charge.amount;
+                await admin.firestore().collection('fee').add({
+                     fee: fund
+                });
 
                 break;
             case 'transfer.created':
@@ -692,13 +697,14 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
                 amount = event.data.object.transfer.metadata.amount;
 
                 if (transfer.status == 'paid'){
-                    message_consumer = 'You have paid to ' +tradieName+' successfully.'
-                    message_tradie = 'You have been paied by '+consumerName+' with '+amount+' successfully.'.
+                    message_consumer = 'You have paid to ' +tradieName+' successfully.';
+                    message_tradie = 'You have been paied by '+consumerName+' with '+amount+' successfully.';
                 }
 
                 if (transfer.status == 'failed'){
-                     message_consumer = 'Transfer to tradie failed, please contact tradie.'
+                     message_consumer = 'Transfer to tradie failed, please contact tradie.';
                 }
+                break;
             default:
                 console.log(`Unhandled event type ${event.type}`);
                 res.json({ received: true });
