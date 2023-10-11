@@ -96,12 +96,19 @@ exports.StripeCheckOut = functions.https.onRequest(async (req, res) => {
 
 //Note: this is function for transfer to tradies account
 exports.Transfer = functions.https.onRequest(async (req, res)=>{cors(req, res, async()=>{
-    const {accountId, amount}= req.body;
+    const {accountId, consumerId, consumerName, tradieId, tradieName, amount}= req.body;
     try{
         const transfer = await stripe.transfers.create({
           amount: parseInt(amount),
           currency: 'aud',
           destination: accountId,
+          metadata: {
+            consumerId: consumerId,
+            tradieId: tradieId,
+            consumerName: consumerName,
+            tradieName: tradieName,
+            amount: (parseInt(amount)/100).toString(),
+          }
         });
         return res.send(transfer.amount);
     }catch(error){
@@ -638,11 +645,13 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
     cors(req, res, async () => {
         let event;
         const signature = req.headers["stripe-signature"];
-        message_consumer = '';
-        message_tradie = '';
+        let message_consumer;
+        let message_tradie;
         let consumerId;
         let tradieId;
         let consumerName;
+        let tradieName;
+        let amount;
         try {
             event = stripe.webhooks.constructEvent(req.rawBody, signature, endpointSecret);
         } catch (err) {
@@ -670,7 +679,26 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
                     return;
                 }
                 break;
+            case 'charge.succeeded':
 
+                break;
+            case 'transfer.created':
+                const transferId = event.data.object.transfer.id;
+                const transfer =stripe.Transfer.retrieve(transferId);
+                consumerId = event.data.object.transfer.metadata.consumerId;
+                tradieId = event.data.object.transfer.metadata.tradieId;
+                consumerName = event.data.object.transfer.metadata.consumerName;
+                tradieName = event.data.object.transfer.metadata.tradieName;
+                amount = event.data.object.transfer.metadata.amount;
+
+                if (transfer.status == 'paid'){
+                    message_consumer = 'You have paid to ' +tradieName+' successfully.'
+                    message_tradie = 'You have been paied by '+consumerName+' with '+amount+' successfully.'.
+                }
+
+                if (transfer.status == 'failed'){
+                     message_consumer = 'Transfer to tradie failed, please contact tradie.'
+                }
             default:
                 console.log(`Unhandled event type ${event.type}`);
                 res.json({ received: true });

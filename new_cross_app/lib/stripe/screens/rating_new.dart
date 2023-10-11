@@ -168,6 +168,10 @@ class _RatingState extends State<Rating> {
                               print((booking.quote*100*0.95).toString());
                               await confirmWork({
                                 'accountId': data['stripeId'],
+                                'consumerId': booking.consumerId,
+                                'consumerName': booking.consumerName,
+                                'tradieId': booking.tradieId,
+                                'tradieName': booking.tradieName,
                                 //TODO: Get Amount after deducting fee
                                 'amount': (booking.quote*100*0.95).toString(),
                               });
