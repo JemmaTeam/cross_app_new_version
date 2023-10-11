@@ -680,15 +680,15 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
                 }
                 break;
             case 'charge.succeeded':
-                const charge = event.data.object.charge;
+                const charge = event.data.object;
                 const fund = charge.amount;
                 await admin.firestore().collection('fee').add({
                      fee: fund
                 });
-
+                console.log('charge');
                 break;
             case 'transfer.created':
-                const transferId = event.data.object.transfer.id;
+                const transferId = event.data.object.id;
                 const transfer =stripe.Transfer.retrieve(transferId);
                 consumerId = event.data.object.transfer.metadata.consumerId;
                 tradieId = event.data.object.transfer.metadata.tradieId;
@@ -704,6 +704,7 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
                 if (transfer.status == 'failed'){
                      message_consumer = 'Transfer to tradie failed, please contact tradie.';
                 }
+                console.log('Transfer');
                 break;
             default:
                 console.log(`Unhandled event type ${event.type}`);
