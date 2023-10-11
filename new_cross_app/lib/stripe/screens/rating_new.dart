@@ -39,6 +39,7 @@ class _RatingState extends State<Rating> {
       key: data['key'] ?? '',
       tradieId: data['tradieId'] ?? '',
       tradieName: data['tradieName'] ?? '',
+      consumerName: data['consumerName'] ?? '',
       consumerId: data['consumerId'] ?? '',
       comment: data['comment'] ?? '',
       rating: data['rating'] ?? 0,
@@ -163,9 +164,6 @@ class _RatingState extends State<Rating> {
                               await FirebaseFirestore.instance
                                   .collection('users')
                                   .doc(booking.tradieId).update({'rate':data['rate']+serviceRating});
-                              print('transfer test');
-                              print(data['stripeId']);
-                              print((booking.quote*100*0.95).toString());
                               await confirmWork({
                                 'accountId': data['stripeId'],
                                 'consumerId': booking.consumerId,

@@ -372,6 +372,8 @@ class BookingEditorTState extends State<BookingEditorT> {
                           comment: '',
                           rating: 0,
                         ));
+                        print(_rating);
+                        print(quote);
                         _events.appointments!.add(meetings[0]);
                         _events.notifyListeners(
                             CalendarDataSourceAction.add, meetings);
@@ -400,7 +402,8 @@ class BookingEditorTState extends State<BookingEditorT> {
                           'rating': _rating,
                           'comment': _comment,
                         });
-
+                        print(_rating);
+                        print(quote);
                         var k = await getKey(keys);
                         colRef.doc(k).update({'key': k});
                       } else {
@@ -420,6 +423,8 @@ class BookingEditorTState extends State<BookingEditorT> {
                           _selectedAppointment!.comment = _comment;
                           _selectedAppointment!.eventName = _subject;
                         });
+                        print(_rating);
+                        print(quote);
                         colRef.doc(_selectedAppointment?.key).update({
                           'eventName': _subject,
                           'from': _startDate.toString(),
@@ -435,6 +440,8 @@ class BookingEditorTState extends State<BookingEditorT> {
                           'rating': _rating,
                           'comment': _comment,
                         });
+                        print(_rating);
+                        print(quote);
                       }
                       _selectedAppointment = null;
                       //_consumer.bookings.add(meetings[0]);

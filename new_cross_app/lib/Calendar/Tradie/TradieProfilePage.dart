@@ -112,7 +112,7 @@ class TradieProfileState extends State<TradieProfilePage> {
           consumerId: e['consumerId'] ?? '',
           tradieId: e['tradieId'] ?? '',
           quote: e['quote'] ?? '',
-          rating: e['quote'] ?? '',
+          rating: e['rating'] ?? '',
           comment: e['comment']?? '',
                 ))
             .toList();

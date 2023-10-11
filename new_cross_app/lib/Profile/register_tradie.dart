@@ -358,14 +358,14 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
 
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
-                                            content: Text("注册成功"),
+                                            content: Text("Register Successed"),
                                           ),
                                         );
                                         Navigator.pop(context, 'update');
                                       } catch (error) {
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
-                                            content: Text("注册失败"),
+                                            content: Text("Register Failed"),
                                           ),
                                         );
                                       }
