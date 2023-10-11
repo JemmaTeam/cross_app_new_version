@@ -689,7 +689,7 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
                 break;
             case 'transfer.created':
                 const transferId = event.data.object.id;
-                const transfer =stripe.Transfer.retrieve(transferId);
+                const transfer =await stripe.transfer.retrieve(transferId);
                 consumerId = event.data.object.transfer.metadata.consumerId;
                 tradieId = event.data.object.transfer.metadata.tradieId;
                 consumerName = event.data.object.transfer.metadata.consumerName;
