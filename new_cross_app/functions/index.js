@@ -689,22 +689,16 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
                 break;
             case 'transfer.created':
                 const transferId = event.data.object.id;
-                const transfer =await stripe.transfer.retrieve(transferId);
-                consumerId = event.data.object.transfer.metadata.consumerId;
-                tradieId = event.data.object.transfer.metadata.tradieId;
-                consumerName = event.data.object.transfer.metadata.consumerName;
-                tradieName = event.data.object.transfer.metadata.tradieName;
-                amount = event.data.object.transfer.metadata.amount;
+                console.log(transferId);
+                const transfer = await stripe.transfers.retrieve(transferId);
+                consumerId = event.data.object.metadata.consumerId;
+                tradieId = event.data.object.metadata.tradieId;
+                consumerName = event.data.object.metadata.consumerName;
+                tradieName = event.data.object.metadata.tradieName;
+                amount = event.data.object.metadata.amount;
+                message_consumer = 'You have paid to ' +tradieName+' successfully.';
+                message_tradie = 'You have been paied by '+consumerName+' with '+amount+' successfully.';
 
-                if (transfer.status == 'paid'){
-                    message_consumer = 'You have paid to ' +tradieName+' successfully.';
-                    message_tradie = 'You have been paied by '+consumerName+' with '+amount+' successfully.';
-                }
-
-                if (transfer.status == 'failed'){
-                     message_consumer = 'Transfer to tradie failed, please contact tradie.';
-                }
-                console.log('Transfer');
                 break;
             default:
                 console.log(`Unhandled event type ${event.type}`);
