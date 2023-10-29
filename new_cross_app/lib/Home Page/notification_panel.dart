@@ -42,26 +42,38 @@ class _NotificationPanelState extends State<NotificationPanel> {
 
   Widget _buildNotifications(String content, String docId, bool isRead) {
     return Card(
-        child: ListTile(
-            title: Text(
-              content,
-            ),
-            trailing: Icon(isRead
-                ? Icons.remove_red_eye
-                : Icons.assignment_turned_in_rounded),
-            onTap: () {
-              setState(() {
-                if (!isRead) {
-                  FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(consumerId)
-                      .collection('notifications')
-                      .doc(docId)
-                      .update({'read': true});
-                }
-              });
-            }));
+      child: ListTile(
+          title: Text(content),
+          leading: IconButton( // Adding the delete button
+            icon: Icon(Icons.delete),
+            onPressed: () async {
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(consumerId)
+                  .collection('notifications')
+                  .doc(docId)
+                  .delete();
+            },
+          ),
+          trailing: Icon(isRead
+              ? Icons.remove_red_eye
+              : Icons.assignment_turned_in_rounded),
+          onTap: () {
+            setState(() {
+              if (!isRead) {
+                FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(consumerId)
+                    .collection('notifications')
+                    .doc(docId)
+                    .update({'read': true});
+              }
+            });
+          }
+      ),
+    );
   }
+
 
   @override
   Widget build(BuildContext context) {
