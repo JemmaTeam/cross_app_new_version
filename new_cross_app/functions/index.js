@@ -4,7 +4,7 @@
 const functions = require("firebase-functions");
 const admin = require('firebase-admin');
 const sgMail = require('@sendgrid/mail');
-// 获取SendGrid API密钥
+// Get SendGrid API Key
 const sendgridApiKey = functions.config().sendgrid.key;
 sgMail.setApiKey(sendgridApiKey);
 admin.initializeApp();
