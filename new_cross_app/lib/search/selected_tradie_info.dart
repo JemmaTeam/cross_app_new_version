@@ -246,7 +246,7 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
                       });
                     },
                     style: ElevatedButton.styleFrom(
-                        primary: kLogoColor, elevation: 2),
+                        backgroundColor: kLogoColor, elevation: 2),
                     child: const Text(
                       "Chat",
                       style: TextStyle(
@@ -267,7 +267,7 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
                           });
                     },
                     style: ElevatedButton.styleFrom(
-                        primary: kLogoColor, elevation: 2),
+                        backgroundColor: kLogoColor, elevation: 2),
                     child: const Text(
                       "Booking",
                       style: TextStyle(

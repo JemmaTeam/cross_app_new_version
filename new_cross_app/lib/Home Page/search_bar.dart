@@ -91,7 +91,7 @@ class SearchBar extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        style: ElevatedButton.styleFrom(primary: kLogoColor, elevation: 2),
+        style: ElevatedButton.styleFrom(backgroundColor: kLogoColor, elevation: 2),
       ),
     );
   }
