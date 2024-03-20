@@ -154,12 +154,9 @@ class ConsumerBookingState extends State<ConsumerBooking> {
   SfCalendar getBookingCalendar(
       CalendarDataSource dataSource, CalendarTapCallback calendarTapCallback) {
     return SfCalendar(
-        view: CalendarView.week,
+        view: CalendarView.month,
         controller: calendarController,
-        allowedViews: const [CalendarView.week,
-          CalendarView.month,
-          CalendarView.day,
-          CalendarView.timelineMonth],
+        allowedViews: const [CalendarView.week,CalendarView.month,CalendarView.timelineMonth],
         dataSource: dataSource,
         onTap: calendarTapCallback,
         appointmentBuilder: (context, calendarAppointmentDetails) {
