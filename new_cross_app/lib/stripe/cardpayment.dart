@@ -33,7 +33,7 @@ class CardPayment extends StatelessWidget {
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            primary: primaryColor,
+            backgroundColor: primaryColor,
             minimumSize: const Size(double.infinity, 56),
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -42,8 +42,7 @@ class CardPayment extends StatelessWidget {
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            primary: Colors.black,
-            minimumSize: const Size(double.infinity, 56),
+            foregroundColor: Colors.black, minimumSize: const Size(double.infinity, 56),
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
             ),

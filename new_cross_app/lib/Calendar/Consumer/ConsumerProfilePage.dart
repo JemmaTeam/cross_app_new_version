@@ -138,7 +138,7 @@ class ConsumerProfileState extends State<ConsumerProfilePage> {
         view: CalendarView.month,
         controller: calendarController,
         //Display Mode:
-        allowedViews: const [CalendarView.week, CalendarView.month],
+        allowedViews: const [CalendarView.week, CalendarView.month, CalendarView.schedule],
         dataSource: _calendarDataSource,
         onTap: calendarTapCallback,
 
@@ -159,9 +159,11 @@ class ConsumerProfileState extends State<ConsumerProfilePage> {
         },
         initialDisplayDate: DateTime(DateTime.now().year, DateTime.now().month,
             DateTime.now().day, 0, 0, 0),
-        monthViewSettings: const MonthViewSettings(
-            appointmentDisplayMode: MonthAppointmentDisplayMode.appointment),
+
         //Minimum appointment duration set to be 60 mins
+        monthViewSettings: const MonthViewSettings(showAgenda: false,
+            appointmentDisplayMode: MonthAppointmentDisplayMode.appointment,
+          ),
         timeSlotViewSettings: const TimeSlotViewSettings(
             minimumAppointmentDuration: Duration(minutes: 60)));
   }

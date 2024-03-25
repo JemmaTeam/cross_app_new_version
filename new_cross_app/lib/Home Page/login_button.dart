@@ -11,8 +11,7 @@ class LoginButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       style: ElevatedButton.styleFrom(
-          textStyle: const TextStyle(fontSize: 20),
-          primary: Colors.white,
+          textStyle: const TextStyle(fontSize: 20), backgroundColor: Colors.white,
           elevation: 2),
       onPressed: () {
         //Navigator.pushNamed(context, Screen.login.getURL());
