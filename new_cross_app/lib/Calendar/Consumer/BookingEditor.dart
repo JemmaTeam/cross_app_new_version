@@ -214,33 +214,31 @@ class BookingEditorState extends State<BookingEditor> {
                   _statusNames[_selectedStatusIndex],
                 ),
                 trailing: TextButton(
-                    child: Text(displayText(_statusNames[_selectedStatusIndex])),
-                    onPressed: () async {
-                      if (_statusNames[_selectedStatusIndex] == 'Rating') {
-                        setState(() {
-                          _selectedStatusIndex=_statusNames.indexOf('Complete');
+                  child: Text(displayText(_statusNames[_selectedStatusIndex])),
+                  onPressed: () async {
+                    if (_statusNames[_selectedStatusIndex] == 'Rating') {
+                      setState(() {
+                        _selectedStatusIndex = _statusNames.indexOf('Complete');
+                      });
+                      GoRouter.of(context).pushNamed(RouterName.Rate,
+                          params: {'bookingId': selectedKey});
+                    } else if (_statusNames[_selectedStatusIndex] ==
+                        'Confirmed') {
+                      setState(() {
+                        _selectedStatusIndex = _statusNames.indexOf('Working');
+                      });
+                      if (quote != 0) {
+                        await createPaymentIntent({
+                          'price': (quote * 100).toString(),
+                          'consumerId': _consumerId,
+                          'tradieId': _tradieId,
+                          'product_name': _subject,
+                          'consumerName': _consumerName,
                         });
-                        GoRouter.of(context).pushNamed(RouterName.Rate,
-                            params: {'bookingId': selectedKey});
-                      } else if (_statusNames[_selectedStatusIndex] ==
-                          'Confirmed') {
-                        setState(() {
-                          _selectedStatusIndex=_statusNames.indexOf('Working');
-                        });
-                        if(quote != 0){
-                          await createPaymentIntent({
-                            'price':(quote*100).toString(),
-                            'consumerId': _consumerId,
-                            'tradieId': _tradieId,
-                            'product_name': _subject,
-                            'consumerName': _consumerName,
-                          });
-                        }
-                        bookingRef
-                            .doc(selectedKey)
-                            .update({'status': 'Working'});
                       }
-                    },
+                      bookingRef.doc(selectedKey).update({'status': 'Working'});
+                    }
+                  },
                 )),
             const Divider(
               height: 1.0,
@@ -333,7 +331,7 @@ class BookingEditorState extends State<BookingEditor> {
                     ),
                     onPressed: () async {
                       AlertDialog alert_outBound;
-                      if (!weekend && _startDate.weekday>5){
+                      if (!weekend && _startDate.weekday > 5) {
                         Widget OKButton = TextButton(
                           child: const Text("Ok"),
                           onPressed: () {
@@ -354,9 +352,9 @@ class BookingEditorState extends State<BookingEditor> {
                           },
                         );
                         return;
-                      }else{
+                      } else {
                         if (_startDate.hour < workStart ||
-                            _endDate.hour > workEnd ){
+                            _endDate.hour > workEnd) {
                           Widget OKButton = TextButton(
                             child: const Text("Ok"),
                             onPressed: () {
@@ -446,10 +444,15 @@ class BookingEditorState extends State<BookingEditor> {
                         });
                         bookingRef.doc(br.id).update({'key': br.id.trim()});
                         // update torder
-                        await usersRef.doc(_tradieId).get().then((DocumentSnapshot doc){
+                        await usersRef
+                            .doc(_tradieId)
+                            .get()
+                            .then((DocumentSnapshot doc) {
                           final data = doc.data() as Map<String, dynamic>;
                           var orders = data['tOrders'];
-                          usersRef.doc(_tradieId).update({'tOrders': orders+1});
+                          usersRef
+                              .doc(_tradieId)
+                              .update({'tOrders': orders + 1});
                         });
                       } else {
                         print('old booking');
@@ -505,12 +508,16 @@ class BookingEditorState extends State<BookingEditor> {
                   _bookings.notifyListeners(
                       CalendarDataSourceAction.remove, bookings);
                 });
+
                 try {
                   bookingRef.doc(_selectedAppointment?.key).delete();
-                  await usersRef.doc(_tradieId).get().then((DocumentSnapshot doc){
+                  await usersRef
+                      .doc(_tradieId)
+                      .get()
+                      .then((DocumentSnapshot doc) {
                     final data = doc.data() as Map<String, dynamic>;
                     var orders = data['tOrders'];
-                    usersRef.doc(_tradieId).update({'tOrders': orders-1});
+                    usersRef.doc(_tradieId).update({'tOrders': orders - 1});
                   });
                 } catch (e) {}
                 _selectedAppointment = null;
@@ -600,11 +607,11 @@ class BookingEditorState extends State<BookingEditor> {
   }
 
   String displayText(String statusNam) {
-    if(statusNam == 'Rating'){
+    if (statusNam == 'Rating') {
       return 'Go to Rating Page';
-    }else if (statusNam == 'Confirmed'){
+    } else if (statusNam == 'Confirmed') {
       return 'Make Payment';
-    }else{
+    } else {
       return 'No Action Required';
     }
   }

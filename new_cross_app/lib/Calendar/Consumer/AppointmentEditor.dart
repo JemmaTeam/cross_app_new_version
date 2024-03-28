@@ -103,29 +103,55 @@ class AppointmentEditorState extends State<AppointmentEditor> {
             ),
             //Status
             ListTile(
-              contentPadding: const EdgeInsets.fromLTRB(5, 2, 5, 2),
-              leading: Icon(Icons.lens,
-                  color: _colorCollection[_selectedStatusIndex]),
-              title: Text(
-                _statusNames[_selectedStatusIndex],
-              ),
-              trailing: TextButton(
-                child: Text(displayText(_statusNames[_selectedStatusIndex])),
-                onPressed: () async {
-                  if (_statusNames[_selectedStatusIndex] == 'Rating') {
-                    setState(() {
-                      _selectedStatusIndex=_statusNames.indexOf('Complete');
-                    });
-                    update();
-                    GoRouter.of(context).pushReplacementNamed(RouterName.Rate,
-                        params: {'bookingId': selectedKey});
-                  } else if (_statusNames[_selectedStatusIndex] == 'Confirmed') {
-                    setState(() {
-                      _selectedStatusIndex=_statusNames.indexOf('Working');
-                    });
-                    if(quote == 0){
+                contentPadding: const EdgeInsets.fromLTRB(5, 2, 5, 2),
+                leading: Icon(Icons.lens,
+                    color: _colorCollection[_selectedStatusIndex]),
+                title: Text(
+                  _statusNames[_selectedStatusIndex],
+                ),
+                trailing: TextButton(
+                  child: Text(displayText(_statusNames[_selectedStatusIndex])),
+                  onPressed: () async {
+                    if (_statusNames[_selectedStatusIndex] == 'Rating') {
+                      setState(() {
+                        _selectedStatusIndex = _statusNames.indexOf('Complete');
+                      });
+                      update();
+                      GoRouter.of(context).pushReplacementNamed(RouterName.Rate,
+                          params: {'bookingId': selectedKey});
+                    } else if (_statusNames[_selectedStatusIndex] ==
+                        'Confirmed') {
+                      setState(() {
+                        _selectedStatusIndex = _statusNames.indexOf('Working');
+                      });
+                      if (quote == 0) {
+                        final snackBar = SnackBar(
+                          content: Text('The quote is 0!'),
+                          duration: Duration(seconds: 3),
+                          action: SnackBarAction(
+                            label: 'Close',
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).clearSnackBars();
+                              // Handle the action when the user taps the "Close" button.
+                            },
+                          ),
+                        );
+
+                        // Show the SnackBar at the bottom of the screen
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      } else {
+                        await createPaymentIntent({
+                          'price': (quote * 100).toString(),
+                          'consumerId': _consumerId,
+                          'tradieId': _tradieId,
+                          'product_name': _subject,
+                          'consumerName': _consumerName,
+                        });
+                      }
+                      bookingRef.doc(selectedKey).update({'status': 'Working'});
+                    } else {
                       final snackBar = SnackBar(
-                        content: Text('The quote is 0!'),
+                        content: Text('No Action Allowed!'),
                         duration: Duration(seconds: 3),
                         action: SnackBarAction(
                           label: 'Close',
@@ -138,37 +164,9 @@ class AppointmentEditorState extends State<AppointmentEditor> {
 
                       // Show the SnackBar at the bottom of the screen
                       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                    }else{
-                      await createPaymentIntent({
-                        'price':(quote*100).toString(),
-                        'consumerId': _consumerId,
-                        'tradieId': _tradieId,
-                        'product_name': _subject,
-                        'consumerName': _consumerName,
-                      });
                     }
-                    bookingRef
-                        .doc(selectedKey)
-                        .update({'status': 'Working'});
-                  } else {
-                    final snackBar = SnackBar(
-                      content: Text('No Action Allowed!'),
-                      duration: Duration(seconds: 3),
-                      action: SnackBarAction(
-                        label: 'Close',
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).clearSnackBars();
-                          // Handle the action when the user taps the "Close" button.
-                        },
-                      ),
-                    );
-
-                    // Show the SnackBar at the bottom of the screen
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                  }
-                },
-              )
-            ),
+                  },
+                )),
             const Divider(
               height: 1.0,
               thickness: 1,
@@ -219,7 +217,7 @@ class AppointmentEditorState extends State<AppointmentEditor> {
                 Icons.rate_review,
                 color: Colors.black87,
               ),
-              title:Text(_comment),
+              title: Text(_comment),
             ),
             const Divider(
               height: 1.0,
@@ -269,32 +267,37 @@ class AppointmentEditorState extends State<AppointmentEditor> {
               children: <Widget>[_getAppointmentEditor(context)],
             ),
           ),
-          floatingActionButton:FloatingActionButton(
-                  onPressed: () async {
-                    List<Booking> bookings = [_selectedAppointment!];
-                    setState(() {
-                      _events.appointments!.removeAt(_selectedStatusIndex);
-                      _events.notifyListeners(CalendarDataSourceAction.remove,
-                         bookings);
-                    });
-                    try {
-                      bookingRef.doc(_selectedAppointment?.key).delete();
-                      await usersRef.doc(_tradieId).get().then((DocumentSnapshot doc){
-                        final data = doc.data() as Map<String, dynamic>;
-                        var orders = data['tOrders'];
-                        usersRef.doc(_tradieId).update({'tOrders': orders-1});
-                      });
-                    } catch (e) {}
-                    _selectedAppointment = null;
-                    GoRouter.of(context).pop();
-                  },
-                  child: const Text(
-                    'Cancel',
-                    selectionColor: Colors.white,
-                  ),
-                  /*const Icon(Icons.delete_outline, color: Colors.white),*/
-                  backgroundColor: Colors.red,
-                ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () async {
+              debugPrint("cancel here");
+              List<Booking> bookings = [_selectedAppointment!];
+              setState(() {
+                _events.appointments!.removeAt(_selectedStatusIndex);
+                _events.notifyListeners(
+                    CalendarDataSourceAction.remove, bookings);
+              });
+              try {
+                bookingRef.doc(_selectedAppointment?.key).delete();
+
+                await usersRef
+                    .doc(_tradieId)
+                    .get()
+                    .then((DocumentSnapshot doc) {
+                  final data = doc.data() as Map<String, dynamic>;
+                  var orders = data['tOrders'];
+                  usersRef.doc(_tradieId).update({'tOrders': orders - 1});
+                });
+              } catch (e) {}
+              _selectedAppointment = null;
+              GoRouter.of(context).pop();
+            },
+            child: const Text(
+              'Cancel',
+              selectionColor: Colors.white,
+            ),
+            /*const Icon(Icons.delete_outline, color: Colors.white),*/
+            backgroundColor: Colors.red,
+          ),
         ));
   }
 
@@ -379,11 +382,11 @@ Future<String> createPaymentIntent(Map<String, String> body) async {
 // }
 
 String displayText(String statusNam) {
-  if(statusNam == 'Rating'){
+  if (statusNam == 'Rating') {
     return 'Go to Rating Page';
-  }else if (statusNam == 'Confirmed'){
+  } else if (statusNam == 'Confirmed') {
     return 'Make Payment';
-  }else{
+  } else {
     return 'No Action Required';
   }
 }

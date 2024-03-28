@@ -20,9 +20,7 @@ String? _postcode;
 
 class SearchBar extends StatelessWidget {
   String userId;
-  SearchBar({
-    Key? key,
-  required this.userId}) : super(key: key);
+  SearchBar({Key? key, required this.userId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -46,10 +44,14 @@ class SearchBar extends StatelessWidget {
         spacing: 2.5.pw(size),
         overflowSpacing: 1.75.ph(size),
         children: [
-          DropDownContainer(topic:"Job type",topicIconData: Icons.handyman, dropDownContent: {},),
+          DropDownContainer(
+            topic: "Job type",
+            topicIconData: Icons.handyman,
+            dropDownContent: {},
+          ),
           // DropDownContainer(topic:"Location",topicIconData: Icons.location_pin, dropDownContent: {},),
           buildPostcodeInput(_postCodeFormKey, (value) => _postcode = value),
-          _buildSearchButton(context,_postCodeFormKey)
+          _buildSearchButton(context, _postCodeFormKey)
         ],
       ),
     );
@@ -61,7 +63,7 @@ class SearchBar extends StatelessWidget {
     return Container(
       child: ElevatedButton.icon(
         onPressed: () {
-          if(_isLoggedIn){
+          if (_isLoggedIn) {
             if (formKey.currentState!.validate()) {
               formKey.currentState!.save();
               print('Postcode saved: $_postcode');
@@ -73,11 +75,11 @@ class SearchBar extends StatelessWidget {
                   'postcode': _postcode!,
                   'workType': _worktype!,
                 };
-                GoRouter.of(context).pushNamed(RouterName.SearchOutcome,params: _params);
+                GoRouter.of(context)
+                    .pushNamed(RouterName.SearchOutcome, params: _params);
               }
             }
           }
-
         }, // TODO: Replace with search request
         icon: Icon(
           Icons.search,
@@ -208,7 +210,7 @@ class _DropDownContainerState extends State<DropDownContainer> {
         child: DropdownButton(
             value: _worktype,
             onChanged: (selection) => setState(() {
-              _worktype = selection.toString();
+                  _worktype = selection.toString();
                 }),
             hint: Container(
               padding: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
@@ -231,46 +233,45 @@ class _DropDownContainerState extends State<DropDownContainer> {
             isExpanded: true,
             underline: SizedBox(),
             items:
-            // topic == "Location"
-            //     ? Location.map<DropdownMenuItem<String>>((String value) {
-            //         return DropdownMenuItem<String>(
-            //           value: value,
-            //           child: Row(children: [
-            //             Expanded(
-            //                 flex: 2,
-            //                 child: Icon(Icons.handyman_outlined,
-            //                     color: Colors.black)),
-            //             Expanded(
-            //                 flex: 4,
-            //                 child: Text(
-            //                   value,
-            //                   textAlign: TextAlign.center,
-            //                   style:
-            //                       TextStyle(fontSize: 14, color: Colors.black),
-            //                 ))
-            //           ]),
-            //         );
-            //       }).toList()
-            //     :
-            JobType.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Row(children: [
-                        Expanded(
-                            flex: 2,
-                            child: Icon(Icons.handyman_outlined,
-                                color: Colors.black)),
-                        Expanded(
-                            flex: 4,
-                            child: Text(
-                              value,
-                              textAlign: TextAlign.center,
-                              style:
-                                  TextStyle(fontSize: 14, color: Colors.black),
-                            ))
-                      ]),
-                    );
-                  }).toList()),
+                // topic == "Location"
+                //     ? Location.map<DropdownMenuItem<String>>((String value) {
+                //         return DropdownMenuItem<String>(
+                //           value: value,
+                //           child: Row(children: [
+                //             Expanded(
+                //                 flex: 2,
+                //                 child: Icon(Icons.handyman_outlined,
+                //                     color: Colors.black)),
+                //             Expanded(
+                //                 flex: 4,
+                //                 child: Text(
+                //                   value,
+                //                   textAlign: TextAlign.center,
+                //                   style:
+                //                       TextStyle(fontSize: 14, color: Colors.black),
+                //                 ))
+                //           ]),
+                //         );
+                //       }).toList()
+                //     :
+                JobType.map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Row(children: [
+                  Expanded(
+                      flex: 2,
+                      child:
+                          Icon(Icons.handyman_outlined, color: Colors.black)),
+                  Expanded(
+                      flex: 4,
+                      child: Text(
+                        value,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 14, color: Colors.black),
+                      ))
+                ]),
+              );
+            }).toList()),
       ),
     );
   }
@@ -280,20 +281,22 @@ class _DropDownContainerState extends State<DropDownContainer> {
 ///
 /// [formKey] is the GlobalKey used to associate with the [Form].
 /// [onSave] is a function that takes a nullable string and is invoked when the form is saved.
-Widget buildPostcodeInput(GlobalKey<FormState> formKey, Function(String?) onSave) {
+Widget buildPostcodeInput(
+    GlobalKey<FormState> formKey, Function(String?) onSave) {
   // Return a Form widget that wraps the input field.
   return Form(
-      key: formKey,  // Set GlobalKey for the form to perform form validation later.
+      key:
+          formKey, // Set GlobalKey for the form to perform form validation later.
       child: Container(
         constraints: const BoxConstraints(maxWidth: 200),
         padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
         decoration: const BoxDecoration(
-          color: Colors.white,  // Set background color to white.
+          color: Colors.white, // Set background color to white.
         ),
         // Use DecoratedBox to further decorate the input field.
         child: DecoratedBox(
           decoration: ShapeDecoration(
-            color: Colors.white10,  // Set base color.
+            color: Colors.white10, // Set base color.
             // Define border and border-radius.
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(5.0)),
@@ -309,8 +312,12 @@ Widget buildPostcodeInput(GlobalKey<FormState> formKey, Function(String?) onSave
                 padding: EdgeInsets.only(left: 18),
                 child: Icon(Icons.location_pin, color: Colors.black),
               ),
-              hintStyle: TextStyle(fontSize: 14.0,),
-              enabledBorder: OutlineInputBorder(borderSide: BorderSide.none,),
+              hintStyle: TextStyle(
+                fontSize: 14.0,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide.none,
+              ),
               counterText: "",
             ),
             keyboardType: TextInputType.number,
@@ -332,6 +339,5 @@ Widget buildPostcodeInput(GlobalKey<FormState> formKey, Function(String?) onSave
             onSaved: onSave,
           ),
         ),
-      )
-  );
+      ));
 }

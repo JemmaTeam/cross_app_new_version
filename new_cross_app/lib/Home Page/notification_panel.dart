@@ -44,7 +44,8 @@ class _NotificationPanelState extends State<NotificationPanel> {
     return Card(
       child: ListTile(
           title: Text(content),
-          leading: IconButton( // Adding the delete button
+          leading: IconButton(
+            // Adding the delete button
             icon: Icon(Icons.delete),
             onPressed: () async {
               await FirebaseFirestore.instance
@@ -69,11 +70,9 @@ class _NotificationPanelState extends State<NotificationPanel> {
                     .update({'read': true});
               }
             });
-          }
-      ),
+          }),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +113,7 @@ class _NotificationPanelState extends State<NotificationPanel> {
                     if (index == 0) {
                       return const DrawerHeader(
                         child: Center(
-                          child: Text('Notifications',
+                          child: Text('NotificationsLOL',
                               style: TextStyle(
                                   fontSize: 25, fontWeight: FontWeight.w500)),
                         ),
