@@ -54,7 +54,9 @@ class _SearchOutcomeState extends State<SearchOutcome> {
           // Filter out documents with empty "WorkTitle"
           final docs = snapshot.data!.docs.where((doc) {
             final data = doc.data() as Map<String, dynamic>;
-            return data['workTitle'] != '' && data['uid'] != widget.userId && (data['workStart'] != 0 || data['workEnd'] != 0);
+            return data['workTitle'] != '' &&
+                data['uid'] != widget.userId &&
+                (data['workStart'] != 0 || data['workEnd'] != 0);
           }).toList();
 
           // If docs.length is 0, display prompt information
@@ -115,21 +117,20 @@ class _SearchOutcomeState extends State<SearchOutcome> {
     );
   }
 
-/// Function to build an individual item for a tradie
+  /// Function to build an individual item for a tradie
   Widget buildTradieItem(Map<String, dynamic> data) {
     // Set the certificate image URL, if not exists, use the default one
     String lincensePic = ImageURL.certificateDefault;
     if (data.containsKey('lincensePic')) {
-      if(!data['lincensePic'].isEmpty){
+      if (!data['lincensePic'].isEmpty) {
         lincensePic = data['lincensePic'];
       }
     }
     // Set the average rating scores
     num averageRate = 0;
-    if (data['tOrders'] == 0){
+    if (data['tOrders'] == 0) {
       averageRate = data['rate'];
-    }
-    else {
+    } else {
       averageRate = data['rate'] / data['tOrders'];
     }
     return Container(
@@ -166,13 +167,13 @@ class _SearchOutcomeState extends State<SearchOutcome> {
           Container(
               width: 300,
               height: 250,
-              child:
-              CachedNetworkImage(
+              child: CachedNetworkImage(
                 imageUrl: lincensePic,
-                placeholder: (context, url) => CircularProgressIndicator(), // placeholder when loading
-                errorWidget: (context, url, error) => Icon(Icons.error), // error icon
-              )
-          ),
+                placeholder: (context, url) => CircularProgressIndicator(),
+                // placeholder when loading
+                errorWidget: (context, url, error) =>
+                    Icon(Icons.error), // error icon
+              )),
           // Add some more vertical space
           const SizedBox(height: 8),
           // Display full name, default to 'Unknown' if empty

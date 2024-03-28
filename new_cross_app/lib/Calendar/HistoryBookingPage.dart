@@ -22,11 +22,12 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
   late Stream<QuerySnapshot> _usersStream;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   String userId;
+
   _BookingHistoryPageState(this.userId) {
     _usersStream = firestore
         .collection('bookings')
         .where(Filter.or(Filter('consumerId', isEqualTo: userId),
-            Filter('tradieId', isEqualTo: userId)))
+        Filter('tradieId', isEqualTo: userId)))
         .snapshots();
   }
 
@@ -51,7 +52,7 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                             selectedYear = newValue!;
                           });
                         },
-                        items: <String>['2023', '2022', '2021', '2020']
+                        items: <String>['2024', '2023', '2022', '2021', '2020']
                             .map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
@@ -122,23 +123,24 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                         }
                         List<Widget> filteredBookings = [];
                         List<Booking>? bookings = snapshot.data?.docs
-                            .map((e) => Booking(
-                                  eventName: e['eventName'] ?? '',
-                                  from: DateFormat('yyyy-MM-dd HH:mm:ss.sss')
-                                      .parse(e['from']),
-                                  to: DateFormat('yyyy-MM-dd HH:mm:ss.sss')
-                                      .parse(e['to']),
-                                  status: e['status'],
-                                  consumerName: e['consumerName'] ?? '',
-                                  tradieName: e['tradieName'] ?? '',
-                                  description: e['description'] ?? '',
-                                  key: e['key'],
-                                  consumerId: e['consumerId'] ?? '',
-                                  tradieId: e['tradieId'] ?? '',
-                                  quote: e['quote'] ?? '',
-                                  rating: e['rating'] ?? '',
-                                  comment: e['comment'] ?? '',
-                                ))
+                            .map((e) =>
+                            Booking(
+                              eventName: e['eventName'] ?? '',
+                              from: DateFormat('yyyy-MM-dd HH:mm:ss.sss')
+                                  .parse(e['from']),
+                              to: DateFormat('yyyy-MM-dd HH:mm:ss.sss')
+                                  .parse(e['to']),
+                              status: e['status'],
+                              consumerName: e['consumerName'] ?? '',
+                              tradieName: e['tradieName'] ?? '',
+                              description: e['description'] ?? '',
+                              key: e['key'],
+                              consumerId: e['consumerId'] ?? '',
+                              tradieId: e['tradieId'] ?? '',
+                              quote: e['quote'] ?? '',
+                              rating: e['rating'] ?? '',
+                              comment: e['comment'] ?? '',
+                            ))
                             .toList();
                         // Apply filters
 
@@ -148,10 +150,12 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                                   monthtonum(selectedMonth)) {
                             if (userTypeFilter == 'Consumer' &&
                                 booking.consumerId == userId) {
-                              filteredBookings.add(getCard(context,'consumer', booking));
+                              filteredBookings.add(getCard(
+                                  context, 'consumer', booking));
                             } else if (userTypeFilter == 'Tradie' &&
                                 booking.tradieId == userId) {
-                              filteredBookings.add(getCard(context, 'tradie', booking));
+                              filteredBookings.add(getCard(
+                                  context, 'tradie', booking));
                             }
                           } else {
                             print(booking.from.year);
@@ -173,180 +177,161 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
   }
 
   GestureDetector getCard(BuildContext context, String s, Booking booking) {
-    if(s == 'consumer'){
+    if (s == 'consumer') {
       return GestureDetector(
         onTap: () {
           showGeneralDialog(
             context: context,
-            barrierDismissible:
-            true, // click background to close
-            barrierLabel:
-            MaterialLocalizations.of(context)
+            barrierDismissible: true,
+            barrierLabel: MaterialLocalizations
+                .of(context)
                 .modalBarrierDismissLabel,
-            transitionDuration:
-            const Duration(milliseconds: 200),
+            transitionDuration: const Duration(milliseconds: 200),
             pageBuilder: (BuildContext buildContext,
                 Animation<double> animation,
                 Animation<double> secondaryAnimation) {
-              // content
               return Center(
-                child: Container(
-                  width: 200.0,
-                  height: 200.0,
-                  color: Colors.white,
-                  child: Column(
-                    mainAxisAlignment:
-                    MainAxisAlignment.center,
-                    children: <Widget>[
-                      ListTile(
-                        title: Text(booking.eventName),
-                        titleTextStyle: TextStyle(
-                            fontWeight:
-                            FontWeight.bold),
-                      ),
-                      Divider(
-                        height: 1,
-                      ),
-                      SelectableText('Tradie Name: ' +
-                          booking.tradieName),
-                      SelectableText('From: ' +
-                          booking.from.toString()),
-                      SelectableText('To: ' +
-                          booking.to.toString()),
-                      SelectableText('Quote: ' +
-                          booking.quote.toString()),
-                      SelectableText('Rating: ' +
-                          booking.rating.toString()),
-                    ],
+                child: Material( // Add Material widget here
+                  child: Container(
+                    width: 200.0,
+                    height: 200.0,
+                    color: Colors.white,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        ListTile(
+                          title: Text(booking.eventName),
+                          titleTextStyle: TextStyle(
+                              fontWeight: FontWeight.bold),
+                        ),
+                        Divider(
+                          height: 1,
+                        ),
+                        SelectableText('Tradie Name: ' + booking.tradieName),
+                        SelectableText('From: ' + booking.from.toString()),
+                        SelectableText('To: ' + booking.to.toString()),
+                        SelectableText('Quote: ' + booking.quote.toString()),
+                        SelectableText('Rating: ' + booking.rating.toString()),
+                      ],
+                    ),
                   ),
                 ),
               );
             },
           );
         },
-        child: Card(
-          color: Colors.lightGreen[300],
-          elevation: 4.0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
-            side: BorderSide(
-                color: Colors.black, width: 1.0),
-          ),
-          child: ListTile(
-            title: Text(booking.eventName),
-            titleTextStyle:
-            TextStyle(fontWeight: FontWeight.bold),
-            subtitle: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
-              children: [
-                Text(booking.tradieName),
-                SizedBox(height: 10),
-                Text(booking.from.toString()),
-                SizedBox(height: 10),
-                Text(booking.to.toString()),
-              ],
+        child: Material( // Add Material widget here
+          child: Card(
+            color: Colors.lightGreen[300],
+            elevation: 4.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              side: BorderSide(color: Colors.black, width: 1.0),
+            ),
+            child: ListTile(
+              title: Text(booking.eventName),
+              titleTextStyle: TextStyle(fontWeight: FontWeight.bold),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(booking.tradieName),
+                  SizedBox(height: 10),
+                  Text(booking.from.toString()),
+                  SizedBox(height: 10),
+                  Text(booking.to.toString()),
+                ],
+              ),
             ),
           ),
         ),
       );
-    }else {
+    } else {
       return GestureDetector(
         onTap: () {
           showGeneralDialog(
             context: context,
-            barrierDismissible:
-            true,
-            // click background to close
-            barrierLabel:
-            MaterialLocalizations
+            barrierDismissible: true,
+            barrierLabel: MaterialLocalizations
                 .of(context)
                 .modalBarrierDismissLabel,
-            transitionDuration:
-            const Duration(milliseconds: 200),
+            transitionDuration: const Duration(milliseconds: 200),
             pageBuilder: (BuildContext buildContext,
                 Animation<double> animation,
                 Animation<double> secondaryAnimation) {
-              // content
               return Center(
-                child: Container(
-                  width: 200.0,
-                  height: 200.0,
-                  color: Colors.white,
-                  child: Column(
-                    mainAxisAlignment:
-                    MainAxisAlignment.center,
-                    children: <Widget>[
-                      ListTile(
-                        title: Text(booking.eventName),
-                        titleTextStyle: TextStyle(
-                            fontWeight:
-                            FontWeight.bold),
-                      ),
-                      Divider(
-                        height: 1,
-                      ),
-                      SelectableText('Consumer Name: ' +
-                          booking.consumerName),
-                      SelectableText('From: ' +
-                          booking.from.toString()),
-                      SelectableText('To: ' +
-                          booking.to.toString()),
-                      SelectableText('Quote: ' +
-                          booking.quote.toString()),
-                      SelectableText('Rating: ' +
-                          booking.rating.toString()),
-                    ],
+                child: Material( // Add Material widget here
+                  child: Container(
+                    width: 200.0,
+                    height: 200.0,
+                    color: Colors.white,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        ListTile(
+                          title: Text(booking.eventName),
+                          titleTextStyle: TextStyle(
+                              fontWeight: FontWeight.bold),
+                        ),
+                        Divider(
+                          height: 1,
+                        ),
+                        SelectableText('Consumer Name: ' + booking
+                            .consumerName),
+                        SelectableText('From: ' + booking.from.toString()),
+                        SelectableText('To: ' + booking.to.toString()),
+                        SelectableText('Quote: ' + booking.quote.toString()),
+                        SelectableText('Rating: ' + booking.rating.toString()),
+                      ],
+                    ),
                   ),
                 ),
               );
             },
           );
         },
-        child: Card(
-          color: Colors.lightGreen[300],
-          elevation: 4.0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
-            side: BorderSide(
-                color: Colors.black, width: 1.0),
-          ),
-          child: ListTile(
-            title: Text(booking.eventName),
-            titleTextStyle:
-            TextStyle(fontWeight: FontWeight.bold),
-            subtitle: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
-              children: [
-                Text(booking.consumerName),
-                SizedBox(height: 10),
-                Text(booking.from.toString()),
-                SizedBox(height: 10),
-                Text(booking.to.toString()),
-              ],
+        child: Material( // Add Material widget here
+          child: Card(
+            color: Colors.lightGreen[300],
+            elevation: 4.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              side: BorderSide(color: Colors.black, width: 1.0),
+            ),
+            child: ListTile(
+              title: Text(booking.eventName),
+              titleTextStyle: TextStyle(fontWeight: FontWeight.bold),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(booking.consumerName),
+                  SizedBox(height: 10),
+                  Text(booking.from.toString()),
+                  SizedBox(height: 10),
+                  Text(booking.to.toString()),
+                ],
+              ),
             ),
           ),
         ),
       );
     }
   }
-}
 
-num monthtonum(String month) {
-  List<String> months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
-  ];
-  return months.indexOf(month) + 1;
+  num monthtonum(String month) {
+    List<String> months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ];
+    return months.indexOf(month) + 1;
+  }
 }

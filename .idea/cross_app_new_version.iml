@@ -330,6 +330,18 @@
       <excludeFolder url="file://$MODULE_DIR$/new_cross_app/windows/flutter/ephemeral/.plugin_symlinks/firebase_auth/example/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/new_cross_app/windows/flutter/ephemeral/.plugin_symlinks/firebase_auth/example/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/new_cross_app/windows/flutter/ephemeral/.plugin_symlinks/firebase_auth/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/new_cross_app/windows/flutter/ephemeral/.plugin_symlinks/cloud_firestore/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/new_cross_app/windows/flutter/ephemeral/.plugin_symlinks/cloud_firestore/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/new_cross_app/windows/flutter/ephemeral/.plugin_symlinks/cloud_firestore/build" />
+      <excludeFolder url="file://$MODULE_DIR$/new_cross_app/windows/flutter/ephemeral/.plugin_symlinks/cloud_firestore/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/new_cross_app/windows/flutter/ephemeral/.plugin_symlinks/cloud_firestore/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/new_cross_app/windows/flutter/ephemeral/.plugin_symlinks/cloud_firestore/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/new_cross_app/windows/flutter/ephemeral/.plugin_symlinks/firebase_storage/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/new_cross_app/windows/flutter/ephemeral/.plugin_symlinks/firebase_storage/build" />
+      <excludeFolder url="file://$MODULE_DIR$/new_cross_app/windows/flutter/ephemeral/.plugin_symlinks/firebase_storage/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/new_cross_app/windows/flutter/ephemeral/.plugin_symlinks/firebase_storage/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/new_cross_app/windows/flutter/ephemeral/.plugin_symlinks/firebase_storage/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/new_cross_app/windows/flutter/ephemeral/.plugin_symlinks/firebase_storage/example/.pub" />
     </content>
     <orderEntry type="jdk" jdkName="Android API 30 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

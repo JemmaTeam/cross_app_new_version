@@ -1,10 +1,9 @@
 library booking_calendar;
-
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:new_cross_app/Calendar/Consumer/ConsumerProfilePage.dart';
-import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:intl/intl.dart';
 // import 'dart:js' as js;
 import '../../Routes/route_const.dart';
@@ -157,8 +156,7 @@ class ConsumerBookingState extends State<ConsumerBooking> {
     return SfCalendar(
         view: CalendarView.month,
         controller: calendarController,
-        //Display Mode:
-        allowedViews: const [CalendarView.week, CalendarView.month],
+        allowedViews: const [CalendarView.week,CalendarView.month,CalendarView.timelineMonth],
         dataSource: dataSource,
         onTap: calendarTapCallback,
         appointmentBuilder: (context, calendarAppointmentDetails) {

@@ -41,6 +41,7 @@ class _ChatState extends State<Chat> {
   bool showEmojiPicker = false;
   Stream<QuerySnapshot>? chats;
   TextEditingController messageEditingController = TextEditingController();
+  final ScrollController _scrollController = ScrollController(); // 添加 ScrollController，实现让聊天界面在发送新消息后自动滚动到底部
 
   String TalkeruserName = '';
 
@@ -115,6 +116,13 @@ class _ChatState extends State<Chat> {
         messageEditingController.text = "";
         //latestMessageId = '';
       });
+
+      // 滚动到底部
+      _scrollController.animateTo(
+        _scrollController.position.minScrollExtent,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     }
   }
 
@@ -128,6 +136,9 @@ class _ChatState extends State<Chat> {
       });
     });
     getTalkerUserName();
+
+    // 在 initState 中监听文本框的编辑完成事件
+    messageEditingController.addListener(_onMessageEditComplete);
   }
 
   // 获取聊天对象的用户名的函数
@@ -148,7 +159,6 @@ class _ChatState extends State<Chat> {
     });
   }
 
-
   // 在数据库中插入上传照片的信息
   void addImageMessage(String imageUrl) {
     Map<String, dynamic> chatMessageMap = {
@@ -159,6 +169,32 @@ class _ChatState extends State<Chat> {
       'isImage': true, // 添加新的属性，表示这是一张图片
     };
     DatabaseService().addMessage(widget.chatRoomId, chatMessageMap);
+
+    // 重置上传进度
+    setState(() {
+      uploadProgress = 0.0;
+    });
+
+    // 滚动到底部
+    _scrollController.animateTo(
+      _scrollController.position.minScrollExtent,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose(); // 在组件销毁时释放 ScrollController
+    super.dispose();
+  }
+
+  void _onMessageEditComplete() {
+    if (messageEditingController.text.isNotEmpty &&
+        messageEditingController.text.endsWith('\n')) {
+      // 如果文本框内容不为空且以换行符结尾，则发送消息
+      addMessage();
+    }
   }
 
 
@@ -190,7 +226,51 @@ class _ChatState extends State<Chat> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Expanded(
-            child: chatMessages(),
+              child: StreamBuilder(
+                stream: chats, // 使用正确的 chats 流
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                  // 如果连接状态为等待，显示加载指示器
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else if (snapshot.hasError) {
+                  // 如果出现错误，显示错误消息
+                    return Center(
+                      child: Text('Error: ${snapshot.error}'),
+                    );
+                  } else {
+                      return ListView.builder(
+                        controller: _scrollController, // 将 ScrollController 分配给 ListView
+                        reverse: true, // 设置为 true，以便从底部开始滚动
+                        itemCount: snapshot.data?.docs.length ?? 0, // 获取聊天消息文档列表的长度
+                        itemBuilder: (context, index) { // 构建每个列表项的回调函数
+                          // 计算实际索引，以便正确获取消息数据
+                          final int reversedIndex = snapshot.data!.docs.length - index - 1;
+                          final Map<String, dynamic>? messageData =
+                          snapshot.data?.docs[reversedIndex].data() as Map<String, dynamic>?;
+
+                          final DateTime sendTime = DateTime.fromMillisecondsSinceEpoch( // 解析消息发送时间
+                              messageData?['time'] ?? 0
+                          );
+                          final DateFormat formatter = DateFormat('yy/MM/dd  HH:mm'); // 时间格式化器
+                          final String formattedTime = formatter.format(sendTime); // 格式化发送时间
+                          final bool Isread = messageData?['Isread']; // 检查消息是否已读
+                          final bool isImage = messageData?['isImage'] ?? false; // 检查消息是否为图片
+
+                          return MessageTile( // 返回消息列表项组件
+                            message: messageData?['message'], // 消息内容
+                            sendByMe: Constants.MyId == messageData?['sendBy'], // 检查消息是否由当前用户发送
+                            sendTime: formattedTime, // 格式化后的发送时间
+                            Isread: Isread, // 是否已读
+                            chatRoomId: widget.chatRoomId, // 聊天室 ID
+                            isImage: isImage, // 是否为图片消息
+                          );
+                        },
+                      );
+                    }
+                 },
+              ),
           ),
           if (uploadProgress > 0.0 && uploadProgress < 1.0) // 当进度在这个范围内时显示
             Column(
@@ -377,103 +457,114 @@ class MessageTile extends StatelessWidget {
     this.isImage = false,  // 默认值为 false
   }) : super(key: key);
 
+  void _viewImage(BuildContext context) {
+    if (isImage) {
+      // 如果是图片消息，则打开放大图片的页面或对话框
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          content: Container(
+            child: Image.network(
+              message,
+              fit: BoxFit.contain, // 使图片适应对话框
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    //if (!sendByMe) {
-    //DatabaseService().updateMessageReadStatus(chatRoomId);
-    //}
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Column(
-        crossAxisAlignment:
-            sendByMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment:
-                sendByMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-            children: [
-              Text(
-                sendTime,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
+      child: GestureDetector(
+        onTap: () => _viewImage(context), // 添加点击事件
+        child: Column(
+          crossAxisAlignment:
+          sendByMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: sendByMe
+                  ? MainAxisAlignment.end
+                  : MainAxisAlignment.start,
+              children: [
+                Text(
+                  sendTime,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 4),
-              Icon(
-                Icons.done_all,
-                size: 16,
-                color: sendByMe
-                    ? (Isread ? Colors.green : Colors.grey[600])
-                    : Colors.white,
-              )
-            ],
-          ),
-          Container(
-            padding: EdgeInsets.only(
-              top: 8,
-              bottom: 8,
-              left: sendByMe ? 0 : 24,
-              right: sendByMe ? 24 : 0,
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.done_all,
+                  size: 16,
+                  color: sendByMe
+                      ? (Isread ? Colors.green : Colors.grey[600])
+                      : Colors.white,
+                )
+              ],
             ),
-            alignment: sendByMe ? Alignment.centerRight : Alignment.centerLeft,
-            child: Container(
-              margin: sendByMe
-                  ? const EdgeInsets.only(left: 30)
-                  : const EdgeInsets.only(right: 30),
-              padding: const EdgeInsets.symmetric(
-                vertical: 17,
-                horizontal: 20,
+            Container(
+              padding: EdgeInsets.only(
+                top: 8,
+                bottom: 8,
+                left: sendByMe ? 0 : 24,
+                right: sendByMe ? 24 : 0,
               ),
-              decoration: BoxDecoration(
-                borderRadius: sendByMe
-                    ? const BorderRadius.only(
-                        topLeft: Radius.circular(23),
-                        topRight: Radius.circular(23),
-                        bottomLeft: Radius.circular(23),
-                      )
-                    : const BorderRadius.only(
-                        topLeft: Radius.circular(23),
-                        topRight: Radius.circular(23),
-                        bottomRight: Radius.circular(23),
-                      ),
-                color: sendByMe ? const Color(0xFF4CAF50) : Colors.grey[200],
-              ),
-              // child: Text(
-              //   message,
-              //   textAlign: sendByMe ? TextAlign.right : TextAlign.left,
-              //   style: TextStyle(
-              //     color: sendByMe ? Colors.white : Colors.black,
-              //     fontSize: 16,
-              //     fontFamily: 'OverpassRegular',
-              //     fontWeight: FontWeight.w300,
-              //   ),
-              child: isImage
-                  ? Container(//如果是图片显示图片
-                      width: MediaQuery.of(context).size.width / 4, // 设置宽度为屏幕的四分之一
-                      height: MediaQuery.of(context).size.height / 4, // 设置高度为屏幕的四分之一
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0),
-                        child: Image.network(
-                          message,
-                          fit: BoxFit.cover,  // 使用 BoxFit.cover 使图片按比例缩放
-                        ),
-                      ),
-                    )
-                  : Text(  // 如果不是图片，显示文本
-                message,
-                textAlign: sendByMe ? TextAlign.right : TextAlign.left,
-                style: TextStyle(
-                  color: sendByMe ? Colors.white : Colors.black,
-                  fontSize: 16,
-                  fontFamily: 'OverpassRegular',
-                  fontWeight: FontWeight.w300,
+              alignment:
+              sendByMe ? Alignment.centerRight : Alignment.centerLeft,
+              child: Container(
+                margin: sendByMe
+                    ? const EdgeInsets.only(left: 30)
+                    : const EdgeInsets.only(right: 30),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 17,
+                  horizontal: 20,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: sendByMe
+                      ? const BorderRadius.only(
+                    topLeft: Radius.circular(23),
+                    topRight: Radius.circular(23),
+                    bottomLeft: Radius.circular(23),
+                  )
+                      : const BorderRadius.only(
+                    topLeft: Radius.circular(23),
+                    topRight: Radius.circular(23),
+                    bottomRight: Radius.circular(23),
+                  ),
+                  color: sendByMe ? const Color(0xFF4CAF50) : Colors.grey[200],
+                ),
+                child: isImage
+                    ? Container(
+                  width: MediaQuery.of(context).size.width /
+                      4, // 设置宽度为屏幕的四分之一
+                  height: MediaQuery.of(context).size.height /
+                      4, // 设置高度为屏幕的四分之一
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Image.network(
+                      message,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                )
+                    : Text(
+                  message,
+                  textAlign: sendByMe ? TextAlign.right : TextAlign.left,
+                  style: TextStyle(
+                    color: sendByMe ? Colors.white : Colors.black,
+                    fontSize: 16,
+                    fontFamily: 'OverpassRegular',
+                    fontWeight: FontWeight.w300,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

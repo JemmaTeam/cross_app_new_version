@@ -228,26 +228,31 @@ class HomeState extends State<Home> {
                       params: {'userId': userId});
                 },
               ),
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'logout') {
-                    _showLogoutDialog();
-                  }
+              TextButton(
+                onPressed: () {
+                  _showLogoutDialog();
                 },
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(
-                    value: 'logout',
-                    child: Text('Log Out'),
+                child: Text(
+                  'Log Out',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
+                ),
               ),
             ],
             if (userId == '' || !_isLoggedIn)
-              IconButton(
-                icon: Icon(Icons.login),
+              TextButton(
                 onPressed: () {
                   GoRouter.of(context).pushNamed(RouterName.Login);
                 },
+                child: Text(
+                  'Log in',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
           ],
         ),
