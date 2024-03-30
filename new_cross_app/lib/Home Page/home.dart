@@ -4,6 +4,7 @@ library home;
 
 // import 'dart:html';
 
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -262,27 +263,53 @@ class HomeState extends State<Home> {
                   children: [
                     const DrawerHeader(
                       padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
-                      child: Text(
-                        'Please Login First',
-                        textAlign: TextAlign.center,
-                        textScaleFactor: 2.0,
+                      decoration: BoxDecoration(
+                      image: DecorationImage(
+                      image: AssetImage("assets/images/logo.png"),
+                      fit: BoxFit.cover,
+                        ),
                       ),
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                            child: Text(
+                                    'Please login First',
+                                    textAlign: TextAlign.center,
+                                    textScaleFactor: 1.5,
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      ),
+                                  ),
+
+                     ),
                     ),
                     TextButton(
                         onPressed: () {
                           GoRouter.of(context).pushNamed(RouterName.Login);
                         },
+                        style: ButtonStyle(
+                          alignment: Alignment.centerLeft,
+                        ),
                         child: const Text(
                           'Login',
-                          textScaleFactor: 2.0,
+                          textScaleFactor: 1.5,
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
                         )),
+                    Divider(),
                     TextButton(
                         onPressed: () {
                           GoRouter.of(context).pushNamed(RouterName.SignUp);
                         },
+                        style: ButtonStyle(
+                          alignment: Alignment.centerLeft,
+                        ),
                         child: const Text(
                           'Sign Up',
-                          textScaleFactor: 2.0,
+                          textScaleFactor: 1.5,
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
                         ))
                   ],
                 )
@@ -291,14 +318,29 @@ class HomeState extends State<Home> {
                   children: [
                     const DrawerHeader(
                       decoration: BoxDecoration(
-                        color: Colors.lightGreen,
+                        image: DecorationImage(
+                          image: AssetImage("assets/images/logo.png"),
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                      child: Text(
-                        'Menu',
+                      child: Align(
+                      alignment: Alignment.bottomLeft,
+                        child: Text(
+                          'Menu',
+                          textScaleFactor: 1.5,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                     ListTile(
-                      title: const Text('Profile'),
+                      title: const Text('Profile',
+                      style: TextStyle(
+                        fontSize: 20.0,
+                      ),
+                    ),
+
                       onTap: () {
                         GoRouter.of(context)
                             .pushNamed(RouterName.profilePage, params: {
@@ -306,16 +348,26 @@ class HomeState extends State<Home> {
                         });
                       },
                     ),
+                    Divider(),
                     ListTile(
-                      title: const Text('Calendar'),
+                      title: const Text('Calendar',
+                      style: TextStyle(
+                      fontSize: 20.0,
+                      ),
+                  ),
                       onTap: () {
                         context.pushNamed(RouterName.CalendarConsumer, params: {
                           'userId': userId,
                         });
                       },
                     ),
+                    Divider(),
                     ListTile(
-                      title: const Text('Chat'),
+                      title: const Text('Chat',
+                        style: TextStyle(
+                          fontSize: 20.0,
+                        ),
+                      ),
                       onTap: () {
                         GoRouter.of(context)
                             .pushNamed(RouterName.chat, params: {
@@ -323,8 +375,13 @@ class HomeState extends State<Home> {
                         });
                       },
                     ),
+                    Divider(),
                     ListTile(
-                      title: const Text('History Boookings'),
+                      title: const Text('History Boookings',
+                        style: TextStyle(
+                          fontSize: 20.0,
+                        ),
+                      ),
                       onTap: () {
                         GoRouter.of(context)
                             .pushNamed(RouterName.BookingHistory, params: {
