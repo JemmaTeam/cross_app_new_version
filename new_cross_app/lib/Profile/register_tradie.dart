@@ -51,6 +51,18 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
 
   bool isImageUploaded = false;  // 是否已经上传了
 
+  // 澳大利亚邮政编码的正则表达式（4 位数字） Regular expression for Australian postal codes (4 digits)
+  RegExp australiaPostcodeRegExp = RegExp(r'^\d{4}$');
+
+ // 添加一个布尔变量来跟踪邮政编码是否有效Add a boolean variable to track if the postal code is valid
+  bool isPostcodeValid = false;
+
+  bool isValidAustralianPostcode(String postcode) {
+    RegExp australiaPostcodeRegExp = RegExp(r'^\d{4}$');
+    return australiaPostcodeRegExp.hasMatch(postcode);
+  }
+
+
   @override
   Widget build(BuildContext context) { // build函数，用于构建界面
     var size = MediaQuery.of(context).size; // 获取当前媒体查询数据，例如屏幕尺寸
@@ -121,15 +133,22 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                             child: Container(
                               width: 300,
                               child: TextField(
-                                controller: postcodeController, // 使用新的控制器
+                                controller: postcodeController,
                                 decoration: InputDecoration(
                                   labelText: 'Enter Postcode',
                                   hintText: 'Input your postcode here',
+                                  errorText: isPostcodeValid ? null : 'Please enter a valid Australian postcode',
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(5.0),
                                     borderSide: BorderSide(color: Colors.grey, width: 1.0),
                                   ),
                                 ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    // Check if the input matches the pattern
+                                    isPostcodeValid = australiaPostcodeRegExp.hasMatch(value);
+                                  });
+                                },
                               ),
                             ),
                           ),
@@ -312,6 +331,15 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                       padding: const EdgeInsets.all(20),
                                       backgroundColor: kLogoColor),
                                   onPressed: () async {
+                                    if (!isPostcodeValid) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text("Please enter a valid Australian postcode"),
+                                        ),
+                                      );
+                                      return;
+                                    }
+
                                     if (_formKey.currentState!.validate()) {
                                       // 验证表单字段
 

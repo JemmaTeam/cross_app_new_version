@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
+//import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
-import '../firebase_options.dart';
+//import '../firebase_options.dart';
 import 'Consumer/Booking.dart';
 
 
@@ -37,6 +37,12 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
         home: Scaffold(
             appBar: AppBar(
               title: Text('Booking History'),
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
             ),
             body: SafeArea(
               child: Column(
