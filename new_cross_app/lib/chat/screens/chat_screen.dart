@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 //import 'package:image_picker_web/image_picker_web.dart';
 import 'package:new_cross_app/chat/screens/chat_home_screen.dart';
@@ -51,6 +52,9 @@ class _ChatState extends State<Chat> {
   bool isUploading = false;
   // 追踪图片上传的进度
   double uploadProgress = 0.0;
+
+  bool isShiftDown = false;  // Track if the shift key is pressed
+
 
   Widget chatMessages() {
     if (chats == null) {
@@ -139,6 +143,31 @@ class _ChatState extends State<Chat> {
 
     // 在 initState 中监听文本框的编辑完成事件
     messageEditingController.addListener(_onMessageEditComplete);
+
+    // 监听按键事件
+    RawKeyboard.instance.addListener(_handleKey);
+  }
+
+  void _onMessageEditComplete() {
+    if (messageEditingController.text.isNotEmpty &&
+        messageEditingController.text.endsWith('\n') &&
+        !isShiftDown) {
+      // 如果文本框内容不为空且以换行符结尾，并且没有按下 Shift 键，则发送消息
+      addMessage();
+    }
+  }
+
+  void _handleKey(RawKeyEvent event) {
+    if (event is RawKeyDownEvent) {
+      if (event.logicalKey == LogicalKeyboardKey.enter) {
+        // 按下 Enter 键时判断是否同时按下了 Shift 键
+        isShiftDown = event.isShiftPressed;
+        print('Shift key is down: $isShiftDown');
+      }
+    } else if (event is RawKeyUpEvent && event.logicalKey == LogicalKeyboardKey.enter) {
+      // 松开 Enter 键时重置 isShiftDown
+      isShiftDown = false;
+    }
   }
 
   // 获取聊天对象的用户名的函数
@@ -186,16 +215,13 @@ class _ChatState extends State<Chat> {
   @override
   void dispose() {
     _scrollController.dispose(); // 在组件销毁时释放 ScrollController
+
+    // 移除事件监听
+    RawKeyboard.instance.removeListener(_handleKey);
+
     super.dispose();
   }
 
-  void _onMessageEditComplete() {
-    if (messageEditingController.text.isNotEmpty &&
-        messageEditingController.text.endsWith('\n')) {
-      // 如果文本框内容不为空且以换行符结尾，则发送消息
-      addMessage();
-    }
-  }
 
 
   @override
@@ -400,14 +426,43 @@ class _ChatState extends State<Chat> {
                           width: 10,
                         ),
                         Expanded(
-                          child: TextField(
-                            controller: messageEditingController,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'Type your message ...',
-                              hintStyle: TextStyle(color: Colors.grey[500]),
+                          child: RawKeyboardListener(
+                            focusNode: FocusNode(),
+                            onKey: (event) {
+                              if (event is RawKeyDownEvent) {
+                                isShiftDown = event.logicalKey == LogicalKeyboardKey.shiftLeft || event.logicalKey == LogicalKeyboardKey.shiftRight;
+                              } else if (event is RawKeyUpEvent) {
+                                isShiftDown = false;
+                              }
+                            },
+                            child: TextField(
+                              controller: messageEditingController,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: 'Type your message ...',
+                                hintStyle: TextStyle(color: Colors.grey[500]),
+                              ),
+                              keyboardType: TextInputType.multiline,
+                              maxLines: null,
+                              textInputAction: TextInputAction.newline,
+                              onSubmitted: (value) {
+                                if (isShiftDown) {
+                                  // 插入换行符
+                                  messageEditingController.text += '\n';
+                                } else {
+                                  // 发送消息
+                                  addMessage();
+                                }
+                              },
+                              onChanged: (value) {
+                                if (value.endsWith('\n') && isShiftDown) {
+                                  messageEditingController.text = value.substring(0, value.length - 1);
+                                  messageEditingController.selection = TextSelection.collapsed(offset: messageEditingController.text.length);
+                                }
+                              },
+                              onEditingComplete: addMessage,
                             ),
-                          ),
+                          )
                         ),
                       ],
                     ),
