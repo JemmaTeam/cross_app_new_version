@@ -43,6 +43,7 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                   Navigator.of(context).pop();
                 },
               ),
+              backgroundColor: Colors.green,
             ),
             body: SafeArea(
               child: Column(
@@ -199,11 +200,12 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
               return Center(
                 child: Material( // Add Material widget here
                   child: Container(
-                    width: 200.0,
+                    width: 350.0,
                     height: 200.0,
                     color: Colors.white,
+                    alignment: Alignment.centerLeft,
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      //mainAxisAlignment: MainAxisAlignment.start,
                       children: <Widget>[
                         ListTile(
                           title: Text(booking.eventName),
@@ -214,9 +216,13 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                           height: 1,
                         ),
                         SelectableText('Tradie Name: ' + booking.tradieName),
+                        SizedBox(height: 8.0),
                         SelectableText('From: ' + booking.from.toString()),
+                        SizedBox(height: 8.0),
                         SelectableText('To: ' + booking.to.toString()),
+                        SizedBox(height: 8.0),
                         SelectableText('Quote: ' + booking.quote.toString()),
+                        SizedBox(height: 8.0),
                         SelectableText('Rating: ' + booking.rating.toString()),
                       ],
                     ),
@@ -267,7 +273,7 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
               return Center(
                 child: Material( // Add Material widget here
                   child: Container(
-                    width: 200.0,
+                    width: 350.0,
                     height: 200.0,
                     color: Colors.white,
                     child: Column(
@@ -283,9 +289,13 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                         ),
                         SelectableText('Consumer Name: ' + booking
                             .consumerName),
+                        SizedBox(height: 8.0),
                         SelectableText('From: ' + booking.from.toString()),
+                        SizedBox(height: 8.0),
                         SelectableText('To: ' + booking.to.toString()),
+                        SizedBox(height: 8.0),
                         SelectableText('Quote: ' + booking.quote.toString()),
+                        SizedBox(height: 8.0),
                         SelectableText('Rating: ' + booking.rating.toString()),
                       ],
                     ),
