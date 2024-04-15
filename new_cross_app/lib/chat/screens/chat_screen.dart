@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 //import 'package:image_picker_web/image_picker_web.dart';
 import 'package:new_cross_app/chat/screens/chat_home_screen.dart';
@@ -53,9 +52,6 @@ class _ChatState extends State<Chat> {
   // 追踪图片上传的进度
   double uploadProgress = 0.0;
 
-  bool isShiftDown = false;  // Track if the shift key is pressed
-
-
   Widget chatMessages() {
     if (chats == null) {
       return Container();
@@ -66,28 +62,28 @@ class _ChatState extends State<Chat> {
       builder: (context, snapshot) {
         return snapshot.hasData
             ? ListView.builder(
-                reverse: false,
-                itemCount: snapshot.data?.docs.length ?? 0,
-                itemBuilder: (context, index) {
-                  final Map<String, dynamic>? messageData =
-                      snapshot.data?.docs[index].data()
-                          as Map<String, dynamic>?;
-                  final DateTime sendTime = DateTime.fromMillisecondsSinceEpoch(
-                      messageData?['time'] ?? 0);
-                  final DateFormat formatter = DateFormat('yy/MM/dd  HH:mm');
-                  final String formattedTime = formatter.format(sendTime);
-                  final bool Isread = messageData?['Isread'];
-                  final bool isImage = messageData?['isImage'] ?? false;
-                  return MessageTile(
-                    message: messageData?['message'],
-                    sendByMe: Constants.MyId == messageData?['sendBy'],
-                    sendTime: formattedTime,
-                    Isread: Isread,
-                    chatRoomId: widget.chatRoomId,
-                    isImage: isImage,  // 传递isImage参数
-                  );
-                },
-              )
+          reverse: false,
+          itemCount: snapshot.data?.docs.length ?? 0,
+          itemBuilder: (context, index) {
+            final Map<String, dynamic>? messageData =
+            snapshot.data?.docs[index].data()
+            as Map<String, dynamic>?;
+            final DateTime sendTime = DateTime.fromMillisecondsSinceEpoch(
+                messageData?['time'] ?? 0);
+            final DateFormat formatter = DateFormat('yy/MM/dd  HH:mm');
+            final String formattedTime = formatter.format(sendTime);
+            final bool Isread = messageData?['Isread'];
+            final bool isImage = messageData?['isImage'] ?? false;
+            return MessageTile(
+              message: messageData?['message'],
+              sendByMe: Constants.MyId == messageData?['sendBy'],
+              sendTime: formattedTime,
+              Isread: Isread,
+              chatRoomId: widget.chatRoomId,
+              isImage: isImage,  // 传递isImage参数
+            );
+          },
+        )
             : Container();
       },
     );
@@ -143,31 +139,6 @@ class _ChatState extends State<Chat> {
 
     // 在 initState 中监听文本框的编辑完成事件
     messageEditingController.addListener(_onMessageEditComplete);
-
-    // 监听按键事件
-    RawKeyboard.instance.addListener(_handleKey);
-  }
-
-  void _onMessageEditComplete() {
-    if (messageEditingController.text.isNotEmpty &&
-        messageEditingController.text.endsWith('\n') &&
-        !isShiftDown) {
-      // 如果文本框内容不为空且以换行符结尾，并且没有按下 Shift 键，则发送消息
-      addMessage();
-    }
-  }
-
-  void _handleKey(RawKeyEvent event) {
-    if (event is RawKeyDownEvent) {
-      if (event.logicalKey == LogicalKeyboardKey.enter) {
-        // 按下 Enter 键时判断是否同时按下了 Shift 键
-        isShiftDown = event.isShiftPressed;
-        print('Shift key is down: $isShiftDown');
-      }
-    } else if (event is RawKeyUpEvent && event.logicalKey == LogicalKeyboardKey.enter) {
-      // 松开 Enter 键时重置 isShiftDown
-      isShiftDown = false;
-    }
   }
 
   // 获取聊天对象的用户名的函数
@@ -175,7 +146,7 @@ class _ChatState extends State<Chat> {
     // 聊天室ID是由两个用户ID组合而成的，例如 "user1_user2"
     List<String> users = widget.chatRoomId.split("_");
     String talkerUserId =
-        users.first == Constants.MyId ? users.last : users.first;
+    users.first == Constants.MyId ? users.last : users.first;
 
     // 从数据库中获取聊天对象的用户名
     DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
@@ -184,7 +155,7 @@ class _ChatState extends State<Chat> {
         .get();
     setState(() {
       TalkeruserName =
-          documentSnapshot['fullName']; // 假设'userName'是数据库中存储用户名的字段
+      documentSnapshot['fullName']; // 假设'userName'是数据库中存储用户名的字段
     });
   }
 
@@ -215,13 +186,16 @@ class _ChatState extends State<Chat> {
   @override
   void dispose() {
     _scrollController.dispose(); // 在组件销毁时释放 ScrollController
-
-    // 移除事件监听
-    RawKeyboard.instance.removeListener(_handleKey);
-
     super.dispose();
   }
 
+  void _onMessageEditComplete() {
+    if (messageEditingController.text.isNotEmpty &&
+        messageEditingController.text.endsWith('\n')) {
+      // 如果文本框内容不为空且以换行符结尾，则发送消息
+      addMessage();
+    }
+  }
 
 
   @override
@@ -252,51 +226,51 @@ class _ChatState extends State<Chat> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Expanded(
-              child: StreamBuilder(
-                stream: chats, // 使用正确的 chats 流
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
+            child: StreamBuilder(
+              stream: chats, // 使用正确的 chats 流
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
                   // 如果连接状态为等待，显示加载指示器
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (snapshot.hasError) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                } else if (snapshot.hasError) {
                   // 如果出现错误，显示错误消息
-                    return Center(
-                      child: Text('Error: ${snapshot.error}'),
-                    );
-                  } else {
-                      return ListView.builder(
-                        controller: _scrollController, // 将 ScrollController 分配给 ListView
-                        reverse: true, // 设置为 true，以便从底部开始滚动
-                        itemCount: snapshot.data?.docs.length ?? 0, // 获取聊天消息文档列表的长度
-                        itemBuilder: (context, index) { // 构建每个列表项的回调函数
-                          // 计算实际索引，以便正确获取消息数据
-                          final int reversedIndex = snapshot.data!.docs.length - index - 1;
-                          final Map<String, dynamic>? messageData =
-                          snapshot.data?.docs[reversedIndex].data() as Map<String, dynamic>?;
+                  return Center(
+                    child: Text('Error: ${snapshot.error}'),
+                  );
+                } else {
+                  return ListView.builder(
+                    controller: _scrollController, // 将 ScrollController 分配给 ListView
+                    reverse: true, // 设置为 true，以便从底部开始滚动
+                    itemCount: snapshot.data?.docs.length ?? 0, // 获取聊天消息文档列表的长度
+                    itemBuilder: (context, index) { // 构建每个列表项的回调函数
+                      // 计算实际索引，以便正确获取消息数据
+                      final int reversedIndex = snapshot.data!.docs.length - index - 1;
+                      final Map<String, dynamic>? messageData =
+                      snapshot.data?.docs[reversedIndex].data() as Map<String, dynamic>?;
 
-                          final DateTime sendTime = DateTime.fromMillisecondsSinceEpoch( // 解析消息发送时间
-                              messageData?['time'] ?? 0
-                          );
-                          final DateFormat formatter = DateFormat('yy/MM/dd  HH:mm'); // 时间格式化器
-                          final String formattedTime = formatter.format(sendTime); // 格式化发送时间
-                          final bool Isread = messageData?['Isread']; // 检查消息是否已读
-                          final bool isImage = messageData?['isImage'] ?? false; // 检查消息是否为图片
-
-                          return MessageTile( // 返回消息列表项组件
-                            message: messageData?['message'], // 消息内容
-                            sendByMe: Constants.MyId == messageData?['sendBy'], // 检查消息是否由当前用户发送
-                            sendTime: formattedTime, // 格式化后的发送时间
-                            Isread: Isread, // 是否已读
-                            chatRoomId: widget.chatRoomId, // 聊天室 ID
-                            isImage: isImage, // 是否为图片消息
-                          );
-                        },
+                      final DateTime sendTime = DateTime.fromMillisecondsSinceEpoch( // 解析消息发送时间
+                          messageData?['time'] ?? 0
                       );
-                    }
-                 },
-              ),
+                      final DateFormat formatter = DateFormat('yy/MM/dd  HH:mm'); // 时间格式化器
+                      final String formattedTime = formatter.format(sendTime); // 格式化发送时间
+                      final bool Isread = messageData?['Isread']; // 检查消息是否已读
+                      final bool isImage = messageData?['isImage'] ?? false; // 检查消息是否为图片
+
+                      return MessageTile( // 返回消息列表项组件
+                        message: messageData?['message'], // 消息内容
+                        sendByMe: Constants.MyId == messageData?['sendBy'], // 检查消息是否由当前用户发送
+                        sendTime: formattedTime, // 格式化后的发送时间
+                        Isread: Isread, // 是否已读
+                        chatRoomId: widget.chatRoomId, // 聊天室 ID
+                        isImage: isImage, // 是否为图片消息
+                      );
+                    },
+                  );
+                }
+              },
+            ),
           ),
           if (uploadProgress > 0.0 && uploadProgress < 1.0) // 当进度在这个范围内时显示
             Column(
@@ -340,7 +314,7 @@ class _ChatState extends State<Chat> {
                     textAlign: TextAlign.center,
                   ), // Needs to be const Widget
                   loadingIndicator:
-                      SizedBox.shrink(), // Needs to be const Widget
+                  SizedBox.shrink(), // Needs to be const Widget
                   tabIndicatorAnimDuration: kTabScrollDuration,
                   categoryIcons: CategoryIcons(),
                   buttonMode: ButtonMode.MATERIAL,
@@ -426,43 +400,14 @@ class _ChatState extends State<Chat> {
                           width: 10,
                         ),
                         Expanded(
-                          child: RawKeyboardListener(
-                            focusNode: FocusNode(),
-                            onKey: (event) {
-                              if (event is RawKeyDownEvent) {
-                                isShiftDown = event.logicalKey == LogicalKeyboardKey.shiftLeft || event.logicalKey == LogicalKeyboardKey.shiftRight;
-                              } else if (event is RawKeyUpEvent) {
-                                isShiftDown = false;
-                              }
-                            },
-                            child: TextField(
-                              controller: messageEditingController,
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: 'Type your message ...',
-                                hintStyle: TextStyle(color: Colors.grey[500]),
-                              ),
-                              keyboardType: TextInputType.multiline,
-                              maxLines: null,
-                              textInputAction: TextInputAction.newline,
-                              onSubmitted: (value) {
-                                if (isShiftDown) {
-                                  // 插入换行符
-                                  messageEditingController.text += '\n';
-                                } else {
-                                  // 发送消息
-                                  addMessage();
-                                }
-                              },
-                              onChanged: (value) {
-                                if (value.endsWith('\n') && isShiftDown) {
-                                  messageEditingController.text = value.substring(0, value.length - 1);
-                                  messageEditingController.selection = TextSelection.collapsed(offset: messageEditingController.text.length);
-                                }
-                              },
-                              onEditingComplete: addMessage,
+                          child: TextField(
+                            controller: messageEditingController,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Type your message ...',
+                              hintStyle: TextStyle(color: Colors.grey[500]),
                             ),
-                          )
+                          ),
                         ),
                       ],
                     ),
