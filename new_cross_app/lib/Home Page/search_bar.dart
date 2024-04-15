@@ -1,28 +1,14 @@
 part of home;
-//import 'package:flutter/cupertino.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter/widgets.dart';
-// import 'package:go_router/go_router.dart';
-// //import 'package:jemma/models/searchtradie.dart';
-// import 'package:new_cross_app/Home Page/constants.dart';
-// import 'package:new_cross_app/Home Page/decorations.dart';
-// import 'package:new_cross_app/Home Page/responsive.dart';
-// import 'package:new_cross_app/Routes/route_const.dart';
 
-//import '../../routes.dart';
-
-/// Widget which assist in users searching for trades-person, via job type and location.
-///
-/// Note: Needs to be stateful as to hold onto the dropdown info.
+// Import necessary Flutter packages
 
 String? _worktype;
 String? _postcode;
 
 class SearchBar extends StatelessWidget {
-  String userId;
-  SearchBar({
-    Key? key,
-    required this.userId}) : super(key: key);
+  final String userId;
+
+  SearchBar({Key? key, required this.userId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -31,83 +17,59 @@ class SearchBar extends StatelessWidget {
 
     return Container(
       width: 40.pw(size),
-      constraints: BoxConstraints(minWidth: 250),
+      constraints: const BoxConstraints(minWidth: 250),
       alignment: Alignment.center,
-      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 35),
+      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 35),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: defaultShadows,
         borderRadius: BorderRadius.circular(35),
       ),
-
-      // Contains dropdownButtons + Search button
       child: OverflowBar(
         overflowAlignment: OverflowBarAlignment.center,
         spacing: 2.5.pw(size),
         overflowSpacing: 1.75.ph(size),
         children: [
-          DropDownContainer(topic:"Job type",topicIconData: Icons.handyman, dropDownContent: {},),
-          // DropDownContainer(topic:"Location",topicIconData: Icons.location_pin, dropDownContent: {},),
+          DropDownContainer(
+            topic: "Job type",
+            topicIconData: Icons.handyman,
+            dropDownContent: {},
+          ),
           buildPostcodeInput(_postCodeFormKey, (value) => _postcode = value),
-          _buildSearchButton(context,_postCodeFormKey)
+          _buildSearchButton(context, _postCodeFormKey),
         ],
       ),
     );
   }
 
-  /// Search button which will be able initiate a search and assist in transitioning the screen to the result.
-  Container _buildSearchButton(
-      BuildContext context, GlobalKey<FormState> formKey) {
-    return Container(
-      child: ElevatedButton.icon(
-        onPressed: () {
-          if(_isLoggedIn){
-            if (formKey.currentState!.validate()) {
-              formKey.currentState!.save();
-              print('Postcode saved: $_postcode');
-
-              // Define the parameters
-              if (_postcode != null && _worktype != null) {
-                final _params = {
-                  'userId': userId,
-                  'postcode': _postcode!,
-                  'workType': _worktype!,
-                };
-                GoRouter.of(context).pushNamed(RouterName.SearchOutcome,params: _params);
-              }
-            }
-          }
-
-        }, // TODO: Replace with search request
-        icon: Icon(
-          Icons.search,
-          color: Colors.black,
-          size: 18,
-        ),
-        label: Text(
-          'Search',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        style: ElevatedButton.styleFrom(primary: kLogoColor, elevation: 2),
+  Widget _buildSearchButton(BuildContext context, GlobalKey<FormState> formKey) {
+    return ElevatedButton.icon(
+      onPressed: () => _handleSearch(context, formKey),
+      icon: const Icon(Icons.search, color: Colors.black, size: 18),
+      label: const Text(
+        'Search',
+        style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
       ),
+      style: ElevatedButton.styleFrom(primary: kLogoColor, elevation: 2),
     );
+  }
+
+  void _handleSearch(BuildContext context, GlobalKey<FormState> formKey) {
+    if (formKey.currentState!.validate()) {
+      formKey.currentState!.save();
+      if (_postcode != null && _worktype != null) {
+        final params = {'userId': userId, 'postcode': _postcode!, 'workType': _worktype!};
+        GoRouter.of(context).pushNamed(RouterName.SearchOutcome, params: params);
+      }
+    }
   }
 }
 
-/// Reusable dropdown container that can host icons/images as well.
 class DropDownContainer extends StatefulWidget {
   final String topic;
   final IconData topicIconData;
   final Map<String, Image> dropDownContent;
 
-  // value get from droupdown button
-
-  /// [topic] refers to the dropdownButton's topic; Example: Job type.
-  /// [topicIconData] holds the topic's iconData.
-  /// [dropDownContent] is the map which holds the dropdownItem's name and image.
   DropDownContainer({
     Key? key,
     required this.topic,
@@ -116,222 +78,132 @@ class DropDownContainer extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _DropDownContainerState(
-      topic: topic,
-      dropDownContent: dropDownContent,
-      topicIconData: topicIconData);
+  State<DropDownContainer> createState() => _DropDownContainerState();
 }
 
 class _DropDownContainerState extends State<DropDownContainer> {
-  final String topic;
-  final IconData topicIconData;
-  final Map<String, Image> dropDownContent;
-  // List<String> Location = [
-  //   'Acton',
-  //   'Aranda',
-  //   'Belconnen',
-  //   'Bonner',
-  //   'Braddon',
-  //   'Calwell',
-  //   'Canberra',
-  //   'Charnwood',
-  //   'Crace',
-  //   'Dickson',
-  //   'Deakin',
-  //   'Downer',
-  //   'Evatt',
-  //   'Florey',
-  //   'Forde',
-  //   'Forrest',
-  //   'Franklin',
-  //   'Fyshwick',
-  //   'Garran',
-  //   'Greenway',
-  //   'Griffith',
-  //   'Gungahlin',
-  //   'Harrison',
-  //   'Hawker',
-  //   'Holt',
-  //   'IsabellaPlains',
-  //   'Jacka',
-  //   'Kaleen',
-  //   'Kambah',
-  //   'Kingsrib',
-  //   'Latham',
-  //   'Lyneham'
-  // ];
-  // List<String> JobType= ['Air-conditioning and Mechanical Services Plumber', 'Air-conditioning and Refrigeration Mechanic'
-  //     'Arborist', 'Automotive Electrician', 'Boat Builder and Repairer', 'Bricklayer', 'Cabinetmaker','Carpenter', 'Carpenter and Joiner','Diesel Motor Mechanic'
-  //     'Drainer', 'Electrician (General)', 'Electronic Equipment Tradesperson', 'Fibrous Plasterer', 'Floor Finisher', 'Furniture Finisher',
-  //   'Gasfitter', 'Glazier', 'Hairdresser', 'Landscape Gardener', 'Locksmith', 'Motor Mechanics (General)', 'Motorcycle Mechanic',
-  //   'Painting', 'Plumber (General)', 'Roof Plumber', 'Roof Tiler', 'Signwriter', 'Solid Plasterer', 'Stonemason', 'Upholsteror', 'Wall and Floor Tiler'
-  // ];
-
-  List<String> JobType = [
-    'AirconMechanic',
-    'BrickLayer',
-    'Carpenter',
-    'CarpetLayer',
-    'Decking',
-    'Electrcian',
-    'Fencing',
-    'GasPlumber',
-    'Glazier',
-    'HairAndMakeUp',
-    'HomeRenovation',
-    'Insulation'
-  ];
-
-  _DropDownContainerState({
-    required this.topic,
-    required this.topicIconData,
-    required this.dropDownContent,
-  });
+  final Map<String, IconData> jobTypeIcons = {
+    'AirconMechanic': Icons.ac_unit,
+    'BrickLayer': Icons.landscape,
+    'Carpenter': Icons.build,
+    'CarpetLayer': Icons.layers,
+    'Decking': Icons.deck,
+    'Electrcian': Icons.electric_bolt,
+    'Fencing': Icons.fence,
+    'GasPlumber': Icons.fireplace,
+    'Glazier': Icons.window,
+    'HairAndMakeUp': Icons.face,
+    'HomeRenovation': Icons.home_repair_service,
+    'Insulation': Icons.thermostat,
+  };
 
   @override
   Widget build(BuildContext context) {
     return Container(
       constraints: const BoxConstraints(maxWidth: 200),
       padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
+        borderRadius: BorderRadius.circular(10), // Rounded corners
+        border: Border.all(color: Colors.grey.shade300), // Border color
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: Offset(0, 2), // Shadow position
+          ),
+        ],
       ),
-
-      // Just some decoration
-      child: DecoratedBox(
-        decoration: ShapeDecoration(
-          color: Colors.white10,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(5.0)),
-              side: BorderSide(color: Colors.grey.withOpacity(0.45))),
+      child: DropdownButton<String>(
+        value: _worktype,
+        onChanged: (String? newValue) {
+          setState(() {
+            _worktype = newValue;
+          });
+        },
+        hint: Container(
+          width: double.infinity, // Ensures the hint content takes full width to center align the text properly
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(widget.topicIconData, color: Colors.grey),  // 使用来自 StatefulWidget 的图标
+              SizedBox(width: 10),
+              Text(
+                'Job Type',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey),
+              ),
+            ],
+          ),
         ),
-        child: DropdownButton(
-            value: _worktype,
-            onChanged: (selection) => setState(() {
-              _worktype = selection.toString();
-            }),
-            hint: Container(
-              padding: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-              child: Row(children: [
-                Expanded(
-                    flex: 2,
-                    child: Icon(
-                      topicIconData,
-                      color: Colors.black,
-                    )),
-                Expanded(
-                    flex: 4,
-                    child: Text(
-                      topic,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 14),
-                    ))
-              ]),
+        items: jobTypeIcons.entries.map<DropdownMenuItem<String>>((MapEntry<String, IconData> entry) {
+          return DropdownMenuItem<String>(
+            value: entry.key,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(entry.value, color: Colors.black54),
+                SizedBox(width: 10),
+                Text(entry.key),
+              ],
             ),
-            isExpanded: true,
-            underline: SizedBox(),
-            items:
-            // topic == "Location"
-            //     ? Location.map<DropdownMenuItem<String>>((String value) {
-            //         return DropdownMenuItem<String>(
-            //           value: value,
-            //           child: Row(children: [
-            //             Expanded(
-            //                 flex: 2,
-            //                 child: Icon(Icons.handyman_outlined,
-            //                     color: Colors.black)),
-            //             Expanded(
-            //                 flex: 4,
-            //                 child: Text(
-            //                   value,
-            //                   textAlign: TextAlign.center,
-            //                   style:
-            //                       TextStyle(fontSize: 14, color: Colors.black),
-            //                 ))
-            //           ]),
-            //         );
-            //       }).toList()
-            //     :
-            JobType.map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Row(children: [
-                  Expanded(
-                      flex: 2,
-                      child: Icon(Icons.handyman_outlined,
-                          color: Colors.black)),
-                  Expanded(
-                      flex: 4,
-                      child: Text(
-                        value,
-                        textAlign: TextAlign.center,
-                        style:
-                        TextStyle(fontSize: 14, color: Colors.black),
-                      ))
-                ]),
-              );
-            }).toList()),
+          );
+        }).toList(),
+        isExpanded: true,
+        underline: SizedBox(), // Removes the default underline
       ),
     );
   }
 }
 
-/// Builds and returns a postcode input widget.
-///
-/// [formKey] is the GlobalKey used to associate with the [Form].
-/// [onSave] is a function that takes a nullable string and is invoked when the form is saved.
+
+
 Widget buildPostcodeInput(GlobalKey<FormState> formKey, Function(String?) onSave) {
-  // Return a Form widget that wraps the input field.
   return Form(
-      key: formKey,  // Set GlobalKey for the form to perform form validation later.
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 200),
-        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-        decoration: const BoxDecoration(
-          color: Colors.white,  // Set background color to white.
-        ),
-        // Use DecoratedBox to further decorate the input field.
-        child: DecoratedBox(
-          decoration: ShapeDecoration(
-            color: Colors.white10,  // Set base color.
-            // Define border and border-radius.
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                side: BorderSide(color: Colors.grey.withOpacity(0.45))),
+    key: formKey,
+    child: Container(
+      constraints: const BoxConstraints(maxWidth: 200), // Ensure it matches the width of the Job Type dropdown.
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade300),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: Offset(0, 2), // Changes position of shadow
           ),
-          // TextFormField is used for text input and has built-in functionalities like form validation.
-          child: TextFormField(
-            textAlign: TextAlign.center,
-            // Decorate the inside of the input box, e.g., hint text, prefix icon.
-            decoration: const InputDecoration(
-              hintText: 'Postcode',
-              prefixIcon: Padding(
-                padding: EdgeInsets.only(left: 18),
-                child: Icon(Icons.location_pin, color: Colors.black),
-              ),
-              hintStyle: TextStyle(fontSize: 14.0,),
-              enabledBorder: OutlineInputBorder(borderSide: BorderSide.none,),
-              counterText: "",
-            ),
-            keyboardType: TextInputType.number,
-            maxLength: 4,
-            // Validation function to check if the input value is valid.
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter a postcode'; // Prompt: Cannot be empty.
-              }
-              final isDigitsOnly = int.tryParse(value);
-              if (isDigitsOnly == null) {
-                return 'Please enter only numeric characters'; // Prompt: Must be digits.
-              }
-              if (value.length != 4) {
-                return 'Postcode must be exactly 4 digits'; // Prompt: Must be 4 digits.
-              }
-              return null;
-            },
-            onSaved: onSave,
+        ],
+      ),
+      child: TextFormField(
+        textAlign: TextAlign.center, // Centers the text as it is entered.
+        decoration: InputDecoration(
+          hintText: 'Postcode',
+          hintStyle: TextStyle(color: Colors.grey), // Grey color for the hint.
+          prefixIcon: Padding(
+            padding: EdgeInsets.only(left: 10), // Padding to align the icon better within the input box.
+            child: Icon(Icons.location_pin, color: Colors.black), // Icon for postcode input.
           ),
+          border: InputBorder.none, // Removes the underline.
+          counterText: "", // Removes the counter text.
         ),
-      )
+        keyboardType: TextInputType.number,
+        maxLength: 4, // Maintains the limit of 4 characters but hides the counter.
+        validator: (value) => _validatePostcode(value),
+        onSaved: onSave,
+      ),
+    ),
   );
 }
+
+String? _validatePostcode(String? value) {
+  if (value == null || value.isEmpty) return 'Please enter a postcode';
+  if (int.tryParse(value) == null) return 'Please enter only numeric characters';
+  if (value.length != 4) return 'Postcode must be exactly 4 digits';
+  return null;
+}
+
+
