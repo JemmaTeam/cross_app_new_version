@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 //import 'package:new_cross_app/contact_us.dart';
 import 'package:new_cross_app/Home Page/help.dart';
 import 'package:new_cross_app/Home Page/constants.dart';
-import 'package:sizer/sizer.dart';
+//import 'package:sizer/sizer.dart';
 import 'package:new_cross_app/Home Page/responsive.dart';
 
 //import '../routes.dart';
@@ -11,22 +11,21 @@ import 'package:new_cross_app/Home Page/responsive.dart';
 class WebFooter extends StatelessWidget {
   const WebFooter({Key? key}) : super(key: key);
 
-
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Container(
-      height: 4.h,
+      height: size.height * 0.04, // 使用 MediaQuery 替换 Sizer 的 .h 方法
       color: kLogoColor,
       padding: EdgeInsets.symmetric(
-        horizontal: 4.h,
+        horizontal: size.height * 0.04, // 使用 MediaQuery 替换 Sizer 的 .h 方法
       ),
       child: Row(
         children: [
           Text("J",style: GoogleFonts.parisienne(fontWeight: FontWeight.w700),),
           Container(
             margin: const EdgeInsets.symmetric(
-              horizontal: 50
+                horizontal: 50
             ),
             child: Row(
               children: [
@@ -35,13 +34,13 @@ class WebFooter extends StatelessWidget {
                   /*press: () => Navigator.pushNamed(
                     context,
                     Screen.contactUs.getURL(),*/
-                  ),
+                ),
                 _FooterTag(
                   text: 'Help', press: () {  },
                   /*press: () => Navigator.pushNamed(
                     context,
                     Screen.help.getURL(),*/
-                  )
+                )
               ],
             ),
           ),
@@ -75,7 +74,7 @@ class _FooterTag extends StatelessWidget {
           ),
         ),
         style: ButtonStyle(
-          overlayColor: MaterialStateProperty.all<Color>(Color(0x00000000))
+            overlayColor: MaterialStateProperty.all<Color>(Color(0x00000000))
         ),
       ),
     );

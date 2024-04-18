@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:new_cross_app/Home Page/home.dart';
 import 'package:new_cross_app/Home Page/decorations.dart';
-import 'package:sizer/sizer.dart';
 
 /// Reusable widget which is primarily used for aesthetics.
 class GraphicalBanner extends StatelessWidget {
@@ -12,8 +11,10 @@ class GraphicalBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height; // 获取屏幕高度用于字体大小计算
+
     return Container(
-        height: MediaQuery.of(context).size.height * 0.2,
+        height: screenHeight * 0.2,
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
             image: const DecorationImage(
@@ -30,7 +31,8 @@ class GraphicalBanner extends StatelessWidget {
               alignment: const Alignment(0, -.55),
               child: DefaultTextStyle(
                   style: GoogleFonts.parisienne(
-                      fontSize: 20.sp, color: Colors.black),
+                      fontSize: screenHeight * 0.02, // 使用 screenHeight 的百分比来调整字体大小
+                      color: Colors.black),
                   child: AnimatedTextKit(
                     animatedTexts: [
                       TypewriterAnimatedText("Jemma",

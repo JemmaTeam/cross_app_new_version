@@ -207,17 +207,16 @@ class _WhyJemmaState extends State<WhyJemma> {
     final size = MediaQuery.of(context).size;
 
     return Container(
-      padding:
-      EdgeInsets.symmetric(horizontal: 5.pw(size), vertical: 1.pw(size)),
+      padding: EdgeInsets.symmetric(horizontal: size.width * 0.05, vertical: size.height * 0.01),
       decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: defaultShadows,
           borderRadius: BorderRadius.circular(40)),
       child: Column(children: [
-        SizedBox(height: 0.75.ph(size)),
+        SizedBox(height: size.height * 0.0075),
         OverflowBar(
-          spacing: 25.pw(size),
-          overflowSpacing: 1.5.ph(size),
+          spacing: size.width * 0.25,
+          overflowSpacing: size.height * 0.015,
           overflowAlignment: OverflowBarAlignment.center,
           children: [
             Row(mainAxisSize: MainAxisSize.min, children: [
@@ -234,7 +233,7 @@ class _WhyJemmaState extends State<WhyJemma> {
                 isCustomerSelected: _isCustomerSelected)
           ],
         ),
-        SizedBox(height: 2.5.ph(size)),
+        SizedBox(height: size.height * 0.025),
         Carousel(isCustomerSelected: _isCustomerSelected)
       ]),
     );
