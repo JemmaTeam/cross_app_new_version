@@ -272,7 +272,7 @@ class HomeState extends State<Home> {
                       child: Align(
                         alignment: Alignment.bottomCenter,
                             child: Text(
-                                    'Please login First',
+                                    'Please login first',
                                     textAlign: TextAlign.center,
                                     textScaleFactor: 1.5,
                                     style: TextStyle(
@@ -377,7 +377,7 @@ class HomeState extends State<Home> {
                     ),
                     Divider(),
                     ListTile(
-                      title: const Text('History Boookings',
+                      title: const Text('Booking history',
                         style: TextStyle(
                           fontSize: 20.0,
                         ),
