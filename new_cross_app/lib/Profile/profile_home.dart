@@ -122,7 +122,7 @@ class _ProfileHomeState extends State<ProfileHome> {
             child: Column(children: [
               // General customer information part
               customerInfo(size),
-              SizedBox(height: 2.5.ph(size)),
+              SizedBox(height: size.height * 0.025), // 替换 2.5.ph(size)
               // Tradie register button
               if (_isConsumer)
                 TextButton(
@@ -143,7 +143,7 @@ class _ProfileHomeState extends State<ProfileHome> {
               // Tradie information part
               if (!_isConsumer)
                 Container(
-                  width: 50.pw(size),
+                  width: size.width * 0.50, // 替换 50.pw(size)
                   constraints: const BoxConstraints(minWidth: 400),
                   margin: const EdgeInsets.all(10),
                   padding: const EdgeInsets.all(30),
@@ -177,13 +177,14 @@ class _ProfileHomeState extends State<ProfileHome> {
     );
   }
 
+
   Container customerInfo(Size size) {
     return Container(
-      width: 50.pw(size),
+      width: size.width * 0.50,  // 替换 50.pw(size)
       // height: 240,
       constraints: const BoxConstraints(minWidth: 400),
       margin: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-      padding: EdgeInsets.all(4.pw(size)),
+      padding: EdgeInsets.all(size.width * 0.04),  // 替换 4.pw(size)
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: Colors.white,
@@ -203,7 +204,7 @@ class _ProfileHomeState extends State<ProfileHome> {
             radius: 55,
           ),
           // Personal Info
-          SizedBox(width: 5.pw(size)),
+          SizedBox(width: size.width * 0.05),  // 替换 5.pw(size)
           Stack(clipBehavior: Clip.none, children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,21 +214,21 @@ class _ProfileHomeState extends State<ProfileHome> {
                         color: Colors.black87,
                         fontSize: 20,
                         fontWeight: FontWeight.w600)),
-                SizedBox(height: 6.ph(size)),
+                SizedBox(height: size.height * 0.06),  // 替换 6.ph(size)
                 Text(
                   email,
                   style: const TextStyle(color: Colors.black87),
                 ),
-                SizedBox(height: 3.ph(size)),
+                SizedBox(height: size.height * 0.03),  // 替换 3.ph(size)
                 Container(
-                  width: 25.pw(size),
+                  width: size.width * 0.25,  // 替换 25.pw(size)
                   constraints: const BoxConstraints(minWidth: 150),
                   child: Text(
                     address,
                     style: const TextStyle(color: Colors.black87),
                   ),
                 ),
-                SizedBox(height: 3.ph(size)),
+                SizedBox(height: size.height * 0.03),  // 替换 3.ph(size)
                 Text(
                   phone,
                   style: const TextStyle(color: Colors.black87),
@@ -258,11 +259,12 @@ class _ProfileHomeState extends State<ProfileHome> {
     );
   }
 
+
   Container certificateInfo(Size size) {
     return Container(
-        width: 40.pw(size),
+        width: size.width * 0.40, // 替换 40.pw(size)
         constraints: const BoxConstraints(minWidth: 320),
-        margin: EdgeInsets.fromLTRB(1.pw(size), 30, 1.pw(size), 0),
+        margin: EdgeInsets.fromLTRB(size.width * 0.01, 30, size.width * 0.01, 0), // 替换 1.pw(size) 两侧
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -281,7 +283,7 @@ class _ProfileHomeState extends State<ProfileHome> {
                     fontSize: 16,
                     fontWeight: FontWeight.w600),
               ),
-              SizedBox(height: 2.ph(size)),
+              SizedBox(height: size.height * 0.02), // 替换 2.ph(size)
               // Display information
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -289,21 +291,20 @@ class _ProfileHomeState extends State<ProfileHome> {
                   Container(
                       width: 120,
                       height: 100,
-                      child:
-                      CachedNetworkImage(
+                      child: CachedNetworkImage(
                         imageUrl: lincensePic,
                         placeholder: (context, url) => CircularProgressIndicator(), // placeholder when loading
                         errorWidget: (context, url, error) => Icon(Icons.error), // error icon
                       )
                   ),
-                  SizedBox(width: 4.pw(size)),
+                  SizedBox(width: size.width * 0.04), // 替换 4.pw(size)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: 1.5.ph(size)),
+                      SizedBox(height: size.height * 0.015), // 替换 1.5.ph(size)
                       // Work type information
                       Text(workType, style: TextStyle(fontSize: 12)),
-                      SizedBox(height: 1.5.ph(size)),
+                      SizedBox(height: size.height * 0.015), // 替换 1.5.ph(size)
                       // License number information
                       Text(licenseNumber, style: TextStyle(fontSize: 12)),
                     ],
@@ -320,8 +321,7 @@ class _ProfileHomeState extends State<ProfileHome> {
                     final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>
-                              RegisterTradiePage(uid: userId)),
+                          builder: (context) => RegisterTradiePage(uid: userId)),
                     );
                     if (result.toString() == 'update') {
                       await getUserProfile(userId);
@@ -334,11 +334,12 @@ class _ProfileHomeState extends State<ProfileHome> {
         ));
   }
 
+
   Container stripeAccount(Size size) {
     return Container(
-      width: 40.pw(size),
+      width: size.width * 0.40,  // 替换了 40.pw(size)
       constraints: const BoxConstraints(minWidth: 320),
-      margin: EdgeInsets.fromLTRB(1.pw(size), 30, 1.pw(size), 0),
+      margin: EdgeInsets.fromLTRB(size.width * 0.01, 30, size.width * 0.01, 0), // 替换了 1.pw(size)
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -353,7 +354,7 @@ class _ProfileHomeState extends State<ProfileHome> {
             style: TextStyle(
                 color: kTextColor, fontSize: 16, fontWeight: FontWeight.w600),
           ),
-          SizedBox(height: 2.ph(size)),
+          SizedBox(height: size.height * 0.02), // 替换了 2.ph(size)
           Row(
             children: [
               Icon(
@@ -375,19 +376,19 @@ class _ProfileHomeState extends State<ProfileHome> {
     );
   }
 
+
   Container ratingInfo(Size size) {
     // Set the average rating scores
     num averageRate = 0;
-    if (tOrders == 0){
+    if (tOrders == 0) {
       averageRate = rate;
-    }
-    else {
+    } else {
       averageRate = rate / tOrders;
     }
     return Container(
-      width: 40.pw(size),
+      width: size.width * 0.40,  // Replaced 40.pw(size)
       constraints: const BoxConstraints(minWidth: 320),
-      margin: EdgeInsets.fromLTRB(1.pw(size), 30, 1.pw(size), 0),
+      margin: EdgeInsets.fromLTRB(size.width * 0.01, 30, size.width * 0.01, 0), // Replaced 1.pw(size)
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -400,12 +401,13 @@ class _ProfileHomeState extends State<ProfileHome> {
           style: TextStyle(
               color: kTextColor, fontSize: 16, fontWeight: FontWeight.w600),
         ),
-        SizedBox(height: 2.ph(size)),
+        SizedBox(height: size.height * 0.02), // Replaced 2.ph(size)
         // Create a row to display rating stars and actual rating number
         buildRateStars(averageRate, 'start'),
       ]),
     );
   }
+
 
   Container workingDetails(Size size) {
     String workTime = "";
@@ -413,9 +415,9 @@ class _ProfileHomeState extends State<ProfileHome> {
       workTime = "No information";
     } else {
       String workStartSuffix =
-          workStart >= 12 && workStart < 24 ? ":00 PM" : ":00 AM";
+      workStart >= 12 && workStart < 24 ? ":00 PM" : ":00 AM";
       String workEndSuffix =
-          workEnd >= 12 && workEnd < 24 ? ":00 PM" : ":00 AM";
+      workEnd >= 12 && workEnd < 24 ? ":00 PM" : ":00 AM";
       if (workWeekend) {
         workTime = 'Monday to Sunday: $workStart$workStartSuffix to $workEnd$workEndSuffix';
       }
@@ -424,9 +426,9 @@ class _ProfileHomeState extends State<ProfileHome> {
       }
     }
     return Container(
-        width: 40.pw(size),
+        width: size.width * 0.40, // 替换 40.pw(size)
         constraints: const BoxConstraints(minWidth: 320),
-        margin: EdgeInsets.fromLTRB(1.pw(size), 30, 1.pw(size), 0),
+        margin: EdgeInsets.fromLTRB(size.width * 0.01, 30, size.width * 0.01, 0), // 替换 1.pw(size)
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -448,19 +450,19 @@ class _ProfileHomeState extends State<ProfileHome> {
                       fontSize: 16,
                       fontWeight: FontWeight.w600),
                 ),
-                SizedBox(height: 2.ph(size)),
+                SizedBox(height: size.height * 0.02), // 替换 2.ph(size)
                 Container(
-                  padding: EdgeInsets.fromLTRB(1.pw(size), 4, 1.pw(size), 4),
-                  width: 36.pw(size),
+                  padding: EdgeInsets.fromLTRB(size.width * 0.01, 4, size.width * 0.01, 4), // 替换 1.pw(size)
+                  width: size.width * 0.36, // 替换 36.pw(size)
                   constraints:
-                      const BoxConstraints(minWidth: 240, maxHeight: 50),
+                  const BoxConstraints(minWidth: 240, maxHeight: 50),
                   decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey),
                       color: Colors.grey.withOpacity(0.15)),
                   child: Text(workTitle,
                       style: const TextStyle(color: Colors.black54, fontSize: 10)),
                 ),
-                SizedBox(height: 3.ph(size)),
+                SizedBox(height: size.height * 0.03), // 替换 3.ph(size)
                 // Working Time
                 const Text(
                   'Working Time',
@@ -469,38 +471,19 @@ class _ProfileHomeState extends State<ProfileHome> {
                       fontSize: 16,
                       fontWeight: FontWeight.w600),
                 ),
-                SizedBox(height: 2.ph(size)),
+                SizedBox(height: size.height * 0.02), // 替换 2.ph(size)
                 Container(
-                  padding: EdgeInsets.fromLTRB(1.pw(size), 4, 1.pw(size), 4),
-                  width: 36.pw(size),
+                  padding: EdgeInsets.fromLTRB(size.width * 0.01, 4, size.width * 0.01, 4), // 替换 1.pw(size)
+                  width: size.width * 0.36, // 替换 36.pw(size)
                   constraints:
-                      const BoxConstraints(minWidth: 240, maxHeight: 50),
+                  const BoxConstraints(minWidth: 240, maxHeight: 50),
                   decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey),
                       color: Colors.grey.withOpacity(0.15)),
                   child: Text(workTime,
                       style: const TextStyle(color: Colors.black54, fontSize: 10)),
                 ),
-                SizedBox(height: 2.ph(size)),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.calendar_month,
-                      color: Colors.green.shade500,
-                    ),
-                    TextButton(
-                        onPressed: () {
-                          GoRouter.of(context).pushReplacementNamed(
-                              RouterName.CalendarTradie,
-                              params: {'userId': userId});
-                        },
-                        child: const Text(
-                          "Go to Tradie's Calendar",
-                          style: TextStyle(color: Colors.black87),
-                        ))
-                  ],
-                ),
-                SizedBox(height: 3.ph(size)),
+                SizedBox(height: size.height * 0.03), // 替换 3.ph(size)
                 // Work Description
                 const Text(
                   'Work Description',
@@ -509,12 +492,12 @@ class _ProfileHomeState extends State<ProfileHome> {
                       fontSize: 16,
                       fontWeight: FontWeight.w600),
                 ),
-                SizedBox(height: 2.ph(size)),
+                SizedBox(height: size.height * 0.02), // 替换 2.ph(size)
                 Container(
-                  padding: EdgeInsets.fromLTRB(1.pw(size), 4, 1.pw(size), 4),
-                  width: 36.pw(size),
+                  padding: EdgeInsets.fromLTRB(size.width * 0.01, 4, size.width * 0.01, 4), // 替换 1.pw(size)
+                  width: size.width * 0.36, // 替换 36.pw(size)
                   constraints:
-                      const BoxConstraints(minWidth: 240, maxHeight: 50),
+                  const BoxConstraints(minWidth: 240, maxHeight: 50),
                   decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey),
                       color: Colors.grey.withOpacity(0.15)),
@@ -547,6 +530,7 @@ class _ProfileHomeState extends State<ProfileHome> {
           ],
         ));
   }
+
 
   Future<void> createStripeConnectAccount(String userId) async {
     Map<String, String> body = {'userId': userId};

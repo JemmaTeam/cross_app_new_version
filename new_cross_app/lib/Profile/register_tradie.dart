@@ -33,11 +33,13 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
     printer: PrettyPrinter(),
   ); // 初始化日志记录器
 
-  final jemmaTitle = Center( // 定义中心标题
+  final jemmaTitle = Center(
     child: FittedBox(
-        fit: BoxFit.contain,
-        child: Text("Jemma", style: GoogleFonts.parisienne(fontSize: 40.sp))),
+      fit: BoxFit.contain,
+      child: Text("Jemma", style: GoogleFonts.parisienne(fontSize: 50.0)),
+    ),
   );
+
 
   final _formKey = GlobalKey<FormState>(); // 创建一个全局键，用于后续验证表单，**这个暂时没有用
 
@@ -78,10 +80,12 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                     child: Column( // 列布局
                         mainAxisSize: MainAxisSize.min, // 最小主轴尺寸
                         children: [
-                          ConstrainedBox( // 约束框
-                              constraints: BoxConstraints(minHeight: 30.ph(size)), // 最小高度约束
-                              child: jemmaTitle), // 插入之前定义的标题
-                          SizedBox(height: max(2.ph(size), 20)), // 空间填充，垂直间距
+                          ConstrainedBox(
+                            constraints: BoxConstraints(minHeight: size.height * 0.30), // 使用MediaQuery的结果直接计算高度
+                            child: jemmaTitle, // 使用之前定义的标题
+                          ),
+                          SizedBox(height: max(size.height * 0.02, 20)), // 使用MediaQuery的结果直接计算高度，并确保最小值为20
+
 
                           Center(
                             child: Container(
@@ -123,7 +127,8 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                               ),
                             ),
                           ),
-                          SizedBox(height: max(2.ph(size), 20)),
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+
                           //
                           // Text('UID: ${widget.uid}'), // 添加这行代码来显示uid
                           // SizedBox(height: max(2.ph(size), 20)),
@@ -152,7 +157,7 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                               ),
                             ),
                           ),
-                          SizedBox(height: max(2.ph(size), 20)), // 添加垂直间距
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.02),// 添加垂直间距
 
                           Column(
                             children: [
@@ -318,7 +323,8 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                             ],
                           ),
 
-                              SizedBox(height: max(2.ph(size), 20)), // 空间填充，垂直间距
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                          // 空间填充，垂直间距
 
 
                           SizedBox( // 注册按钮的约束框
@@ -408,7 +414,7 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                   ),
                                 )
                               ),
-                          SizedBox(height: max(1.75.ph(size), 10)), // 空间填充，垂直间距
+                          SizedBox(height: max(size.height * 0.0175, 10)), // 空间填充，垂直间距
                         ]),
                   ),
                 ),

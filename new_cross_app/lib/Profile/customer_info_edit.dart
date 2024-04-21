@@ -40,14 +40,14 @@ class _CustomerInfoEditState extends State<CustomerInfoEdit> {
 
   _getUserData() async {
     DocumentSnapshot docSnapshot = await colRef.doc(widget.userID).get();
-    Map<String, dynamic> values = docSnapshot.data() as Map<String, dynamic>;
+    Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>;
 
-    if (values != null) {
-      nameController.text = values['fullName'] ?? '';
-      phoneController.text = values['Phone'] ?? '';
+    if (data != null) {
+      nameController.text = data['fullName'] ?? '';
+      phoneController.text = data['Phone'] ?? '';
       passwordController.text = '';
       confirmPasswordController.text = '';
-      addressController.text = values['address'] ?? '';
+      addressController.text = data['address'] ?? '';
     }
   }
 
@@ -63,14 +63,12 @@ class _CustomerInfoEditState extends State<CustomerInfoEdit> {
       'address': address,
     };
 
-    // Update fullName, phone, and address in Firestore
     try {
       await colRef.doc(widget.userID).update(updatedInfo);
     } catch (e) {
       print("Error updating document: $e");
     }
 
-    // Update password if provided
     if (password != '') {
       bool result = await AuthService().updatePassword(password);
       if (result) {
@@ -92,33 +90,21 @@ class _CustomerInfoEditState extends State<CustomerInfoEdit> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Name
             attributeEdit(size, nameController, 'Name', 'Enter your new name here', false),
-            SizedBox(height: 2.5.ph(size)),
-
-            // Phone number
+            SizedBox(height: size.height * 0.025),
             attributeEdit(size, phoneController, 'Phone', 'Enter your new phone number here', false),
-            SizedBox(height: 2.5.ph(size)),
-
-            // New password (leave it empty if not changing)
+            SizedBox(height: size.height * 0.025),
             attributeEdit(size, passwordController, 'New Password', 'Enter your new password here. Leave it empty if not changing.', true),
-            SizedBox(height: 2.5.ph(size)),
-
-            // Confirm the new password (leave it empty if not changing)
+            SizedBox(height: size.height * 0.025),
             attributeEdit(size, confirmPasswordController, 'Confirm New Password', 'Confirm your new password. Leave it empty if not changing.', true),
-            SizedBox(height: 2.5.ph(size)),
-
-            // Address
+            SizedBox(height: size.height * 0.025),
             attributeEdit(size, addressController, 'Address', 'Put your new address here', false),
-            SizedBox(height: 2.5.ph(size)),
-
-            // Update information button
+            SizedBox(height: size.height * 0.025),
             ElevatedButton(
               onPressed: () async {
-                // Before updating information, check if the new password has been confirmed
                 if (passwordController.text == confirmPasswordController.text) {
                   await _updateData();
-                  Navigator.pop(context, 'update');  // Return to the previous page, with a parameter to indicate that the information has been updated
+                  Navigator.pop(context, 'update');
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -135,10 +121,9 @@ class _CustomerInfoEditState extends State<CustomerInfoEdit> {
     );
   }
 
-  // Widget for each input text field
   Container attributeEdit(Size size, TextEditingController controller, String labelText, String hintText, bool obscure) {
     return Container(
-      width: 50.pw(size),
+      width: size.width * 0.50,
       constraints: const BoxConstraints(minWidth: 400),
       child: TextField(
         controller: controller,
@@ -150,7 +135,7 @@ class _CustomerInfoEditState extends State<CustomerInfoEdit> {
             borderSide: const BorderSide(color: kLogoColor, width: 1.0),
           ),
         ),
-        obscureText: obscure, // Hide password input
+        obscureText: obscure,
       ),
     );
   }
