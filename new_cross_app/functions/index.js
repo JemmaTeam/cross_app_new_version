@@ -18,7 +18,7 @@ const endpointSecret = 'whsec_j8jlLf5euoIVW2LESEFPp7mxWuXwpZqD';
 
 
 
-const sendLink=function(accountLinks){
+const sendLink = function (accountLinks) {
     return accountLinks.url
 }
 const cors = require('cors')({ origin: true });
@@ -27,227 +27,230 @@ const cors = require('cors')({ origin: true });
 //TODO: pass user id and return url to redirect
 
 //This is function for onboarding tradies
-exports.createConnectAccount = functions.https.onRequest(async (req, res) => {cors(req, res,async () => {
-    const userId = req.body
-    try {
-        // create stripe account
-        const account = await stripe.accounts.create({
-          type: 'express',
-        });
-        // create stripe account link for onboarding
-        const accountLinks = await stripe.accountLinks.create({
-            account: account.id,
-            refresh_url: 'https://jemma-b0fcd.web.app/#/create_success',
-            return_url: 'https://jemma-b0fcd.web.app/#/create_success',
-            type: 'account_onboarding',
-        });
-        // return account id to store on firebase and account link for redirection
+exports.createConnectAccount = functions.https.onRequest(async (req, res) => {
+    cors(req, res, async () => {
+        const userId = req.body
+        try {
+            // create stripe account
+            const account = await stripe.accounts.create({
+                type: 'express',
+            });
+            // create stripe account link for onboarding
+            const accountLinks = await stripe.accountLinks.create({
+                account: account.id,
+                refresh_url: 'https://jemma-b0fcd.web.app/#/create_success',
+                return_url: 'https://jemma-b0fcd.web.app/#/create_success',
+                type: 'account_onboarding',
+            });
+            // return account id to store on firebase and account link for redirection
 
-        return res.send({
-            url:accountLinks.url,
-            id: account.id
-        })
-      } catch (error) {
-        console.error(error);
-        return res.send({error: error.message});
-      }
-  });
+            return res.send({
+                url: accountLinks.url,
+                id: account.id
+            })
+        } catch (error) {
+            console.error(error);
+            return res.send({ error: error.message });
+        }
+    });
 });
 
 //NOTE: this is function for checkout
 exports.StripeCheckOut = functions.https.onRequest(async (req, res) => {
-  cors(req, res, async () => {
-    const { price, consumerId, tradieId, product_name, consumerName } = req.body;
-    try {
-      const session = await stripe.checkout.sessions.create({
-        metadata: {
-            consumerId: consumerId,
-            tradieId: tradieId,
-            consumerName: consumerName, // Record information
-        },
-        mode: 'payment',
-        line_items: [
-          {
-            price_data: {
-              currency: 'aud',
-              unit_amount: parseInt(price),
-              product_data: {
-                name: product_name
-              }
-            },
-            quantity: 1
-          }
-        ],
-        success_url: 'https://jemma-b0fcd.web.app/#/',
-        cancel_url: 'https://jemma-b0fcd.web.app/#/',
-      });
+    cors(req, res, async () => {
+        const { price, consumerId, tradieId, product_name, consumerName } = req.body;
+        try {
+            const session = await stripe.checkout.sessions.create({
+                metadata: {
+                    consumerId: consumerId,
+                    tradieId: tradieId,
+                    consumerName: consumerName, // Record information
+                },
+                mode: 'payment',
+                line_items: [
+                    {
+                        price_data: {
+                            currency: 'aud',
+                            unit_amount: parseInt(price),
+                            product_data: {
+                                name: product_name
+                            }
+                        },
+                        quantity: 1
+                    }
+                ],
+                success_url: 'https://jemma-b0fcd.web.app/#/',
+                cancel_url: 'https://jemma-b0fcd.web.app/#/',
+            });
 
-      // 返回 session.url 和 session.amount_total
-      return res.send({
-        url: session.url,
-        amount: session.amount_total
-      });
-    } catch (error) {
-      console.error(error);
-      return res.send({ error: error.message });
-    }
-  });
+            // 返回 session.url 和 session.amount_total
+            return res.send({
+                url: session.url,
+                amount: session.amount_total
+            });
+        } catch (error) {
+            console.error(error);
+            return res.send({ error: error.message });
+        }
+    });
 });
 
 //Note: this is function for transfer to tradies account
-exports.Transfer = functions.https.onRequest(async (req, res)=>{cors(req, res, async()=>{
-    const {accountId, consumerId, consumerName, tradieId, tradieName, amount}= req.body;
-    try{
-        const transfer = await stripe.transfers.create({
-          amount: parseInt(amount),
-          currency: 'aud',
-          destination: accountId,
-          metadata: {
-            consumerId: consumerId,
-            tradieId: tradieId,
-            consumerName: consumerName,
-            tradieName: tradieName,
-            amount: (parseInt(amount) / 100).toFixed(2), // Convert to human-readable currency format
-          },
-        });
-        return res.send(transfer.amount);
-    }catch(error){
-        console.error(error)
-        return res.send({error:error.message})
-    }
+exports.Transfer = functions.https.onRequest(async (req, res) => {
+    cors(req, res, async () => {
+        const { accountId, consumerId, consumerName, tradieId, tradieName, amount } = req.body;
+        try {
+            const transfer = await stripe.transfers.create({
+                amount: parseInt(amount),
+                currency: 'aud',
+                destination: accountId,
+                metadata: {
+                    consumerId: consumerId,
+                    tradieId: tradieId,
+                    consumerName: consumerName,
+                    tradieName: tradieName,
+                    amount: (parseInt(amount) / 100).toFixed(2), // Convert to human-readable currency format
+                },
+            });
+            return res.send(transfer.amount);
+        } catch (error) {
+            console.error(error)
+            return res.send({ error: error.message })
+        }
     });
 });
 
 
 //Old code, reserve until the end of semester
 const calculateOrderAmount = (items) => {
-  const prices = []; // Add 'let' before variable declaration
-  const catalog = [ // Add 'let' before variable declaration
-    {"id": "0", "price": 20},
-    {"id": "1", "price": 20},
-    {"id": "2", "price": 4.99},
-    {"id": "3", "price": 5.99},
-    {"id": "4", "price": 6.99},
-  ];
+    const prices = []; // Add 'let' before variable declaration
+    const catalog = [ // Add 'let' before variable declaration
+        { "id": "0", "price": 20 },
+        { "id": "1", "price": 20 },
+        { "id": "2", "price": 4.99 },
+        { "id": "3", "price": 5.99 },
+        { "id": "4", "price": 6.99 },
+    ];
 
-  items.forEach((item) =>{
-    const price = catalog.find((x) => x.id == item.id).price;
-    prices.push(price);
-  });
+    items.forEach((item) => {
+        const price = catalog.find((x) => x.id == item.id).price;
+        prices.push(price);
+    });
 
-  return parseInt(prices.reduce((a, b) => a + b) * 100);
+    return parseInt(prices.reduce((a, b) => a + b) * 100);
 };
 
-const generateResponse = function(intent) {
-  switch (intent.status) {
-    case "requires_action":
-      return {
-        clientSecret: intent.client_secret,
-        requiresAction: true,
-        status: intent.status,
-      };
-    case "requires_payment_method":
-      return {
-        "error": "Your card was denied, please provide a new payment method",
-      };
-    case "succeeded":
-      console.log("Payment succeeded");
-      return {clientSecret: intent.client_secret, status: intent.status};
-    default:
-      return {error: "Failed"};
-  }
+const generateResponse = function (intent) {
+    switch (intent.status) {
+        case "requires_action":
+            return {
+                clientSecret: intent.client_secret,
+                requiresAction: true,
+                status: intent.status,
+            };
+        case "requires_payment_method":
+            return {
+                "error": "Your card was denied, please provide a new payment method",
+            };
+        case "succeeded":
+            console.log("Payment succeeded");
+            return { clientSecret: intent.client_secret, status: intent.status };
+        default:
+            return { error: "Failed" };
+    }
 };
 
 exports.StripePayEndpointMethodId =
-functions.https.onRequest(async (req, res)=>{
-  const {useStripeSdk, paymentMethodId, currency, items} = req.body;
-  // calculate Order Amount
-  const orderAmount = calculateOrderAmount(items);
+    functions.https.onRequest(async (req, res) => {
+        const { useStripeSdk, paymentMethodId, currency, items } = req.body;
+        // calculate Order Amount
+        const orderAmount = calculateOrderAmount(items);
 
-  try {
-    if (paymentMethodId) {
-      // Create a new PaymentIntent
-      const params = {
-        amount: orderAmount,
-        confirm: true,
-        confirmation_method: "manual",
-        payment_method: paymentMethodId,
-        currency: currency,
-        use_stripe_sdk: useStripeSdk,
-      };
-      // Create a intent object
-      const intent = await stripe.paymentIntents.create(params);
+        try {
+            if (paymentMethodId) {
+                // Create a new PaymentIntent
+                const params = {
+                    amount: orderAmount,
+                    confirm: true,
+                    confirmation_method: "manual",
+                    payment_method: paymentMethodId,
+                    currency: currency,
+                    use_stripe_sdk: useStripeSdk,
+                };
+                // Create a intent object
+                const intent = await stripe.paymentIntents.create(params);
 
-      console.log(`Intent: ${intent}`);
+                console.log(`Intent: ${intent}`);
 
-      return res.send(generateResponse(intent));
+                return res.send(generateResponse(intent));
 
-    }
-    return res.sendStatus(400);
-  } catch (e) {
-    return res.send({error: e.message});
-  }
-});
+            }
+            return res.sendStatus(400);
+        } catch (e) {
+            return res.send({ error: e.message });
+        }
+    });
 
 
 exports.StripePayEndpointIntentId =
-functions.https.onRequest(async (req, res)=>{
-  const {paymentIntentId} = req.body;
+    functions.https.onRequest(async (req, res) => {
+        const { paymentIntentId } = req.body;
 
-  try {
-    if (paymentIntentId) {
-      // Create a intent object
-      const intent = await stripe.paymentIntents.confirm(paymentIntentId);
-      return res.send(generateResponse(intent));
-    }
-    return res.sendStatus(400);
-  } catch (e) {
-    return res.send({error: e.message});
-  }
-});
-
-exports.StripeTransfer=
-functions.https.onRequest(async(req, res)=>{
-    const {destination_id, amount} = req.body;
-
-    try{
-        const params = {
-            amount: amount,
-            currency: 'aud',
-            destination: destination_id,
+        try {
+            if (paymentIntentId) {
+                // Create a intent object
+                const intent = await stripe.paymentIntents.confirm(paymentIntentId);
+                return res.send(generateResponse(intent));
+            }
+            return res.sendStatus(400);
+        } catch (e) {
+            return res.send({ error: e.message });
         }
-        const transfer = await stripe.transfers.create(params);
-        return res.send(transfer);
-    } catch (e) {
-        return res.send({error: e.message});
-    }
-});
+    });
+
+exports.StripeTransfer =
+    functions.https.onRequest(async (req, res) => {
+        const { destination_id, amount } = req.body;
+
+        try {
+            const params = {
+                amount: amount,
+                currency: 'aud',
+                destination: destination_id,
+            }
+            const transfer = await stripe.transfers.create(params);
+            return res.send(transfer);
+        } catch (e) {
+            return res.send({ error: e.message });
+        }
+    });
 
 /*
  2. Jemma transfer to Tradie
 */
 exports.StripeConnectTransfer =
-functions.https.onRequest(async (req, res) => {
-  const {destination_id, amount} = req.body;
-  // TODO：check the status of booking
-  try {
-    const params = {
-      amount: amount,
-      currency: 'usd',
-      destination: destination_id,
-    };
-    // TODO：change to tradie's Stripe account
-    const transfer = await stripe.transfers.create(params);
+    functions.https.onRequest(async (req, res) => {
+        const { destination_id, amount } = req.body;
+        // TODO：check the status of booking
+        try {
+            const params = {
+                amount: amount,
+                currency: 'usd',
+                destination: destination_id,
+            };
+            // TODO：change to tradie's Stripe account
+            const transfer = await stripe.transfers.create(params);
 
-    return res.send(transfer);
-  } catch (e) {
-    return res.send({error: e.message});
-  }
-});
+            return res.send(transfer);
+        } catch (e) {
+            return res.send({ error: e.message });
+        }
+    });
 
 // Cloud Function to monitor bookings
 exports.monitorBookingNotifications = functions.firestore
     .document('bookings/{bookingId}')
+    // .document('bookings/{key}')
     .onCreate(async (snapshot, context) => {
         // Get booking data from snapshot
         const bookingData = snapshot.data();
@@ -266,7 +269,7 @@ exports.monitorBookingNotifications = functions.firestore
             console.error('ConsumerId not found in booking data.');
             return null;
         }
-        
+
         // Formulate your notification message
         const notificationMessage = `Your booking for ${eventName} is successful, the status is ${bookingData.status}`;
 
@@ -279,7 +282,7 @@ exports.monitorBookingNotifications = functions.firestore
             const email = userData.email; // Assuming the user document has an email field
 
             // Formulate your email message
-        const emailMessage = `
+            const emailMessage = `
         <html>
         <head>
             <style>
@@ -319,7 +322,7 @@ exports.monitorBookingNotifications = functions.firestore
         </body>
         </html>
     `;
-            
+
             const msg = {
                 to: email,
                 from: 'jemmaaugroup@gmail.com', // Your verified sender address
@@ -342,6 +345,7 @@ exports.monitorBookingNotifications = functions.firestore
             read: false // to mark if the user has read the notification
         });
 
+        // send this notification to the tradie in a user-specific notifications collection
         return null;
     });
 
@@ -366,7 +370,7 @@ exports.monitorBookingStatusChange = functions.firestore
             // Check if the consumer has NeedEmailInformed set to true
             const consumerSnapshot = await admin.firestore().collection('users').doc(consumerId).get();
             const consumerData = consumerSnapshot.data();
-            const ConsumerfullName = consumerData? consumerData.fullName : null;
+            const ConsumerfullName = consumerData ? consumerData.fullName : null;
             if (consumerData && consumerData.NeedEmailInformed) {
                 // Send an email to the consumer using SendGrid
                 const email = consumerData.email;
@@ -410,7 +414,7 @@ exports.monitorBookingStatusChange = functions.firestore
                 </body>
                 </html>
             `;
-                
+
                 const msg = {
                     to: email,
                     from: 'jemmaaugroup@gmail.com', // Your verified sender address
@@ -472,7 +476,7 @@ exports.monitorBookingStatusChange = functions.firestore
                 </body>
                 </html>
             `;
-                
+
                 const msg = {
                     to: email,
                     from: 'jemmaaugroup@gmail.com', // Your verified sender address
@@ -628,17 +632,17 @@ exports.monitorNewMessages = functions.firestore
 
 
 app.use(bodyParser.json({
-  verify: (req, res, buf) => {
-    req.rawBody = buf.toString();
-  }
+    verify: (req, res, buf) => {
+        req.rawBody = buf.toString();
+    }
 }));
 
 app.use((req, res, next) => {
-  if (req.originalUrl === "/webhook") {
-    next();
-  } else {
-    bodyParser.json()(req, res, next);
-  }
+    if (req.originalUrl === "/webhook") {
+        next();
+    } else {
+        bodyParser.json()(req, res, next);
+    }
 });
 
 exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
@@ -683,7 +687,7 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
                 const charge = event.data.object;
                 const fund = charge.amount;
                 await admin.firestore().collection('fee').add({
-                     fee: fund
+                    fee: fund
                 });
                 console.log('charge');
                 break;
@@ -696,8 +700,8 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
                 consumerName = event.data.object.metadata.consumerName;
                 tradieName = event.data.object.metadata.tradieName;
                 amount = event.data.object.metadata.amount;
-                message_consumer = 'You have paid to ' +tradieName+' successfully.';
-                message_tradie = 'You have been paied by '+consumerName+' with '+amount+' successfully.';
+                message_consumer = 'You have paid to ' + tradieName + ' successfully.';
+                message_tradie = 'You have been paied by ' + consumerName + ' with ' + amount + ' successfully.';
 
                 break;
             default:
@@ -705,7 +709,7 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
                 res.json({ received: true });
                 return;
         }
-        try{
+        try {
             if (message_consumer && consumerId) {
                 await admin.firestore().collection('users').doc(consumerId).collection('notifications').add({
                     message: message_consumer,
@@ -723,8 +727,8 @@ exports.handleStripeWebhooks = functions.https.onRequest(async (req, res) => {
             }
             console.log(`message passed`);
 
-        }catch(error){
-            return res.send({error: error});
+        } catch (error) {
+            return res.send({ error: error });
         }
 
         res.json({ received: true });

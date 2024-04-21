@@ -24,5 +24,10 @@
             "type": "dart",
             "flutterMode": "release"
         }
+        // {
+        //     "name": "new_cross_app",
+        //     "type": "dart",
+        //     "request": "launch"
+        // }
     ]
 }
