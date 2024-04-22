@@ -325,6 +325,7 @@ class HomeState extends State<Home> {
                           ),
                         )),
                     Divider(),
+                    Divider(),
                     TextButton(
                         onPressed: () {
                           GoRouter.of(context).pushNamed(RouterName.SignUp);
@@ -377,6 +378,7 @@ class HomeState extends State<Home> {
                       },
                     ),
                     Divider(),
+                    Divider(),
                     ListTile(
                       title: const Text(
                         'Calendar',
@@ -390,6 +392,7 @@ class HomeState extends State<Home> {
                         });
                       },
                     ),
+                    Divider(),
                     Divider(),
                     ListTile(
                       title: const Text(
@@ -405,6 +408,7 @@ class HomeState extends State<Home> {
                         });
                       },
                     ),
+                    Divider(),
                     Divider(),
                     ListTile(
                       title: const Text(

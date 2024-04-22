@@ -93,23 +93,23 @@ class _TradieWorkPublishState extends State<TradieWorkPublish> {
           children: [
             // Work title
             attributeEdit(size, workTitleController, 'work title', 'Put your work title here', 80),
-            SizedBox(height: 2.5.ph(size)),
+            SizedBox(height: size.height * 0.025), // 2.5% of the total screen height
 
             // work description
             attributeEdit(size, workDescriptionController, 'work description', 'Put your work description here', 500),
-            SizedBox(height: 2.5.ph(size)),
+            SizedBox(height: size.height * 0.025), // 2.5% of the total screen height
 
             // work on weekends or not
             workWeekendDropdownButton(size),
-            SizedBox(height: 2.5.ph(size)),
+            SizedBox(height: size.height * 0.025), // 2.5% of the total screen height
 
             // work start and end time
             startEndTimeDropDownButton(context, size),
-            SizedBox(height: 2.5.ph(size)),
+            SizedBox(height: size.height * 0.025), // 2.5% of the total screen height
 
             // postcode of work area
             postcodeBuildForm(size),
-            SizedBox(height: 2.5.ph(size)),
+            SizedBox(height: size.height * 0.025), // 2.5% of the total screen height
 
             // publish work button
             ElevatedButton(
@@ -140,61 +140,62 @@ class _TradieWorkPublishState extends State<TradieWorkPublish> {
     );
   }
 
+
   // Enter the postcode of the working area, postcode can only be 4 digits and will be validated
   Container postcodeBuildForm(Size size) {
     return Container(
-      width: 50.pw(size),
+      width: size.width * 0.50, // 50% of the screen width
       constraints: const BoxConstraints(minWidth: 400),
       child: Form(
-            key: _formKey,
-            child: TextFormField(
-              controller: postcodeController,
-              decoration: InputDecoration(
-                labelText: 'working postcode',
-                hintText: 'Put your working postcode here',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                  borderSide: const BorderSide(color: kLogoColor, width: 1.0),
-                ),
-              ),
-              keyboardType: TextInputType.number,
-              maxLength: 4,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter a postcode';
-                }
-                final isDigitsOnly = int.tryParse(value);
-                if (isDigitsOnly == null) {
-                  return 'Please enter only numeric characters';
-                }
-                if (value.length != 4) {
-                  return 'Postcode must be exactly 4 digits';
-                }
-                return null;
-              },
+        key: _formKey,
+        child: TextFormField(
+          controller: postcodeController,
+          decoration: InputDecoration(
+            labelText: 'working postcode',
+            hintText: 'Put your working postcode here',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.0),
+              borderSide: const BorderSide(color: kLogoColor, width: 1.0),
             ),
-
           ),
+          keyboardType: TextInputType.number,
+          maxLength: 4,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter a postcode';
+            }
+            final isDigitsOnly = int.tryParse(value);
+            if (isDigitsOnly == null) {
+              return 'Please enter only numeric characters';
+            }
+            if (value.length != 4) {
+              return 'Postcode must be exactly 4 digits';
+            }
+            return null;
+          },
+        ),
+      ),
     );
   }
+
 
   // choose the start and end time of work (the start time can't be later than the end time)
   Column startEndTimeDropDownButton(BuildContext context, Size size) {
     return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Work start time
-            Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                Text(
-                  'Work Start Time',
-                  style: TextStyle(
-                      color: kTextColor,
-                      fontSize: 16),
-                ),
-                SizedBox(width: 5.pw(size)),
-                DropdownButton<num>(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Work start time
+        Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Work Start Time',
+                style: TextStyle(
+                    color: kTextColor,
+                    fontSize: 16),
+              ),
+              SizedBox(width: size.width * 0.05), // 5% of screen width
+              DropdownButton<num>(
                 value: startTime,
                 items: List.generate(24, (index) {
                   return DropdownMenuItem<num>(
@@ -218,19 +219,19 @@ class _TradieWorkPublishState extends State<TradieWorkPublish> {
                 },
               ),
             ]),
-            SizedBox(height: 2.5.ph(size)),
-            // Work end time
-            Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                Text(
-                  'Work End Time',
-                  style: TextStyle(
-                      color: kTextColor,
-                      fontSize: 16),
-                ),
-                SizedBox(width: 5.pw(size)),
-                DropdownButton<num>(
+        SizedBox(height: size.height * 0.025), // 2.5% of screen height
+        // Work end time
+        Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Work End Time',
+                style: TextStyle(
+                    color: kTextColor,
+                    fontSize: 16),
+              ),
+              SizedBox(width: size.width * 0.05), // 5% of screen width
+              DropdownButton<num>(
                 value: endTime,
                 items: List.generate(24, (index) {
                   return DropdownMenuItem<num>(
@@ -254,9 +255,10 @@ class _TradieWorkPublishState extends State<TradieWorkPublish> {
                 },
               ),
             ]),
-          ],
-        );
+      ],
+    );
   }
+
 
   // choose if work on weekend
   Row workWeekendDropdownButton(Size size) {
@@ -269,35 +271,36 @@ class _TradieWorkPublishState extends State<TradieWorkPublish> {
               color: kTextColor,
               fontSize: 16),
         ),
-        SizedBox(width: 5.pw(size)),
+        SizedBox(width: size.width * 0.05),  // 5% of screen width
         DropdownButton<bool>(
-                value: workWeekendValue,
-                items: [
-                  DropdownMenuItem<bool>(
-                    value: true,
-                    child: Text('True'),
-                  ),
-                  DropdownMenuItem<bool>(
-                    value: false,
-                    child: Text('False'),
-                  ),
-                ],
-                hint: Text('Select if you can work on weekend'),
-                onChanged: (bool? newValue) {
-                  setState(() {
-                    workWeekendValue = newValue;
-                  });
-                },
-              ),
+          value: workWeekendValue,
+          items: [
+            DropdownMenuItem<bool>(
+              value: true,
+              child: Text('True'),
+            ),
+            DropdownMenuItem<bool>(
+              value: false,
+              child: Text('False'),
+            ),
+          ],
+          hint: Text('Select if you can work on weekend'),
+          onChanged: (bool? newValue) {
+            setState(() {
+              workWeekendValue = newValue;
+            });
+          },
+        ),
       ],
     );
   }
+
 
   // Each input text field
   Container attributeEdit(Size size, TextEditingController controller,
       String labelText, String hintText, int maxCharLength) {
     return Container(
-      width: 50.pw(size),
+      width: size.width * 0.50,  // 50% of screen width
       constraints: const BoxConstraints(minWidth: 400),
       child: TextField(
         controller: controller,
@@ -314,3 +317,4 @@ class _TradieWorkPublishState extends State<TradieWorkPublish> {
     );
   }
 }
+

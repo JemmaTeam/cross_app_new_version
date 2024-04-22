@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 /// Return the corresponding star icon and rating value
 Row buildRateStars(dynamic rate, String align) {
   return Row(
-    mainAxisAlignment: align == 'center' ? MainAxisAlignment.center : MainAxisAlignment.start,
+    mainAxisAlignment:
+        align == 'center' ? MainAxisAlignment.center : MainAxisAlignment.start,
     children: [
       // Generate star icons based on rating
       ...getStarIconsBasedOnRate(rate),

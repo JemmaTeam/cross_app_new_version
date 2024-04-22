@@ -1,25 +1,13 @@
 part of home;
-//import 'package:flutter/cupertino.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter/widgets.dart';
-// import 'package:go_router/go_router.dart';
-// //import 'package:jemma/models/searchtradie.dart';
-// import 'package:new_cross_app/Home Page/constants.dart';
-// import 'package:new_cross_app/Home Page/decorations.dart';
-// import 'package:new_cross_app/Home Page/responsive.dart';
-// import 'package:new_cross_app/Routes/route_const.dart';
 
-//import '../../routes.dart';
-
-/// Widget which assist in users searching for trades-person, via job type and location.
-///
-/// Note: Needs to be stateful as to hold onto the dropdown info.
+// Import necessary Flutter packages
 
 String? _worktype;
 String? _postcode;
 
 class SearchBar extends StatelessWidget {
-  String userId;
+  final String userId;
+
   SearchBar({Key? key, required this.userId}) : super(key: key);
 
   @override
@@ -29,16 +17,14 @@ class SearchBar extends StatelessWidget {
 
     return Container(
       width: 40.pw(size),
-      constraints: BoxConstraints(minWidth: 250),
+      constraints: const BoxConstraints(minWidth: 250),
       alignment: Alignment.center,
-      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 35),
+      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 35),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: defaultShadows,
         borderRadius: BorderRadius.circular(35),
       ),
-
-      // Contains dropdownButtons + Search button
       child: OverflowBar(
         overflowAlignment: OverflowBarAlignment.center,
         spacing: 2.5.pw(size),
@@ -49,67 +35,47 @@ class SearchBar extends StatelessWidget {
             topicIconData: Icons.handyman,
             dropDownContent: {},
           ),
-          // DropDownContainer(topic:"Location",topicIconData: Icons.location_pin, dropDownContent: {},),
           buildPostcodeInput(_postCodeFormKey, (value) => _postcode = value),
-          _buildSearchButton(context, _postCodeFormKey)
+          _buildSearchButton(context, _postCodeFormKey),
         ],
       ),
     );
   }
 
-  /// Search button which will be able initiate a search and assist in transitioning the screen to the result.
-  Container _buildSearchButton(
+  Widget _buildSearchButton(
       BuildContext context, GlobalKey<FormState> formKey) {
-    return Container(
-      child: ElevatedButton.icon(
-        onPressed: () {
-          if (_isLoggedIn) {
-            if (formKey.currentState!.validate()) {
-              formKey.currentState!.save();
-              print('Postcode saved: $_postcode');
-
-              // Define the parameters
-              if (_postcode != null && _worktype != null) {
-                final _params = {
-                  'userId': userId,
-                  'postcode': _postcode!,
-                  'workType': _worktype!,
-                };
-                GoRouter.of(context)
-                    .pushNamed(RouterName.SearchOutcome, params: _params);
-              }
-            }
-          }
-        }, // TODO: Replace with search request
-        icon: Icon(
-          Icons.search,
-          color: Colors.black,
-          size: 18,
-        ),
-        label: Text(
-          'Search',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        style: ElevatedButton.styleFrom(primary: kLogoColor, elevation: 2),
+    return ElevatedButton.icon(
+      onPressed: () => _handleSearch(context, formKey),
+      icon: const Icon(Icons.search, color: Colors.black, size: 18),
+      label: const Text(
+        'Search',
+        style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
       ),
+      style: ElevatedButton.styleFrom(primary: kLogoColor, elevation: 2),
     );
+  }
+
+  void _handleSearch(BuildContext context, GlobalKey<FormState> formKey) {
+    if (formKey.currentState!.validate()) {
+      formKey.currentState!.save();
+      if (_postcode != null && _worktype != null) {
+        final params = {
+          'userId': userId,
+          'postcode': _postcode!,
+          'workType': _worktype!
+        };
+        GoRouter.of(context)
+            .pushNamed(RouterName.SearchOutcome, params: params);
+      }
+    }
   }
 }
 
-/// Reusable dropdown container that can host icons/images as well.
 class DropDownContainer extends StatefulWidget {
   final String topic;
   final IconData topicIconData;
   final Map<String, Image> dropDownContent;
 
-  // value get from droupdown button
-
-  /// [topic] refers to the dropdownButton's topic; Example: Job type.
-  /// [topicIconData] holds the topic's iconData.
-  /// [dropDownContent] is the map which holds the dropdownItem's name and image.
   DropDownContainer({
     Key? key,
     required this.topic,
@@ -118,226 +84,184 @@ class DropDownContainer extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _DropDownContainerState(
-      topic: topic,
-      dropDownContent: dropDownContent,
-      topicIconData: topicIconData);
+  State<DropDownContainer> createState() => _DropDownContainerState();
 }
 
 class _DropDownContainerState extends State<DropDownContainer> {
-  final String topic;
-  final IconData topicIconData;
-  final Map<String, Image> dropDownContent;
-  // List<String> Location = [
-  //   'Acton',
-  //   'Aranda',
-  //   'Belconnen',
-  //   'Bonner',
-  //   'Braddon',
-  //   'Calwell',
-  //   'Canberra',
-  //   'Charnwood',
-  //   'Crace',
-  //   'Dickson',
-  //   'Deakin',
-  //   'Downer',
-  //   'Evatt',
-  //   'Florey',
-  //   'Forde',
-  //   'Forrest',
-  //   'Franklin',
-  //   'Fyshwick',
-  //   'Garran',
-  //   'Greenway',
-  //   'Griffith',
-  //   'Gungahlin',
-  //   'Harrison',
-  //   'Hawker',
-  //   'Holt',
-  //   'IsabellaPlains',
-  //   'Jacka',
-  //   'Kaleen',
-  //   'Kambah',
-  //   'Kingsrib',
-  //   'Latham',
-  //   'Lyneham'
-  // ];
-  // List<String> JobType= ['Air-conditioning and Mechanical Services Plumber', 'Air-conditioning and Refrigeration Mechanic'
-  //     'Arborist', 'Automotive Electrician', 'Boat Builder and Repairer', 'Bricklayer', 'Cabinetmaker','Carpenter', 'Carpenter and Joiner','Diesel Motor Mechanic'
-  //     'Drainer', 'Electrician (General)', 'Electronic Equipment Tradesperson', 'Fibrous Plasterer', 'Floor Finisher', 'Furniture Finisher',
-  //   'Gasfitter', 'Glazier', 'Hairdresser', 'Landscape Gardener', 'Locksmith', 'Motor Mechanics (General)', 'Motorcycle Mechanic',
-  //   'Painting', 'Plumber (General)', 'Roof Plumber', 'Roof Tiler', 'Signwriter', 'Solid Plasterer', 'Stonemason', 'Upholsteror', 'Wall and Floor Tiler'
-  // ];
-
-  List<String> JobType = [
-    'AirconMechanic',
-    'BrickLayer',
-    'Carpenter',
-    'CarpetLayer',
-    'Decking',
-    'Electrcian',
-    'Fencing',
-    'GasPlumber',
-    'Glazier',
-    'HairAndMakeUp',
-    'HomeRenovation',
-    'Insulation'
-  ];
-
-  _DropDownContainerState({
-    required this.topic,
-    required this.topicIconData,
-    required this.dropDownContent,
-  });
+  final Map<String, IconData> jobTypeIcons = {
+    'AirconMechanic': Icons.ac_unit,
+    'BrickLayer': Icons.landscape,
+    'Carpenter': Icons.build,
+    'CarpetLayer': Icons.layers,
+    'Decking': Icons.deck,
+    'Electrcian': Icons.electric_bolt,
+    'Fencing': Icons.fence,
+    'GasPlumber': Icons.fireplace,
+    'Glazier': Icons.window,
+    'Hairdressing': Icons.face,
+    'Home renovations': Icons.home_repair_service,
+    'Insulation': Icons.thermostat,
+  };
 
   @override
   Widget build(BuildContext context) {
     return Container(
       constraints: const BoxConstraints(maxWidth: 200),
       padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
+        borderRadius: BorderRadius.circular(10), // Rounded corners
+        border: Border.all(color: Colors.grey.shade300), // Border color
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: Offset(0, 2), // Shadow position
+          ),
+        ],
       ),
-
-      // Just some decoration
-      child: DecoratedBox(
-        decoration: ShapeDecoration(
-          color: Colors.white10,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(5.0)),
-              side: BorderSide(color: Colors.grey.withOpacity(0.45))),
+      child: DropdownButton<String>(
+        value: _worktype,
+        onChanged: (String? newValue) {
+          setState(() {
+            _worktype = newValue;
+          });
+        },
+        alignment: Alignment.centerLeft,
+        hint: Container(
+          alignment: Alignment.center,
+          // Center alignment for the hint
+          width: double.infinity,
+          // Ensures the hint content takes full width to center align the text properly
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(widget.topicIconData, color: Colors.grey),
+              // 使用来自 StatefulWidget 的图标
+              SizedBox(width: 10),
+              Text(
+                'Job Type',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ],
+          ),
         ),
-        child: DropdownButton(
-            value: _worktype,
-            onChanged: (selection) => setState(() {
-                  _worktype = selection.toString();
-                }),
-            hint: Container(
-              padding: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-              child: Row(children: [
-                Expanded(
-                    flex: 2,
-                    child: Icon(
-                      topicIconData,
-                      color: Colors.black,
-                    )),
-                Expanded(
-                    flex: 4,
-                    child: Text(
-                      topic,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 14),
-                    ))
-              ]),
+        selectedItemBuilder: (BuildContext context) {
+          return jobTypeIcons.entries
+              .map<Widget>((MapEntry<String, IconData> entry) {
+            return Container(
+              alignment: Alignment.center,
+              // Center alignment for the selected item display
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(entry.value, color: Colors.black54),
+                  SizedBox(width: 10),
+                  Text(entry.key),
+                ],
+              ),
+            );
+          }).toList();
+        },
+        items: jobTypeIcons.entries
+            .map<DropdownMenuItem<String>>((MapEntry<String, IconData> entry) {
+          return DropdownMenuItem<String>(
+            value: entry.key,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              // Start alignment for the dropdown menu items
+              children: [
+                Icon(entry.value, color: Colors.black54),
+                SizedBox(width: 10),
+                Text(entry.key),
+              ],
             ),
-            isExpanded: true,
-            underline: SizedBox(),
-            items:
-                // topic == "Location"
-                //     ? Location.map<DropdownMenuItem<String>>((String value) {
-                //         return DropdownMenuItem<String>(
-                //           value: value,
-                //           child: Row(children: [
-                //             Expanded(
-                //                 flex: 2,
-                //                 child: Icon(Icons.handyman_outlined,
-                //                     color: Colors.black)),
-                //             Expanded(
-                //                 flex: 4,
-                //                 child: Text(
-                //                   value,
-                //                   textAlign: TextAlign.center,
-                //                   style:
-                //                       TextStyle(fontSize: 14, color: Colors.black),
-                //                 ))
-                //           ]),
-                //         );
-                //       }).toList()
-                //     :
-                JobType.map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Row(children: [
-                  Expanded(
-                      flex: 2,
-                      child:
-                          Icon(Icons.handyman_outlined, color: Colors.black)),
-                  Expanded(
-                      flex: 4,
-                      child: Text(
-                        value,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 14, color: Colors.black),
-                      ))
-                ]),
-              );
-            }).toList()),
+          );
+        }).toList(),
+        isExpanded: true,
+        underline: SizedBox(), // Removes the default underline
       ),
     );
   }
 }
 
-/// Builds and returns a postcode input widget.
-///
-/// [formKey] is the GlobalKey used to associate with the [Form].
-/// [onSave] is a function that takes a nullable string and is invoked when the form is saved.
+// 定义一个构建邮编输入表单的函数，接收一个表单键和一个保存数据的回调函数
 Widget buildPostcodeInput(
-    GlobalKey<FormState> formKey, Function(String?) onSave) {
-  // Return a Form widget that wraps the input field.
+    GlobalKey<FormState> formKey, // 表单键，用于关联表单状态
+    Function(String?) onSave) {
+  // 保存函数，用于处理表单提交的数据
   return Form(
-      key:
-          formKey, // Set GlobalKey for the form to perform form validation later.
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 200),
-        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-        decoration: const BoxDecoration(
-          color: Colors.white, // Set background color to white.
-        ),
-        // Use DecoratedBox to further decorate the input field.
-        child: DecoratedBox(
-          decoration: ShapeDecoration(
-            color: Colors.white10, // Set base color.
-            // Define border and border-radius.
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                side: BorderSide(color: Colors.grey.withOpacity(0.45))),
+    key: formKey, // 设置表单键
+    child: Container(
+      constraints: const BoxConstraints(maxWidth: 200), // 设置容器的最大宽度
+      padding:
+          const EdgeInsets.symmetric(vertical: 5, horizontal: 5), // 设置容器内边距
+      decoration: BoxDecoration(
+        color: Colors.white, // 背景颜色设置为白色
+        borderRadius: BorderRadius.circular(10), // 边角为圆角，半径为10
+        border: Border.all(color: Colors.grey.shade300), // 设置边框颜色和样式
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5), // 阴影颜色
+            spreadRadius: 1, // 阴影扩散半径
+            blurRadius: 3, // 阴影模糊半径
+            offset: Offset(0, 2), // 阴影偏移量
           ),
-          // TextFormField is used for text input and has built-in functionalities like form validation.
-          child: TextFormField(
-            textAlign: TextAlign.center,
-            // Decorate the inside of the input box, e.g., hint text, prefix icon.
-            decoration: const InputDecoration(
-              hintText: 'Postcode',
-              prefixIcon: Padding(
-                padding: EdgeInsets.only(left: 18),
-                child: Icon(Icons.location_pin, color: Colors.black),
-              ),
-              hintStyle: TextStyle(
-                fontSize: 14.0,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide.none,
-              ),
-              counterText: "",
-            ),
-            keyboardType: TextInputType.number,
-            maxLength: 4,
-            // Validation function to check if the input value is valid.
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter a postcode'; // Prompt: Cannot be empty.
-              }
-              final isDigitsOnly = int.tryParse(value);
-              if (isDigitsOnly == null) {
-                return 'Please enter only numeric characters'; // Prompt: Must be digits.
-              }
-              if (value.length != 4) {
-                return 'Postcode must be exactly 4 digits'; // Prompt: Must be 4 digits.
-              }
-              return null;
-            },
-            onSaved: onSave,
+        ],
+      ),
+      // 使用 TextFormField 创建一个文本输入框
+      child: TextFormField(
+        textAlign: TextAlign.center, // 文本居中对齐
+        decoration: InputDecoration(
+          hintText: 'Postcode', // 输入框内提示文本
+          hintStyle: TextStyle(color: Colors.grey), // 提示文本样式
+          prefixIcon: Padding(
+            padding: EdgeInsets.only(left: 10), // 图标内边距
+            child: Icon(Icons.location_pin, color: Colors.black), // 设置图标和颜色
           ),
+          border: InputBorder.none, // 不显示输入框边框
+          counterText: "", // 不显示输入长度计数器
         ),
-      ));
+        keyboardType: TextInputType.number, // 键盘类型设置为数字
+        maxLength: 4, // 最大长度设置为4
+        autovalidateMode: AutovalidateMode.onUserInteraction, // 输入后即时验证
+        validator: (value) => _validatePostcode(value), // 验证函数，检查邮编有效性
+        onSaved: onSave, // 保存函数，处理表单提交
+      ),
+    ),
+  );
+}
+
+String? _validatePostcode(String? value) {
+  if (value == null || value.isEmpty) return 'Please enter a postcode';
+  if (int.tryParse(value) == null)
+    return 'Please enter only numeric characters';
+  if (value.length != 4) return 'Postcode must be exactly 4 digits';
+  if (!_isValidAustralianPostcode(value))
+    return 'Invalid postal code'; // Check if it's a valid Australian postcode
+  return null;
+}
+
+bool _isValidAustralianPostcode(String postcode) {
+  int code = int.tryParse(postcode) ?? 0; // 使用 tryParse 并处理可能的 null 值
+  return (code >= 1000 && code <= 1999) || // NSW
+      (code >= 2000 && code <= 2599) || // NSW
+      (code >= 2619 && code <= 2898) || // NSW
+      (code >= 2921 && code <= 2999) || // NSW
+      (code >= 200 && code <= 299) || // ACT
+      (code >= 2600 && code <= 2618) || // ACT
+      (code >= 2900 && code <= 2920) || // ACT
+      (code >= 3000 && code <= 3999) || // VIC
+      (code >= 8000 && code <= 8999) || // VIC (邮件用)
+      (code >= 4000 && code <= 4999) || // QLD
+      (code >= 9000 && code <= 9999) || // QLD (邮件用)
+      (code >= 5000 && code <= 5799) || // SA
+      (code >= 5800 && code <= 5999) || // SA (邮件用)
+      (code >= 6000 && code <= 6797) || // WA
+      (code >= 6800 && code <= 6999) || // WA (邮件用)
+      (code >= 7000 && code <= 7799) || // TAS
+      (code >= 7800 && code <= 7999) || // TAS (邮件用)
+      (code >= 800 && code <= 899) || // NT
+      (code >= 900 && code <= 999); // NT (邮件用)
 }

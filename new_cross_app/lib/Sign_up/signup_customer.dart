@@ -31,13 +31,6 @@ class _SignupComstomerPageState extends State<SignupComstomer> {
   // Logger instance
   final logger = Logger(printer: PrettyPrinter());
 
-  // Title widget
-  final jemmaTitle = Center(
-    child: FittedBox(
-        fit: BoxFit.contain,
-        child: Text("Jemma", style: GoogleFonts.parisienne(fontSize: 40.sp))),
-  );
-
   // Form key
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
@@ -46,6 +39,15 @@ class _SignupComstomerPageState extends State<SignupComstomer> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
+    // Dynamic font size using screen height
+    double dynamicFontSize = size.height * 0.2;
+    // Modified Jemma title with dynamic font size
+    final jemmaTitle = Center(
+      child: FittedBox(
+        fit: BoxFit.contain,
+        child: Text("Jemma", style: GoogleFonts.parisienne(fontSize: dynamicFontSize)),
+      ),
+    );
     return Scaffold(
         body: SafeArea(
           child: ConstrainedBox(

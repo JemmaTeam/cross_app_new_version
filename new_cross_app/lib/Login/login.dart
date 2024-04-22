@@ -130,6 +130,8 @@ class _LoginState extends State<LoginPage> {
               ),
               const Text('Continue with Google',
                   style: TextStyle(fontSize: 17)),
+              const Text('Continue with Google',
+                  style: TextStyle(fontSize: 17)),
             ],
           ),
         ),

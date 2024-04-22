@@ -118,7 +118,7 @@ class _NotificationPanelState extends State<NotificationPanel> {
                     if (index == 0) {
                       return const DrawerHeader(
                         child: Center(
-                          child: Text('Notifications',
+                          child: Text('NotificationsLOL',
                               style: TextStyle(
                                   fontSize: 25, fontWeight: FontWeight.w500)),
                         ),

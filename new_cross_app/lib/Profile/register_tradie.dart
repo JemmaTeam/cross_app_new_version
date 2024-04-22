@@ -33,11 +33,13 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
     printer: PrettyPrinter(),
   ); // 初始化日志记录器
 
-  final jemmaTitle = Center( // 定义中心标题
+  final jemmaTitle = Center(
     child: FittedBox(
-        fit: BoxFit.contain,
-        child: Text("Jemma", style: GoogleFonts.parisienne(fontSize: 40.sp))),
+      fit: BoxFit.contain,
+      child: Text("Jemma", style: GoogleFonts.parisienne(fontSize: 50.0)),
+    ),
   );
+
 
   final _formKey = GlobalKey<FormState>(); // 创建一个全局键，用于后续验证表单，**这个暂时没有用
 
@@ -50,6 +52,35 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
   bool isUploading = false;  // 是否正在上传
 
   bool isImageUploaded = false;  // 是否已经上传了
+
+  // 澳大利亚邮政编码的正则表达式（4 位数字） Regular expression for Australian postal codes (4 digits)
+  RegExp australiaPostcodeRegExp = RegExp(r'^\d{4}$');
+
+ // 添加一个布尔变量来跟踪邮政编码是否有效Add a boolean variable to track if the postal code is valid
+  bool isPostcodeValid = false;
+
+  bool isValidAustralianPostcode(String postcode) {
+    RegExp australiaPostcodeRegExp = RegExp(r'^\d{4}$');
+    return australiaPostcodeRegExp.hasMatch(postcode);
+  }
+  Future<bool> isLicenseNumberUnique(String licenseNumber) async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    try {
+      final querySnapshot = await firestore
+          .collection('users') // 假设你的用户数据存储在 'users' 集合中
+          .where('licenseNumber', isEqualTo: licenseNumber)
+          .get();
+
+      // 如果查询结果为空，说明没有找到相同的执照号码，返回 true
+      if (querySnapshot.docs.isEmpty) {
+        return true;
+      }
+    } catch (e) {
+      print('Error checking license number: $e');
+    }
+    // 否则返回 false，说明执照号码已经存在
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) { // build函数，用于构建界面
@@ -66,10 +97,12 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                     child: Column( // 列布局
                         mainAxisSize: MainAxisSize.min, // 最小主轴尺寸
                         children: [
-                          ConstrainedBox( // 约束框
-                              constraints: BoxConstraints(minHeight: 30.ph(size)), // 最小高度约束
-                              child: jemmaTitle), // 插入之前定义的标题
-                          SizedBox(height: max(2.ph(size), 20)), // 空间填充，垂直间距
+                          ConstrainedBox(
+                            constraints: BoxConstraints(minHeight: size.height * 0.30), // 使用MediaQuery的结果直接计算高度
+                            child: jemmaTitle, // 使用之前定义的标题
+                          ),
+                          SizedBox(height: max(size.height * 0.02, 20)), // 使用MediaQuery的结果直接计算高度，并确保最小值为20
+
 
                           Center(
                             child: Container(
@@ -111,7 +144,8 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                               ),
                             ),
                           ),
-                          SizedBox(height: max(2.ph(size), 20)),
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+
                           //
                           // Text('UID: ${widget.uid}'), // 添加这行代码来显示uid
                           // SizedBox(height: max(2.ph(size), 20)),
@@ -121,19 +155,26 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                             child: Container(
                               width: 300,
                               child: TextField(
-                                controller: postcodeController, // 使用新的控制器
+                                controller: postcodeController,
                                 decoration: InputDecoration(
                                   labelText: 'Enter Postcode',
                                   hintText: 'Input your postcode here',
+                                  errorText: isPostcodeValid ? null : 'Please enter a valid Australian postcode',
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(5.0),
                                     borderSide: BorderSide(color: Colors.grey, width: 1.0),
                                   ),
                                 ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    // Check if the input matches the pattern
+                                    isPostcodeValid = australiaPostcodeRegExp.hasMatch(value);
+                                  });
+                                },
                               ),
                             ),
                           ),
-                          SizedBox(height: max(2.ph(size), 20)), // 添加垂直间距
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.02),// 添加垂直间距
 
                           Column(
                             children: [
@@ -149,6 +190,18 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                       borderSide: BorderSide(color: Colors.grey, width: 1.0),
                                     ),
                                   ),
+                                  onSubmitted: (String value) async {
+                                    bool isUnique = await isLicenseNumberUnique(value);
+                                    if (!isUnique) {
+                                      // 显示错误消息或处理执照号码冲突的逻辑
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('License number already in use. Please use a different license number.'))
+                                      );
+                                    } else {
+                                      // 执行其他操作，例如启用注册按钮或保存数据
+                                      print("License number is unique, you can proceed.");
+                                    }
+                                  },
                                 ),
                               ),
                               SizedBox(height: 10), // 空间填充，垂直间距
@@ -299,7 +352,8 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                             ],
                           ),
 
-                              SizedBox(height: max(2.ph(size), 20)), // 空间填充，垂直间距
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                          // 空间填充，垂直间距
 
 
                           SizedBox( // 注册按钮的约束框
@@ -312,13 +366,30 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                       padding: const EdgeInsets.all(20),
                                       backgroundColor: kLogoColor),
                                   onPressed: () async {
+                                    if (!isPostcodeValid) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text("Please enter a valid Australian postcode"),
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                    String tradieLicense = licenseController.text;
                                     if (_formKey.currentState!.validate()) {
+
+                                      bool isUnique = await isLicenseNumberUnique(tradieLicense);
+                                      if (!isUnique) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text("License number already in use. Please use a different license number.")),
+                                        );
+                                        return; // 如果执照号码不唯一，停止执行后续代码
+                                      }
                                       // 验证表单字段
 
                                       // 从输入框获取值
                                       String workingType = selectedWorkingType ?? '';
                                       String postcode = postcodeController.text;
-                                      String tradieLicense = licenseController.text;
+
 
                                       try {
                                         DocumentSnapshot docSnapshot = await colRef.doc(widget.uid).get();
@@ -380,7 +451,7 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                   ),
                                 )
                               ),
-                          SizedBox(height: max(1.75.ph(size), 10)), // 空间填充，垂直间距
+                          SizedBox(height: max(size.height * 0.0175, 10)), // 空间填充，垂直间距
                         ]),
                   ),
                 ),

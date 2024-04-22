@@ -36,7 +36,8 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
   // Variables to hold tradie information
   String name = "";
   String licenseNumber = "";
-  String lincensePic = ImageURL.certificateDefault; // initialize with the default image
+  String lincensePic =
+      ImageURL.certificateDefault; // initialize with the default image
   String workType = "";
   String workTitle = "";
   num workStart = 0;
@@ -79,11 +80,10 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
       rate = data['rate'];
       tOrders = data['tOrders'];
       if (data.containsKey('lincensePic')) {
-        if(!data['lincensePic'].isEmpty){
+        if (!data['lincensePic'].isEmpty) {
           lincensePic = data['lincensePic'];
         }
       }
-
     });
   }
 
@@ -116,10 +116,9 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
     }
     // Set the average rating scores
     num averageRate = 0;
-    if (tOrders == 0){
+    if (tOrders == 0) {
       averageRate = rate;
-    }
-    else {
+    } else {
       averageRate = rate / tOrders;
     }
     return Scaffold(
@@ -144,13 +143,13 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
               Container(
                   width: 420,
                   height: 350,
-                  child:
-                  CachedNetworkImage(
+                  child: CachedNetworkImage(
                     imageUrl: lincensePic,
-                    placeholder: (context, url) => CircularProgressIndicator(), // placeholder when loading
-                    errorWidget: (context, url, error) => Icon(Icons.error), // error icon
-                  )
-              ),
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    // placeholder when loading
+                    errorWidget: (context, url, error) =>
+                        Icon(Icons.error), // error icon
+                  )),
 
               const SizedBox(height: 8),
               // Display license number
@@ -247,7 +246,7 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
                       });
                     },
                     style: ElevatedButton.styleFrom(
-                        primary: kLogoColor, elevation: 2),
+                        backgroundColor: kLogoColor, elevation: 2),
                     child: const Text(
                       "Chat",
                       style: TextStyle(
@@ -268,7 +267,7 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
                           });
                     },
                     style: ElevatedButton.styleFrom(
-                        primary: kLogoColor, elevation: 2),
+                        backgroundColor: kLogoColor, elevation: 2),
                     child: const Text(
                       "Booking",
                       style: TextStyle(
@@ -286,8 +285,6 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
     );
   }
 
-
-
   /// Function to generate a chat room ID based on two user IDs
   getChatRoomId(String userIdA, String userIdB) {
     // Compare the ASCII code of the first character of userIdA and userIdB.
@@ -298,7 +295,7 @@ class _SelectedTradieInfoState extends State<SelectedTradieInfo> {
       return "$userIdB\_$userIdA";
     } else {
       // Otherwise, return a string combining userId A and B, separated by an underscore.
-      return "$userIdA\_$userIdB";
+      return "${userIdA}_$userIdB";
     }
   }
 
