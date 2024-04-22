@@ -63,7 +63,24 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
     RegExp australiaPostcodeRegExp = RegExp(r'^\d{4}$');
     return australiaPostcodeRegExp.hasMatch(postcode);
   }
+  Future<bool> isLicenseNumberUnique(String licenseNumber) async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    try {
+      final querySnapshot = await firestore
+          .collection('users') // 假设你的用户数据存储在 'users' 集合中
+          .where('licenseNumber', isEqualTo: licenseNumber)
+          .get();
 
+      // 如果查询结果为空，说明没有找到相同的执照号码，返回 true
+      if (querySnapshot.docs.isEmpty) {
+        return true;
+      }
+    } catch (e) {
+      print('Error checking license number: $e');
+    }
+    // 否则返回 false，说明执照号码已经存在
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) { // build函数，用于构建界面
@@ -173,6 +190,18 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                       borderSide: BorderSide(color: Colors.grey, width: 1.0),
                                     ),
                                   ),
+                                  onSubmitted: (String value) async {
+                                    bool isUnique = await isLicenseNumberUnique(value);
+                                    if (!isUnique) {
+                                      // 显示错误消息或处理执照号码冲突的逻辑
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('License number already in use. Please use a different license number.'))
+                                      );
+                                    } else {
+                                      // 执行其他操作，例如启用注册按钮或保存数据
+                                      print("License number is unique, you can proceed.");
+                                    }
+                                  },
                                 ),
                               ),
                               SizedBox(height: 10), // 空间填充，垂直间距
@@ -345,14 +374,22 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                       );
                                       return;
                                     }
-
+                                    String tradieLicense = licenseController.text;
                                     if (_formKey.currentState!.validate()) {
+
+                                      bool isUnique = await isLicenseNumberUnique(tradieLicense);
+                                      if (!isUnique) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text("License number already in use. Please use a different license number.")),
+                                        );
+                                        return; // 如果执照号码不唯一，停止执行后续代码
+                                      }
                                       // 验证表单字段
 
                                       // 从输入框获取值
                                       String workingType = selectedWorkingType ?? '';
                                       String postcode = postcodeController.text;
-                                      String tradieLicense = licenseController.text;
+
 
                                       try {
                                         DocumentSnapshot docSnapshot = await colRef.doc(widget.uid).get();
