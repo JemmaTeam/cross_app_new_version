@@ -4,7 +4,10 @@ library home;
 
 // import 'dart:html';
 
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -72,11 +75,12 @@ class HomeState extends State<Home> {
       unreadNotificationsStream; // Stream for unread notifications
   //bool _isLoggedIn = false;
   String? userNameInitial;
-
+  int testNum = -1;
   @override
   void initState() {
     super.initState();
     Future.delayed(Duration.zero, () async {
+      // print('home dart initState');
       _checkLoginStatus();
       if (_isLoggedIn) {
         fetchUserNameInitial(); // Fetch the initial of the username
@@ -84,14 +88,39 @@ class HomeState extends State<Home> {
             .collection('users')
             .doc(userId)
             .collection('notifications')
+            // .orderBy('timestamp', descending: true)
             .where('read', isEqualTo: false)
             .snapshots();
+
         setState(() {}); // Trigger a rebuild to reflect the changes
       } else {
         unreadNotificationsStream =
             Stream.empty(); // Initialize with an empty stream if not logged in
       }
     });
+  }
+
+//this function was put in the initState(), but it didn't work. so i put it into the build() to ensure it running
+  void getUnreadNotificationsStream() {
+    if (_isLoggedIn) {
+      print('new method');
+      fetchUserNameInitial(); // Fetch the initial of the username
+      unreadNotificationsStream = FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('notifications')
+          // .orderBy('timestamp', descending: true)
+          .where('read', isEqualTo: false)
+          .snapshots();
+
+      unreadNotificationsStream.listen((snapshot) {
+        testNum = snapshot.docs.length;
+      });
+      setState(() {}); // Trigger a rebuild to reflect the changes
+    } else {
+      unreadNotificationsStream =
+          Stream.empty(); // Initialize with an empty stream if not logged in
+    }
   }
 
   // Function to fetch the initial of the username from Firestore
@@ -153,6 +182,7 @@ class HomeState extends State<Home> {
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     var scrollController = ScrollController();
+    getUnreadNotificationsStream();
     return Scaffold(
         backgroundColor: kMenuColor,
         endDrawer: const NotificationPanel(),
@@ -228,26 +258,31 @@ class HomeState extends State<Home> {
                       params: {'userId': userId});
                 },
               ),
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'logout') {
-                    _showLogoutDialog();
-                  }
+              TextButton(
+                onPressed: () {
+                  _showLogoutDialog();
                 },
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(
-                    value: 'logout',
-                    child: Text('Log Out'),
+                child: Text(
+                  'Log Out',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
+                ),
               ),
             ],
             if (userId == '' || !_isLoggedIn)
-              IconButton(
-                icon: Icon(Icons.login),
+              TextButton(
                 onPressed: () {
                   GoRouter.of(context).pushNamed(RouterName.Login);
                 },
+                child: Text(
+                  'Log in',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
           ],
         ),
@@ -257,27 +292,52 @@ class HomeState extends State<Home> {
                   children: [
                     const DrawerHeader(
                       padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
-                      child: Text(
-                        'Please Login First',
-                        textAlign: TextAlign.center,
-                        textScaleFactor: 2.0,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage("assets/images/logo.png"),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Text(
+                          'Please login first',
+                          textAlign: TextAlign.center,
+                          textScaleFactor: 1.5,
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
+                        ),
                       ),
                     ),
                     TextButton(
                         onPressed: () {
                           GoRouter.of(context).pushNamed(RouterName.Login);
                         },
+                        style: ButtonStyle(
+                          alignment: Alignment.centerLeft,
+                        ),
                         child: const Text(
                           'Login',
-                          textScaleFactor: 2.0,
+                          textScaleFactor: 1.5,
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
                         )),
+                    Divider(),
                     TextButton(
                         onPressed: () {
                           GoRouter.of(context).pushNamed(RouterName.SignUp);
                         },
+                        style: ButtonStyle(
+                          alignment: Alignment.centerLeft,
+                        ),
                         child: const Text(
                           'Sign Up',
-                          textScaleFactor: 2.0,
+                          textScaleFactor: 1.5,
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
                         ))
                   ],
                 )
@@ -286,14 +346,29 @@ class HomeState extends State<Home> {
                   children: [
                     const DrawerHeader(
                       decoration: BoxDecoration(
-                        color: Colors.lightGreen,
+                        image: DecorationImage(
+                          image: AssetImage("assets/images/logo.png"),
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                      child: Text(
-                        'Menu',
+                      child: Align(
+                        alignment: Alignment.bottomLeft,
+                        child: Text(
+                          'Menu',
+                          textScaleFactor: 1.5,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                     ListTile(
-                      title: const Text('Profile'),
+                      title: const Text(
+                        'Profile',
+                        style: TextStyle(
+                          fontSize: 20.0,
+                        ),
+                      ),
                       onTap: () {
                         GoRouter.of(context)
                             .pushNamed(RouterName.profilePage, params: {
@@ -301,16 +376,28 @@ class HomeState extends State<Home> {
                         });
                       },
                     ),
+                    Divider(),
                     ListTile(
-                      title: const Text('Calendar'),
+                      title: const Text(
+                        'Calendar',
+                        style: TextStyle(
+                          fontSize: 20.0,
+                        ),
+                      ),
                       onTap: () {
                         context.pushNamed(RouterName.CalendarConsumer, params: {
                           'userId': userId,
                         });
                       },
                     ),
+                    Divider(),
                     ListTile(
-                      title: const Text('Chat'),
+                      title: const Text(
+                        'Chat',
+                        style: TextStyle(
+                          fontSize: 20.0,
+                        ),
+                      ),
                       onTap: () {
                         GoRouter.of(context)
                             .pushNamed(RouterName.chat, params: {
@@ -318,8 +405,14 @@ class HomeState extends State<Home> {
                         });
                       },
                     ),
+                    Divider(),
                     ListTile(
-                      title: const Text('History Boookings'),
+                      title: const Text(
+                        'Booking history',
+                        style: TextStyle(
+                          fontSize: 20.0,
+                        ),
+                      ),
                       onTap: () {
                         GoRouter.of(context)
                             .pushNamed(RouterName.BookingHistory, params: {

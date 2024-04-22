@@ -15,7 +15,7 @@ class _NotificationPanelState extends State<NotificationPanel> {
 
   late Stream<QuerySnapshot> userNotifications;
   bool _wantEmailNotification = false;
-
+  int testNum = -1;
   @override
   void initState() {
     super.initState();
@@ -23,8 +23,13 @@ class _NotificationPanelState extends State<NotificationPanel> {
         .collection('users')
         .doc(consumerId)
         .collection('notifications')
+        .orderBy('read', descending: false)
         .orderBy('timestamp', descending: true)
         .snapshots();
+
+    userNotifications.listen((snapshot) {
+      testNum = snapshot.docs.length;
+    });
 
     // Fetch the 'NeedEmailInformed' field
     FirebaseFirestore.instance
@@ -113,7 +118,7 @@ class _NotificationPanelState extends State<NotificationPanel> {
                     if (index == 0) {
                       return const DrawerHeader(
                         child: Center(
-                          child: Text('NotificationsLOL',
+                          child: Text('Notifications',
                               style: TextStyle(
                                   fontSize: 25, fontWeight: FontWeight.w500)),
                         ),
@@ -131,6 +136,7 @@ class _NotificationPanelState extends State<NotificationPanel> {
                       final content = notification.get('message');
                       final docId = notification.id;
                       final isRead = notification.get('read');
+                      // print(' Notifications Button: $testNum');
                       return _buildNotifications(content, docId, isRead);
                     }
                   },
