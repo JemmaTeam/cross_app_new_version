@@ -62,8 +62,8 @@ class _NotificationPanelState extends State<NotificationPanel> {
             },
           ),
           trailing: Icon(isRead
-              ? Icons.remove_red_eye
-              : Icons.assignment_turned_in_rounded),
+              ? Icons.assignment_turned_in_rounded
+              : Icons.remove_red_eye),
           onTap: () {
             setState(() {
               if (!isRead) {
