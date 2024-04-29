@@ -482,6 +482,24 @@ class _ProfileHomeState extends State<ProfileHome> {
                       color: Colors.grey.withOpacity(0.15)),
                   child: Text(workTime,
                       style: const TextStyle(color: Colors.black54, fontSize: 10)),
+                ),                SizedBox(height: 2.ph(size)),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_month,
+                      color: Colors.green.shade500,
+                    ),
+                    TextButton(
+                        onPressed: () {
+                          GoRouter.of(context).pushReplacementNamed(
+                              RouterName.CalendarTradie,
+                              params: {'userId': userId});
+                        },
+                        child: const Text(
+                          "Go to Tradie's Calendar",
+                          style: TextStyle(color: Colors.black87),
+                        ))
+                  ],
                 ),
                 SizedBox(height: size.height * 0.03), // 替换 3.ph(size)
                 // Work Description
