@@ -263,7 +263,8 @@ exports.monitorBookingNotifications = functions.firestore
         // Use consumerId
         const consumerId = bookingData.consumerId;
         const eventName = bookingData.eventName;
-
+        // Use tradieId
+        const tradieId = bookingData.tradieId;
 
         if (!consumerId) {
             console.error('ConsumerId not found in booking data.');
@@ -272,7 +273,8 @@ exports.monitorBookingNotifications = functions.firestore
 
         // Formulate your notification message
         const notificationMessage = `Your booking for ${eventName} is successful, the status is ${bookingData.status}`;
-
+        // formulate the tradie's notification message 
+        const notificationMessageTradie = `You got a booking for ${eventName} , the status is ${bookingData.status}`;
         // Check if the user has NeedEmailInformed set to true
         const userSnapshot = await admin.firestore().collection('users').doc(consumerId).get();
         const userData = userSnapshot.data();
@@ -346,6 +348,12 @@ exports.monitorBookingNotifications = functions.firestore
         });
 
         // send this notification to the tradie in a user-specific notifications collection
+
+        await admin.firestore().collection('users').doc(tradieId).collection('notifications').add({
+            message: notificationMessageTradie,
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            read: false
+        });
         return null;
     });
 
