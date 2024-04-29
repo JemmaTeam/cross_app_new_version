@@ -123,17 +123,17 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                   });
                                 },
                                 items: <String>[
-                                  'AirconMechanic',
-                                  'BrickLayer',
+                                  'Aircon Mechanic',
+                                  'Brick Layer',
                                   'Carpenter',
-                                  'CarpetLayer',
+                                  'Carpet Layer',
                                   'Decking',
                                   'Electrcian',
                                   'Fencing',
-                                  'GasPlumber',
+                                  'Gas Plumber',
                                   'Glazier',
-                                  'HairAndMakeUp',
-                                  'HomeRenovation',
+                                  'Hair AndM akeUp',
+                                  'Home Renovation',
                                   'Insulation'
                                 ].map<DropdownMenuItem<String>>((String value) {
                                   return DropdownMenuItem<String>(
@@ -342,9 +342,10 @@ class _RegisterTradiePage extends State<RegisterTradiePage> { // 实现_State
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.upload),
+                                    Icon(Icons.upload, color:Colors.black),
                                     SizedBox(width: 5),
-                                    Text(isImageUploaded ? "License Uploaded" : (isUploading ? "Uploading..." : "Upload License Picture")),
+                                    Text(isImageUploaded ? "License Uploaded" : (isUploading ? "Uploading..." : "Upload License Picture"),
+                                      style: TextStyle(color: Colors.black),)
                                   ],
                                 ),
                               ),
