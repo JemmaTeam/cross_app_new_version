@@ -76,34 +76,65 @@ class HomeState extends State<Home> {
   //bool _isLoggedIn = false;
   String? userNameInitial;
   int testNum = -1;
+
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero, () async {
-      // print('home dart initState');
-      _checkLoginStatus();
+    print('into the ini');
+    _initializeAsync().then((_) {
+      print('out the ini');
       if (_isLoggedIn) {
-        fetchUserNameInitial(); // Fetch the initial of the username
-        unreadNotificationsStream = FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .collection('notifications')
-            // .orderBy('timestamp', descending: true)
-            .where('read', isEqualTo: false)
-            .snapshots();
-
-        setState(() {}); // Trigger a rebuild to reflect the changes
-      } else {
-        unreadNotificationsStream =
-            Stream.empty(); // Initialize with an empty stream if not logged in
+        print('log in');
+        setupNotificationsStream();
       }
     });
   }
 
+  Future<void> _initializeAsync() async {
+    print('into the method');
+    await _checkLoginStatus();
+    print('out of the method');
+
+    // Continue with any other async initialization here
+  }
+
+  void setupNotificationsStream() {
+    unreadNotificationsStream = FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('notifications')
+        .where('read', isEqualTo: false)
+        .snapshots();
+  }
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   Future.delayed(Duration.zero, () async {
+  //     // print('home dart initState');
+  //     _checkLoginStatus();
+  //     if (_isLoggedIn) {
+  //       fetchUserNameInitial(); // Fetch the initial of the username
+  //       unreadNotificationsStream = FirebaseFirestore.instance
+  //           .collection('users')
+  //           .doc(userId)
+  //           .collection('notifications')
+  //           // .orderBy('timestamp', descending: true)
+  //           .where('read', isEqualTo: false)
+  //           .snapshots();
+
+  //       setState(() {}); // Trigger a rebuild to reflect the changes
+  //     } else {
+  //       unreadNotificationsStream =
+  //           Stream.empty(); // Initialize with an empty stream if not logged in
+  //     }
+  //   });
+  // }
+
 //this function was put in the initState(), but it didn't work. so i put it into the build() to ensure it running
   void getUnreadNotificationsStream() {
     if (_isLoggedIn) {
-      print('new method');
+      // print('new method');
       fetchUserNameInitial(); // Fetch the initial of the username
       unreadNotificationsStream = FirebaseFirestore.instance
           .collection('users')
@@ -131,8 +162,10 @@ class HomeState extends State<Home> {
     return userName.isNotEmpty ? userName[0].toUpperCase() : null;
   }
 
-  void _checkLoginStatus() async {
+  Future<void> _checkLoginStatus() async {
+    print('into the check');
     bool? userLoggedIn = await HelperFunctions.getUserLoggedInStatus();
+    print('out of the check');
     setState(() {
       _isLoggedIn = userLoggedIn;
     });
@@ -182,7 +215,7 @@ class HomeState extends State<Home> {
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     var scrollController = ScrollController();
-    getUnreadNotificationsStream();
+    // getUnreadNotificationsStream();
     return Scaffold(
         backgroundColor: kMenuColor,
         endDrawer: const NotificationPanel(),
